@@ -1,0 +1,22 @@
+# Xcode
+home42.xcodeproj/project.xcworkspace/*
+home42.xcodeproj/project.xcworkspace/*
+home42.xcodeproj/xcuserdata/*
+home42.xcodeproj/xcuserdata/*
+home42.xcodeproj/project.pbxproj
+home42.xcworkspace/xcshareddata/*
+home42.xcworkspace/xcuserdata/*
+
+# General
+.DS_Store
+
+# Pods
+Pods/
+Podfile.lock
+
+# API Keys
+home42/Homes/HomeApi.swift
+home42/Extra/JSONResources.js
+
+# Hidden Features
+#home42/Controllers/Hidden/*.swift
