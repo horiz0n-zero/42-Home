@@ -14,4 +14,4 @@ Pods/
 Podfile.lock
 
 # Specific Projects files
-home42/Controllers/Hidden/*
+#home42/Controllers/Hidden/*
