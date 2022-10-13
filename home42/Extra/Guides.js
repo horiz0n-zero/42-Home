@@ -18,7 +18,7 @@ const querystring = require('querystring')
 const fs = require('fs')
 
 const client_id = 'API_UID'
-const client_secret = 'API_SECRET'
+const client_secret = 'API_CLIENT'
 
 function sleep(millis) {
     return new Promise(resolve => setTimeout(resolve, millis));
@@ -78,26 +78,27 @@ const guides = [
     {
         'title': 'guides.cluster.title',
         'description': 'guides.cluster',
-        'filename': 'add_cluster.pdf',
+        'video': 'https://www.youtube.com/watch?v=UWMElUxbP-E',
         'version': '1.0',
         'coalitionId': '45'
-        /*id: 45 - name: "The Federation" - slug: "42cursus-paris-the-federation"*/
+        // id: 45 - name: "The Federation" - slug: "42cursus-paris-the-federation"
     },
     {
-        'title': 'guides.cluster.title',
-        'description': 'guides.cluster',
-        'filename': 'add_cluster.pdf',
+        'title': 'guides.languages.title',
+        'description': 'guides.languages',
+        'video': 'https://www.youtube.com/watch?v=zQe1UKE_dSc',
         'version': '1.0',
         'coalitionId': '46'
-        /*id: 46 - name: "The Alliance" - slug: "42cursus-paris-the-alliance"*/
-    },
+        // id: 46 - name: "The Alliance" - slug: "42cursus-paris-the-alliance"
+    }
+    /*,
     {
         'title': 'guides.cluster.title',
         'description': 'guides.cluster',
         'filename': 'add_cluster.pdf',
         'version': '1.0',
         'coalitionId': '48'
-        /*id: 48 - name: "The Assembly" - slug: "42cursus-paris-the-assembly"*/
+        //id: 48 - name: "The Assembly" - slug: "42cursus-paris-the-assembly"
     },
     {
         'title': 'guides.cluster.title',
@@ -105,8 +106,8 @@ const guides = [
         'filename': 'add_cluster.pdf',
         'version': '1.0',
         'coalitionId': '47'
-        /*id: 47 - name: "The Order" - slug: "42cursus-paris-the-order"*/
-    }
+        //id: 47 - name: "The Order" - slug: "42cursus-paris-the-order"
+    }*/
 ]
 
 async function makeRequest(token, path) {
@@ -142,7 +143,7 @@ async function main() {
             newElement = {
                 'title': guide.title,
                 'description': guide.description,
-                'filename': guide.filename,
+                'video': guide.video,
                 'version': guide.version,
                 'coalition': coalition
             }

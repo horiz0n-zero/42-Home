@@ -239,7 +239,7 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
         self.tableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         self.tableView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
         self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        self.headerCell.coalitionImage.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(headerCoalitionIconTapped(sender:))))
+        self.headerCell.coalitionImage.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ProfilViewController.headerCoalitionIconTapped(sender:))))
         self.tableView.contentInset = UIEdgeInsets(top: 0.0, left: 0.0, bottom: HomeLayout.safeAera.bottom, right: 0.0)
         self.tableView.contentInsetAdjustmentBehavior = .never
         self.tableView.delegate = self
@@ -470,7 +470,7 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
             }
             else {
                 func add(listType: People.ListType) {
-                    peoples[self.user.login] = People(id: self.user.id, login: self.user.login, image_url: self.user.image_url, list: listType)
+                    peoples[self.user.login] = People(id: self.user.id, login: self.user.login, image: self.user.image, list: listType)
                     HomeDefaults.save(peoples, forKey: .peoples)
                     updateCluster()
                 }
@@ -489,7 +489,7 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
         else {
             
             func add() {
-                peoples[self.user.login] = People(id: self.user.id, login: self.user.login, image_url: self.user.image_url, list: .friends)
+                peoples[self.user.login] = People(id: self.user.id, login: self.user.login, image: self.user.image, list: .friends)
                 HomeDefaults.save(peoples, forKey: .peoples)
                 updateCluster()
             }
@@ -518,7 +518,7 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
                 }
             }
             catch {
-                HomeGuides.alertShowGuides()
+                HomeGuides.alertShowGuides(self)
             }
         }
         
@@ -541,11 +541,15 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
     }
     
     @objc private func phoneTapped(sender: UITapGestureRecognizer) {
-        // 
+        guard let phone = self.user.phone else {
+            return
+        }
+        
+        HomeTelephony.call(phone)
     }
     
     @objc private func correctionPointsHistoric(sender: UITapGestureRecognizer) {
-        self.presentWithBlur(EvaluationPointsHistoricViewController(userId: self.user.id, userLogin: self.user.login, userImageUrl: self.user.image_url, primary: self.currentPrimary), completion: nil)
+        self.presentWithBlur(EvaluationPointsHistoricViewController(userId: self.user.id, userLogin: self.user.login, userImage: self.user.image, primary: self.currentPrimary), completion: nil)
     }
     
     @objc private func overCampusTapped(sender: UITapGestureRecognizer) {
@@ -806,9 +810,6 @@ fileprivate extension ProfilViewController {
                 self.coalitionImage.image = UIImage.Assets.svgFactionless.image
                 self.coalitionBackground.image = UIImage.Assets.coalitionDefaultBackground.image
             }
-            if user.correction_point != 0 {
-                contents.append(.init(type: .evaluationPoints, value: user.correction_point.scoreFormatted, asset: .actionHistoric, selector: #selector(ProfilViewController.correctionPointsHistoric(sender:))))
-            }
             if user.location != nil {
                 contents.append(.init(type: .location, value: user.location, asset: .actionSee, selector: #selector(ProfilViewController.locationTapped(sender:))))
             }
@@ -824,8 +825,11 @@ fileprivate extension ProfilViewController {
             if contents.count < 5 && parent.currentCampus.campus_id != App.userCampus.campus_id {
                 contents.append(.init(type: .campus, value: parent.user.campus(forUserCampusId: parent.currentCampus.campus_id).name, asset: .actionPeople, selector: #selector(ProfilViewController.overCampusTapped(sender:))))
             }
-            if contents.count > 5 {
-                contents.removeLast(contents.count - 5)
+            if user.correction_point != 0 {
+                contents.append(.init(type: .evaluationPoints, value: user.correction_point.scoreFormatted, asset: .actionHistoric, selector: #selector(ProfilViewController.correctionPointsHistoric(sender:))))
+            }
+            if contents.count > 4 {
+                contents.removeLast(contents.count - 4)
             }
             self.infoView.update(with: contents, primary: primary)
             self.loginLabel.update(with: [user.login, user.displayname])

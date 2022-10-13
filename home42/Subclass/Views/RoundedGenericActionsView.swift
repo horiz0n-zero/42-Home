@@ -158,7 +158,7 @@ final class SearchFieldViewWithTimer: SearchFieldView {
         if self.timer != nil {
             self.timer.invalidate()
         }
-        self.timer = Timer.scheduledTimer(timeInterval: 0.6, target: self, selector: #selector(timerFired(_:)), userInfo: nil, repeats: false)
+        self.timer = Timer.scheduledTimer(timeInterval: 0.6, target: self, selector: #selector(SearchFieldViewWithTimer.timerFired(_:)), userInfo: nil, repeats: false)
         return true
     }
     override func textFieldDidChangeSelection(_ textField: UITextField) { }
@@ -226,7 +226,7 @@ final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButto
         super.init(BasicUILabel(text: text), initialActions: [selectButton])
         self.view.adjustsFontSizeToFitWidth = true
         self.view.textColor = HomeDesign.black
-        selectButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(selectButtonTapped(sender:))))
+        selectButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SelectorView<E>.selectButtonTapped(sender:))))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
@@ -323,10 +323,10 @@ final class ValueSelectorWithArrows<V: Comparable & Numeric>: RoundedGenericActi
         super.init(BasicUILabel(text: "???"), initialActions: [self.leftArrow, self.rigthArrow])
         self.view.textColor = HomeDesign.black
         self.view.text = self.valueText
-        self.leftArrow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(arrowTapped(sender:))))
-        self.rigthArrow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(arrowTapped(sender:))))
-        self.leftArrow.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(arrowPressed(sender:))))
-        self.rigthArrow.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(arrowPressed(sender:))))
+        self.leftArrow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ValueSelectorWithArrows<V>.arrowTapped(sender:))))
+        self.rigthArrow.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ValueSelectorWithArrows<V>.arrowTapped(sender:))))
+        self.leftArrow.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(ValueSelectorWithArrows<V>.arrowPressed(sender:))))
+        self.rigthArrow.addGestureRecognizer(UILongPressGestureRecognizer(target: self, action: #selector(ValueSelectorWithArrows<V>.arrowPressed(sender:))))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     

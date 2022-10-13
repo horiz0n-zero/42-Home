@@ -22,9 +22,9 @@ final class EvaluationPointsHistoricViewController: HomeViewController, UserSear
     private let userSearchFieldView: UserSearchFieldView
     private let tableView: GenericSingleInfiniteRequestTableView<EvaluationPointsHistoricViewControllerCell, IntraEvaluationPointHistoric>
     
-    init(userId: Int, userLogin: String, userImageUrl: String!, primary: UIColor) {
+    init(userId: Int, userLogin: String, userImage: IntraUser.Image, primary: UIColor) {
         self.header = .init(title: ~"profil.info.evaluation-points")
-        self.userSearchFieldView = UserSearchFieldView(user: .init(id: userId, login: userLogin, image_url: userImageUrl), primary: primary)
+        self.userSearchFieldView = UserSearchFieldView(user: .init(id: userId, login: userLogin, image: userImage), primary: primary)
         self.tableView = .init(.usersWithUserIdCorrectionPointHistorics(userId), parameters: ["sort":"-created_at"])
         super.init()
         self.view.backgroundColor = HomeDesign.white

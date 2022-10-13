@@ -192,8 +192,8 @@ final class Cookies: IntraObject {
             self.cancelButton.bottomAnchor.constraint(equalTo: self.container.bottomAnchor, constant: -HomeLayout.margin).isActive = true
             
             self.container.isUserInteractionEnabled = true
-            self.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
-            self.cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
+            self.loginButton.addTarget(self, action: #selector(CookiesRefresherAlert.loginButtonTapped), for: .touchUpInside)
+            self.cancelButton.addTarget(self, action: #selector(CookiesRefresherAlert.cancelButtonTapped), for: .touchUpInside)
             self.loginTextField.delegate = self
             self.passwdTextField.delegate = self
             

@@ -117,7 +117,7 @@ final class CreditsViewController: HomeViewController {
             view.widthAnchor.constraint(equalToConstant: w ?? image.size.width).isActive = true
             view.heightAnchor.constraint(equalToConstant: h ?? image.size.height).isActive = true
         }
-        let appIconRatio = UIScreen.main.bounds.width / 500.0 * 0.7
+        let appIconRatio = UIScreen.main.bounds.width / 500.0 * 0.5
         
         addImage(.appIconBig, constant: -HomeLayout.margin, w: 500.0 * appIconRatio, h: 350 * appIconRatio)
         addTitleSection(text: ~"credits.intro-title", constant: HomeLayout.margind)
@@ -144,7 +144,7 @@ final class CreditsViewController: HomeViewController {
             view.addSubview(particules)
             view.addSubview(icon)
             icon.isUserInteractionEnabled = true
-            icon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(seeMainContributors)))
+            icon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(CreditsViewController.seeMainContributors)))
             icon.setSize(HomeLayout.userProfilIconCreditsHeigth, HomeLayout.userProfilIconCreditsRadius)
             icon.topAnchor.constraint(equalTo: view.topAnchor, constant: HomeLayout.smargin).isActive = true
             icon.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
@@ -177,7 +177,7 @@ final class CreditsViewController: HomeViewController {
             view.layer.shadowOffset = .zero
             view.layer.shadowOpacity = Float(HomeDesign.alphaMiddle)
             view.isUserInteractionEnabled = true
-            view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(seeOtherContributors)))
+            view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(CreditsViewController.seeOtherContributors)))
             label.font = HomeLayout.fontSemiBoldMedium
             label.textColor = HomeDesign.white
             label.textAlignment = .center
@@ -206,8 +206,8 @@ final class CreditsViewController: HomeViewController {
             addText(text: ~"faq\(index)", constant: HomeLayout.smargin)
         }
         
-        addTitleSection(text: ~"credits.donations-title", constant: HomeLayout.margins)
-        addText(text: ~"credits.donations", constant: HomeLayout.margins)
+        // addTitleSection(text: ~"credits.donations-title", constant: HomeLayout.margins)
+        // addText(text: ~"credits.donations", constant: HomeLayout.margins)
         
         self.container.bottomAnchor.constraint(equalTo: top).isActive = true
     }

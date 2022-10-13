@@ -24,13 +24,9 @@ final class GuidesViewController: HomeViewController, UITableViewDataSource, UIT
     private struct Guide: Codable {
         let title: String
         let description: String
-        let filename: String
+        let video: String
         let version: String
         let coalition: IntraCoalition?
-        
-        var fileurl: URL {
-            return HomeResources.applicationDirectory.appendingPathComponent("res/guides/\(self.filename)")
-        }
     }
     private let guides: [Guide]
     
@@ -160,15 +156,8 @@ final class GuidesViewController: HomeViewController, UITableViewDataSource, UIT
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let guide = self.guides[indexPath.row]
-        let document = UIDocumentInteractionController(url: guide.fileurl)
-        let color = guide.coalition?.uicolor ?? HomeDesign.primaryDefault
-        let nav = UINavigationBar.appearance(whenContainedInInstancesOf: [QLPreviewController.self])
         
-        nav.tintColor = color
-        nav.barTintColor = color
-        nav.backgroundColor = HomeDesign.white
-        document.delegate = self
-        document.presentPreview(animated: true)
+        DynamicActionsSheet.presentWithWebLink(guide.video, primary: HomeDesign.primary, parentViewController: self)
     }
     func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
         return self

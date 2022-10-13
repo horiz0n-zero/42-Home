@@ -18,18 +18,18 @@ import UIKit
 
 final class HomeGuides: NSObject {
         
-    static func alertActionLink() -> DynamicAlert.Action {
+    static func alertActionLink(_ controller: HomeViewController) -> DynamicAlert.Action {
         
         func showGuides() {
-            App.mainController.presentWithBlur(GuidesViewController())
+            controller.presentWithBlur(GuidesViewController())
         }
         
         return .highligth(~"general.guide", showGuides)
     }
     
-    static func alertShowGuides() {
+    static func alertShowGuides(_ controller: HomeViewController) {
         DynamicAlert(contents: [.text(~"clusters.campus-map-unavailable")],
-                     actions: [.normal(~"general.ok", nil), HomeGuides.alertActionLink()])
+                     actions: [.normal(~"general.ok", nil), HomeGuides.alertActionLink(controller)])
     }
     
 }

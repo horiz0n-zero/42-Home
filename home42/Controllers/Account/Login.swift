@@ -109,11 +109,11 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.conditionsLabel.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -HomeLayout.margin).isActive = true
         
         self.formContainer.isUserInteractionEnabled = true
-        self.loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
+        self.loginButton.addTarget(self, action: #selector(LoginViewController.loginButtonTapped), for: .touchUpInside)
         self.loginTextField.delegate = self
         self.passwdTextField.delegate = self
         self.conditionsLabel.isUserInteractionEnabled = true
-        self.conditionsLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(termButtonTapped(sender:))))
+        self.conditionsLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LoginViewController.termButtonTapped(sender:))))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     

@@ -20,7 +20,7 @@ final class People: IntraObject {
     
     let id: Int
     let login: String
-    let image_url: String!
+    let image: IntraUser.Image
     let createdAt: Date
     
     @frozen enum ListType: Int, Codable, CaseIterable {
@@ -68,17 +68,17 @@ final class People: IntraObject {
     }
     let list: People.ListType
     
-    init(id: Int, login: String, image_url: String!, list: People.ListType) {
+    init(id: Int, login: String, image: IntraUser.Image, list: People.ListType) {
         self.id = id
         self.login = login
-        self.image_url = image_url
+        self.image = image
         self.createdAt = Date()
         self.list = list
         super.init()
     }
     
     @inlinable static var me: People {
-        return People(id: App.user.id, login: App.user.login, image_url: App.user.image_url, list: .me)
+        return People(id: App.user.id, login: App.user.login, image: App.user.image, list: .me)
     }
     static let assets: [UIImage.Assets] = [.actionFriends, .actionEnemies, .actionAddFriends, .actionAddEnemies,
                                            .actionPeopleKo, .actionPeopleBore, .actionPeopleForced, .actionPeopleHunger,
@@ -276,7 +276,7 @@ final class PeopleListViewController: HomeViewController, UITableViewDelegate, U
                 let people = self.peoples[indexPath.row]
                 
                 self.dismiss(animated: true, completion: {
-                    tracker.selectUser(user: .init(id: people.id, login: people.login, image_url: people.image_url))
+                    tracker.selectUser(user: .init(id: people.id, login: people.login, image: people.image))
                     block(true)
                 })
             }

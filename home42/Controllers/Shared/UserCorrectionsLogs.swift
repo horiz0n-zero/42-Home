@@ -36,7 +36,7 @@ final class UserCorrectionsLogsViewController: HomeViewController, SegmentViewDe
     
     init(user: IntraUser, primary: UIColor = HomeDesign.primary) {
         self.header = HeaderWithActionsView(title: ~"title.corrections")
-        self.userSearchField = UserSearchFieldView(user: .init(id: user.id, login: user.login, image_url: user.image_url), primary: primary)
+        self.userSearchField = UserSearchFieldView(user: .init(id: user.id, login: user.login, image: user.image), primary: primary)
         self.segment = SegmentView(values: UserCorrectionsLogsViewController.Selection.keys)
         self.tableView = .init(.usersWithUserIdScaleTeamsAsCorrector(user.id), parameters: ["filter[future]": false, "filter[filled]": true, "sort": "-begin_at"], pageSize: 15)
         self.primary = primary
@@ -193,7 +193,7 @@ final class UserCorrectionsLogsViewController: HomeViewController, SegmentViewDe
             
             self.scaleTeam = scaleTeam
             self.correctorIcon.update(with: scaleTeam.corrector)
-            self.correctorIcon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(userProfilIconTapped(sender:))))
+            self.correctorIcon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ScaleTeamView.userProfilIconTapped(sender:))))
             self.correctorLabel.text = scaleTeam.corrector.login
             self.correctorComment.text = scaleTeam.comment
             
@@ -225,7 +225,7 @@ final class UserCorrectionsLogsViewController: HomeViewController, SegmentViewDe
                 if index >= self.correctedIcons.arrangedSubviews.count {
                     userProfilIconView = UserProfilIconView(user: corrected)
                     userProfilIconView.setSize(HomeLayout.userProfilIconHeigth, HomeLayout.userProfilIconRadius)
-                    userProfilIconView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(userProfilIconTapped(sender:))))
+                    userProfilIconView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ScaleTeamView.userProfilIconTapped(sender:))))
                     self.correctedIcons.addArrangedSubview(userProfilIconView)
                 }
                 else {

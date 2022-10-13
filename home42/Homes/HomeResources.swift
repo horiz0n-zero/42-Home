@@ -127,25 +127,25 @@ final actor StorageCachingImage: StorageCachingBase {
     }
     
     func obtain(_ userInfo: IntraUserInfo) async -> (String, UIImage)? {
-        if let url = userInfo.image_url, let image = try? await self.downloadImage(id: userInfo.login, url: url) {
+        if userInfo.image.isValid, let image = try? await self.downloadImage(id: userInfo.login, url: userInfo.image.url) {
             return (userInfo.login, image)
         }
         return nil
     }
     func obtain(_ user: IntraUser) async -> (String, UIImage)? {
-        if let url = user.image_url, let image = try? await self.downloadImage(id: user.login, url: url) {
+        if user.image.isValid, let image = try? await self.downloadImage(id: user.login, url: user.image.url) {
             return (user.login, image)
         }
         return nil
     }
     func obtain(_ people: People) async -> (String, UIImage)? {
-        if let url = people.image_url, let image = try? await self.downloadImage(id: people.login, url: url) {
+        if people.image.isValid, let image = try? await self.downloadImage(id: people.login, url: people.image.url) {
             return (people.login, image)
         }
         return nil
     }
     func obtain(_ contributor: HomeApiResources.Contributor) async -> (String, UIImage)? {
-        if let url = contributor.image_url, let image = try? await self.downloadImage(id: contributor.login, url: url) {
+        if contributor.image.isValid, let image = try? await self.downloadImage(id: contributor.login, url: contributor.image.url) {
             return (contributor.login, image)
         }
         return nil
@@ -344,8 +344,10 @@ final actor StorageCachingImageFromSVG: StorageCachingBase {
         
         private func render(_ data: Data) {
             let svg = String(data: data, encoding: .utf8)!
-            let w = "\(self.size.width * UIScreen.main.scale * 0.98)pt"
-            let h = "\(self.size.height * UIScreen.main.scale * 0.98)pt"
+            //let w = "\(self.size.width * UIScreen.main.scale * 0.98)pt"
+            //let h = "\(self.size.height * UIScreen.main.scale * 0.98)pt"
+            let w = "\(self.size.width * 3.0 * 0.98)pt"
+            let h = "\(self.size.height * 3.0 * 0.98)pt"
             let html = "<div style=\"width: \(w); height: \(h);\">\(rewriteSVGSize(svg))</div>"
             
             func rewriteSVGSize(_ string: String) -> String {

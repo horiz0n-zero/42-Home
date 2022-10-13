@@ -37,6 +37,7 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
         self.tableView.register(RowSelectorEnumTableViewCell<UserSettings.ClustersPlaceClassName>.self, forCellReuseIdentifier: SettingsRowEnumAvailable.ClustersPlaceClassName.rawValue)
         self.tableView.register(RowSelectorEnumTableViewCell<UserSettings.ClusterSearchViewSort>.self, forCellReuseIdentifier: SettingsRowEnumAvailable.ClusterSearchViewSort.rawValue)
         self.tableView.register(RowSelectorEnumTableViewCell<UserSettings.PeopleListViewControllerSort>.self, forCellReuseIdentifier: SettingsRowEnumAvailable.PeopleListViewControllerSort.rawValue)
+        self.tableView.register(RowSelectorEnumTableViewCell<UserSettings.ProfilImageQuality>.self, forCellReuseIdentifier: SettingsRowEnumAvailable.ProfilImageQuality.rawValue)
         self.tableView.register(RowIntegerCounterTableViewCell.self, forCellReuseIdentifier: SettingsRowAvailable.integerCounter.rawValue)
         self.tableView.register(RowActionsTableViewCell.self, forCellReuseIdentifier: SettingsRowAvailable.actions.rawValue)
         self.tableView.register(RowCacheActionsTableViewCell.self, forCellReuseIdentifier: SettingsRowAvailable.cacheActions.rawValue)
@@ -99,6 +100,9 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
                 }
                 else if G.self == UserSettings.GraphicsTransitionDuration.self {
                     return SettingsRowEnumAvailable.GraphicsTransitionDuration.rawValue
+                }
+                else if G.self == UserSettings.ProfilImageQuality.self {
+                    return SettingsRowEnumAvailable.ProfilImageQuality.rawValue
                 }
                 else {
                     return SettingsRowEnumAvailable.ParallaxForce.rawValue
@@ -201,14 +205,6 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
         .init("title.languages", .actionText, rows: [
             Section.RowLanguage.init("settings.desc.languages")
         ]),
-        .init("title.graphics", .actionBrush, rows: [
-            Section.RowBoolean.init("settings.desc.graphics.blurprimary", keypath: \.graphicsBlurPrimary),
-            Section.RowSelectorEnum.init("settings.desc.transition-duration", keypath: \.graphicsTransitionDuration),
-            Section.RowBoolean.init("settings.desc.transition-blurprimary", keypath: \.graphicsBlurPrimaryTransition),
-            Section.RowBoolean.init("settings.desc.blur-header", keypath: \.graphicsBlurHeader),
-            Section.RowBoolean.init("settings.desc.parallax", keypath: \.graphicsUseParallax),
-            Section.RowSelectorEnum.init("settings.desc.parallax-force", keypath: \.graphicsParallaxForce)
-        ]),
         .init("title.profil", .actionSee, rows: [
             Section.RowBoolean.init("settings.desc.show.events", keypath: \.profilShowEvents),
             Section.RowBoolean.init("settings.desc.show.corrections", keypath: \.profilShowCorrections),
@@ -222,6 +218,14 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
             Section.RowBoolean.init("settings.desc.counter-show", keypath: \.clusterShowCounters),
             Section.RowBoolean.init("settings.desc.counter-hide", keypath: \.clusterHidePlaceCounter),
             Section.RowBoolean.init("settings.desc.cluster.counter-prefer", keypath: \.clusterCounterPreferTakenPlaces)
+        ]),
+        .init("title.graphics", .actionBrush, rows: [
+            Section.RowBoolean.init("settings.desc.graphics.blurprimary", keypath: \.graphicsBlurPrimary),
+            Section.RowSelectorEnum.init("settings.desc.transition-duration", keypath: \.graphicsTransitionDuration),
+            Section.RowBoolean.init("settings.desc.transition-blurprimary", keypath: \.graphicsBlurPrimaryTransition),
+            Section.RowBoolean.init("settings.desc.blur-header", keypath: \.graphicsBlurHeader),
+            Section.RowBoolean.init("settings.desc.parallax", keypath: \.graphicsUseParallax),
+            Section.RowSelectorEnum.init("settings.desc.parallax-force", keypath: \.graphicsParallaxForce)
         ]),
         .init("title.tracker", .controllerTracker, true, TrackerViewController.self, rows: [
             Section.RowBoolean.init("settings.desc.cluster.show", keypath: \.trackerShowLocationHistoric),
@@ -246,6 +250,7 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
             Section.RowBoolean.init("settings.desc.graph.nightmode", keypath: \.graphPreferDarkTheme)
         ]),
         .init("title.caches", .actionTrash, rows: [
+            Section.RowSelectorEnum.init("settings.desc.cache.profil-quality", keypath: \.cacheProfilQuality),
             Section.RowCacheActions.init("settings.desc.cache.profil", directory: .logins, actions: [
                 .init(selector: #selector(RowCacheActionsTableViewCell.removeHandler(gesture:)),
                       asset: .actionTrash, color: HomeDesign.redError),
@@ -316,6 +321,8 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
             (cell as! RowSelectorEnumTableViewCell<UserSettings.ParallaxForce>).update(with: parallaxForce)
         case let graphicsTransitionDuration as Section.RowSelectorEnum<UserSettings.GraphicsTransitionDuration>:
             (cell as! RowSelectorEnumTableViewCell<UserSettings.GraphicsTransitionDuration>).update(with: graphicsTransitionDuration)
+        case let profilImageQuality as Section.RowSelectorEnum<UserSettings.ProfilImageQuality>:
+            (cell as! RowSelectorEnumTableViewCell<UserSettings.ProfilImageQuality>).update(with: profilImageQuality)
         default:
             break
         }
@@ -340,6 +347,7 @@ fileprivate enum SettingsRowEnumAvailable: String {
     case ClustersPlaceClassName
     case ClusterSearchViewSort
     case PeopleListViewControllerSort
+    case ProfilImageQuality
 }
 fileprivate protocol SettingsRowData {
     var descriptionKey: String { get }
@@ -459,22 +467,23 @@ extension SettingsViewController {
                 super.init(BasicUILabel(text: language.name), initialActions: [selectButton])
                 self.view.adjustsFontSizeToFitWidth = true
                 self.view.textColor = HomeDesign.black
-                selectButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(selectButtonTapped(sender:))))
+                selectButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(EnumView.selectButtonTapped(sender:))))
             }
             required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
             
             @objc private func selectButtonTapped(sender: UITapGestureRecognizer) {
-                let index = HomeApiResources.languages.firstIndex(of: App.userLanguage) ?? 0
+                let languages = HomeApiResources.languages.filter({ HomeWords.exist($0) }).sorted(by: { $0.name < $1.name })
+                let index = languages.firstIndex(where: { $0.id == App.userLanguage.id }) ?? 0
                 
                 func selectLanguage(language: IntraLanguage) {
                     HomeDefaults.save(language, forKey: .language)
                     HomeWords.configure(language)
                     self.parentHomeViewController?.dismissToRootController(animated: true) {
-                        
+                        App.mainController.controllerReload()
                     }
                 }
                 
-                DynamicAlert.init(contents: [.advancedSelector(.languages, Array<IntraLanguage>(HomeApiResources.languages!), index)],
+                DynamicAlert.init(contents: [.advancedSelector(.languages, languages, index)],
                                   actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectLanguage(language:), to: ((Any) -> Void).self))])
             }
             

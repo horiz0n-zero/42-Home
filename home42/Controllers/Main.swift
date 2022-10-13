@@ -111,7 +111,7 @@ final class MainViewController: HomeViewController {
         }
         self.view.addSubview(self.selectionLabel)
         self.view.addSubview(self.selectionIcon)
-        self.selectionIcon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(selectionIconTapped(sender:))))
+        self.selectionIcon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(MainViewController.selectionIconTapped(sender:))))
         self.selectionIcon.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margins).isActive = true
         self.selectionIcon.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: HomeLayout.margins).isActive = true
         self.selectionLabel.centerYAnchor.constraint(equalTo: self.selectionIcon.centerYAnchor).isActive = true
@@ -122,7 +122,7 @@ final class MainViewController: HomeViewController {
         self.userIcon.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -HomeLayout.margins).isActive = true
         self.userIcon.setSize(HomeLayout.userProfilIconMainHeigth, HomeLayout.userProfilIconMainRadius)
         self.userIcon.isUserInteractionEnabled = true
-        self.userIcon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(userIconTapped(sender:))))
+        self.userIcon.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(MainViewController.userIconTapped(sender:))))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
@@ -186,6 +186,17 @@ final class MainViewController: HomeViewController {
         self.controller.willMove(toParent: nil)
         self.controller.view.removeFromSuperview()
         self.controller.removeFromParent()
+        self.controller = nil
+    }
+    
+    func controllerReload() {
+        let controllerRepresentation = MainViewController.getController(Controller(id: HomeDefaults.read(.controller)))
+        
+        self.selectionIcon.icon.image = controllerRepresentation.icon.image
+        self.selectionLabel.text = ~controllerRepresentation.title
+        self.controllerRemove()
+        self.controller = controllerRepresentation.type.init()
+        self.controllerSet(self.controller)
     }
     
     // MARK: -
@@ -498,7 +509,7 @@ fileprivate extension MainViewController {
                 while true {
                     self.view.addSubview(view)
                     view.addGestureRecognizer(UITapGestureRecognizer(target: self,
-                                                                     action: #selector(selectionViewSelect(sender:))))
+                                                                     action: #selector(SelectionViewController.selectionViewSelect(sender:))))
                     view.leadingAnchor.constraint(equalTo: rowViewContainerLeading,
                                                   constant: rowWidth == 0.0 ? 0.0 : HomeLayout.smargin).isActive = true
                     view.topAnchor.constraint(equalTo: rowViewContainer.topAnchor).isActive = true
@@ -593,13 +604,15 @@ extension MainViewController {
     func openClustersDebugFile(_ file: String) {
         
         func selectCampus(_ campus: IntraCampus) {
-            do {
-                let vc = try ClustersSharedViewController(debugFile: file, campus: .init(campus: campus))
-                
-                self.presentWithBlur(vc, completion: nil)
-            }
-            catch {
-                DynamicAlert(contents: [.title(error.localizedDescription)], actions: [.normal(~"general.ok", nil)])
+            App.mainController.controller.dismissToRootController(animated: true) {
+                do {
+                    let vc = try ClustersSharedViewController(debugFile: file, campus: .init(campus: campus))
+                    
+                    self.presentWithBlur(vc, completion: nil)
+                }
+                catch {
+                    DynamicAlert(contents: [.title(error.localizedDescription)], actions: [.normal(~"general.ok", nil)])
+                }
             }
         }
         
@@ -654,13 +667,7 @@ extension MainViewController {
         
         deeplinkUnlock(CorrectionsViewController.self, data: data)
     }
-    
-    @objc func testNonInANonAsyncContext() {
-        let user = App.user!
         
-        DynamicAlert.init(contents: [.text(user.login)], actions: [.normal(~"general.ok", nil)])
-    }
-    
     @objc func deeplinkEvents(parameters: [String: Any]) {
         let id = parameters[HomeDeeplinks.Parameter.id.rawValue] as! Int
         

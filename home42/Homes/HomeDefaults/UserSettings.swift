@@ -184,6 +184,17 @@ final class UserSettings: IntraObject {
         return nil
     }
     
+    @frozen enum ProfilImageQuality: String, Codable, SelectorViewSource {
+        case large
+        case medium
+        case small
+        case micro
+        
+        static let allKeys: [String] = ["settings.profil-quality.large", "settings.profil-quality.medium", "settings.profil-quality.small", "settings.profil-quality.micro"]
+        static let allValues: [UserSettings.ProfilImageQuality] = [.large, .medium, .small, .micro]
+    }
+    var cacheProfilQuality: ProfilImageQuality
+    
     override init() {
         self.depthCloseActivated = false
         self.depthMinimum = 5
@@ -193,7 +204,7 @@ final class UserSettings: IntraObject {
         self.graphicsBlurHeader = true
         self.graphicsUseParallax = true
         self.graphicsParallaxForce = .medium
-        self.graphicsTransitionDuration = .durationMedium
+        self.graphicsTransitionDuration = .durationShort
         
         self.profilShowLogs = false
         self.profilShowCorrections = false
@@ -226,6 +237,7 @@ final class UserSettings: IntraObject {
         self.peopleExtraList2Icon = .actionAddFriends
         self.peopleExtraList2Color = .init(color: HomeDesign.gold)
         self.peopleExtraList2Name = "Extra 2"
+        self.cacheProfilQuality = .small
         super.init()
     }
     init(from decoder: Decoder) throws {
@@ -239,7 +251,7 @@ final class UserSettings: IntraObject {
         self.graphicsBlurHeader = (try? container.decode(Bool.self, forKey: .graphicsBlurHeader)) ?? true
         self.graphicsUseParallax = (try? container.decode(Bool.self, forKey: .graphicsUseParallax)) ?? true
         self.graphicsParallaxForce = (try? container.decode(ParallaxForce.self, forKey: .graphicsParallaxForce)) ?? .medium
-        self.graphicsTransitionDuration = (try? container.decode(GraphicsTransitionDuration.self, forKey: .graphicsTransitionDuration)) ?? .durationMedium
+        self.graphicsTransitionDuration = (try? container.decode(GraphicsTransitionDuration.self, forKey: .graphicsTransitionDuration)) ?? .durationShort
         
         self.profilShowLogs = (try? container.decode(Bool.self, forKey: .profilShowLogs)) ?? false
         self.profilShowCorrections = (try? container.decode(Bool.self, forKey: .profilShowCorrections)) ?? false
@@ -272,6 +284,7 @@ final class UserSettings: IntraObject {
         self.peopleExtraList2Icon = (try? container.decode(UIImage.Assets.self, forKey: .peopleExtraList2Icon)) ?? .actionAddFriends
         self.peopleExtraList2Color = (try? container.decode(DecodableColor.self, forKey: .peopleExtraList2Color)) ?? .init(color: HomeDesign.gold)
         self.peopleExtraList2Name = (try? container.decode(String.self, forKey: .peopleExtraList2Name)) ?? "Extra 2"
+        self.cacheProfilQuality = (try? container.decode(ProfilImageQuality.self, forKey: .cacheProfilQuality)) ?? .small
     }
     
     func save() {

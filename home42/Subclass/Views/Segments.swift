@@ -74,7 +74,7 @@ class GenericSegmentView<G, V: CompatibleSegmentView>: BasicUIView where V.Value
         
         for (index, value) in values.enumerated() {
             view = V(value: value, primary: self.primary)
-            view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(viewTapped(sender:))))
+            view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(GenericSegmentView<G, V>.viewTapped(sender:))))
             if index == self.selectedIndex {
                 view.selectedStyle()
                 view.isUserInteractionEnabled = false
@@ -242,13 +242,14 @@ final class ClusterSegmentView: GenericSegmentView<String, ClusterSegmentViewFlo
         }
     }
     
-    init(values: [String], extraValues: [ClusterSegmentView.ExtraValues]?, selectedIndex: Int = 0) {
+    init(values: [String], extraValues: [ClusterSegmentView.ExtraValues]?, selectedIndex: Int = 0, primary: UIColor = HomeDesign.primary) {
         self.oldSelectedIndex = selectedIndex
         self.extraValues = extraValues ?? Array(repeating: .init(placeAvailable: 0, placeCount: 0, friends: 0, extra1: 0, extra2: 0), count: values.count)
         super.init(values: values, selectedIndex: selectedIndex)
+        self.primary = primary
         self.backgroundColor = HomeDesign.white
         self.layer.borderWidth = HomeLayout.border
-        self.layer.borderColor = HomeDesign.primary.cgColor
+        self.layer.borderColor = primary.cgColor
         self.layer.cornerRadius = HomeLayout.corner
     }
     required init(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }

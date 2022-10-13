@@ -18,7 +18,7 @@ const querystring = require('querystring')
 const fs = require('fs')
 
 const client_id = 'API_UID'
-const client_secret = 'API_SECRET'
+const client_secret = 'API_CLIENT'
 
 function sleep(millis) {
     return new Promise(resolve => setTimeout(resolve, millis));
@@ -269,7 +269,7 @@ async function main() {
             output.push({
                         'login': data.login,
                         'id': user.id,
-                        'image_url': user.image_url,
+                        'image': user.image,
                         'groups': data.groups
                         });
             for (const i in data.groups) {

@@ -33,7 +33,7 @@ final class EventFeedbacksHistoricViewController: HomeViewController, UserSearch
     private init(headerTitle: String, route: HomeApi.Routes, parameters: [String : Any]?, addUserSearchField: Bool) {
         self.header = HeaderWithActionsView(title: headerTitle, actions: nil)
         if addUserSearchField {
-            self.userSearchField = UserSearchFieldView(user: .init(id: App.user.id, login: App.user.login, image_url: App.user.image_url), primary: HomeDesign.primary)
+            self.userSearchField = UserSearchFieldView(user: .init(id: App.user.id, login: App.user.login, image: App.user.image), primary: HomeDesign.primary)
         }
         else {
             self.userSearchField = nil

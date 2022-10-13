@@ -109,6 +109,7 @@ final class DynamicAlert: DynamicController {
         let contentView = BasicUIView()
         let actionsStack = BasicUIStackView()
         var useKeyboard: Bool = false
+        var keyboardFullScreen: Bool = false
         
         var topAnchor: NSLayoutYAxisAnchor!
         
@@ -270,6 +271,8 @@ final class DynamicAlert: DynamicController {
                 view.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
                 view.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 topAnchor = view.bottomAnchor
+                useKeyboard = true
+                keyboardFullScreen = true
             case .roulette(let values, let index):
                 let roulette = RouletteView(primary: primaryColor, values: values)
                 
@@ -299,6 +302,7 @@ final class DynamicAlert: DynamicController {
                 codeView.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 codeView.heightAnchor.constraint(equalToConstant: HomeLayout.dynamicAlertCodeHeigth).isActive = true
                 topAnchor = codeView.bottomAnchor
+                useKeyboard = true
             case .slotInterval:
                 let selector = SlotIntervalSelector()
                 
@@ -325,6 +329,7 @@ final class DynamicAlert: DynamicController {
                 usersSelector.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 topAnchor = usersSelector.bottomAnchor
                 useKeyboard = true
+                keyboardFullScreen = true
             case .textEditor(let txt):
                 let textEditor = TextEditor(defaultText: txt, primary: primaryColor)
                 
@@ -353,7 +358,7 @@ final class DynamicAlert: DynamicController {
                 
                 actionsStack.addArrangedSubview(button)
                 button.isUserInteractionEnabled = true
-                button.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(buttonSelected(sender:))))
+                button.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(DynamicAlert.buttonSelected(sender:))))
             }
         }
         else {
@@ -364,8 +369,15 @@ final class DynamicAlert: DynamicController {
         contentView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         contentView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margins).isActive = true
         if useKeyboard {
-            contentView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: HomeLayout.safeAera.top + HomeLayout.margin).isActive = true
-            contentView.bottomAnchor.constraint(equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -HomeLayout.margin).isActive = true
+            if keyboardFullScreen {
+                contentView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: HomeLayout.safeAera.top + HomeLayout.margin).isActive = true
+                contentView.bottomAnchor.constraint(equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -HomeLayout.margin).isActive = true
+            }
+            else {
+                contentView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
+                contentView.topAnchor.constraint(greaterThanOrEqualTo: self.view.topAnchor, constant: HomeLayout.safeAera.top + HomeLayout.margin).isActive = true
+                contentView.bottomAnchor.constraint(greaterThanOrEqualTo: self.view.keyboardLayoutGuide.topAnchor, constant: -HomeLayout.margin).isActive = true
+            }
         }
         else {
             contentView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
@@ -1148,7 +1160,7 @@ extension DynamicAlert {
                 for _ in 0 ..< countPerLine where index < self.values.count {
                     imageView = BasicUIImageView(asset: self.values[index])
                     imageView.isUserInteractionEnabled = true
-                    imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(imageTapped(sender:))))
+                    imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(IconsView.imageTapped(sender:))))
                     container.addSubview(imageView)
                     if let left = leftImageView {
                         imageView.leadingAnchor.constraint(equalTo: left.trailingAnchor, constant: HomeLayout.smargin).isActive = true
@@ -1654,9 +1666,9 @@ extension DynamicAlert {
             self.greenSelector.delegate = self
             self.blueSelector.delegate = self
             self.colorMap.isUserInteractionEnabled = true
-            self.colorMap.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(colorMapPanGesture(gesture:))))
+            self.colorMap.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(ColorPicker.colorMapPanGesture(gesture:))))
             self.brightnessSlider.selector.isUserInteractionEnabled = true
-            self.brightnessSlider.selector.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(brightnessSliderPanGesture(gesture:))))
+            self.brightnessSlider.selector.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(ColorPicker.brightnessSliderPanGesture(gesture:))))
         }
         required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
         

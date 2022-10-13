@@ -22,12 +22,12 @@ final class IntraUserInfo: IntraObject {
     
     let id: Int
     let login: String
-    let image_url: String!
+    let image: IntraUser.Image
     
-    init(id: Int, login: String, image_url: String!) {
+    init(id: Int, login: String, image: IntraUser.Image) {
         self.id = id
         self.login = login
-        self.image_url = image_url
+        self.image = image
         super.init()
     }
     
@@ -51,7 +51,6 @@ final class IntraUser: IntraObject {
     let wallet: Int
     let pool_month: String!
     let pool_year: String!
-    let image_url: String!
     let titles_users: ContiguousArray<IntraTitleUser>
     let titles: ContiguousArray<IntraTitle>
     let cursus_users: [IntraUserCursus]
@@ -65,6 +64,37 @@ final class IntraUser: IntraObject {
     let partnerships: ContiguousArray<IntraUserPartnership>
     let patroned: ContiguousArray<IntraPatron>
     let patroning: ContiguousArray<IntraPatron>
+    let image: IntraUser.Image
+    
+    final class Image: IntraObject {
+        let link: String!
+        let versions: IntraUser.Image.Versions
+        
+        struct Versions: Codable {
+            let large: String!
+            let medium: String!
+            let micro: String!
+            let small: String!
+        }
+        
+        var url: String {
+            switch App.settings.cacheProfilQuality {
+            case .small where self.versions.small != nil:
+                return self.versions.small
+            case .large where self.versions.large != nil:
+                return self.versions.large
+            case .medium where self.versions.medium != nil:
+                return self.versions.medium
+            case .micro where self.versions.micro != nil:
+                return self.versions.micro
+            default:
+                return self.link
+            }
+        }
+        var isValid: Bool {
+            return self.link != nil && self.versions.small != nil
+        }
+    }
     
     var primaryCampus: IntraUserCampus {
         return self.campus_users.first(where: { $0.is_primary }) ?? self.campus_users[0]

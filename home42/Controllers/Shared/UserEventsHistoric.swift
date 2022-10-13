@@ -26,7 +26,7 @@ final class UserEventsHistoricViewController: HomeViewController, UserSearchFiel
     
     init(user: IntraUser, primary: UIColor) {
         self.header = HeaderWithActionsView(title: ~"title.events", actions: nil)
-        self.userSearchFieldView = UserSearchFieldView(user: .init(id: user.id, login: user.login, image_url: user.image_url), primary: primary)
+        self.userSearchFieldView = UserSearchFieldView(user: .init(id: user.id, login: user.login, image: user.image), primary: primary)
         self.tableView = .init(.usersWithUserIdEvents(App.user.id), parameters: ["sort":"-created_at"], page: 1, pageSize: 100)
         self.primary = primary
         super.init()

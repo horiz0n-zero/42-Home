@@ -114,9 +114,8 @@ final class UsersListViewController: HomeViewController, SearchFieldViewDelegate
         self.gradientView.leadingAnchor.constraint(equalTo: self.tableView.leadingAnchor).isActive = true
         self.gradientView.trailingAnchor.constraint(equalTo: self.tableView.trailingAnchor).isActive = true
         self.gradientView.heightAnchor.constraint(equalToConstant: HomeLayout.margin).isActive = true
-        self.settingsButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(settingsButtonTapped(sender:))))
-        actions?[0].addGestureRecognizer(UITapGestureRecognizer(target: self,
-                                        action: #selector(warnAboutIncorrectAPIResult(sender:))))
+        self.settingsButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(UsersListViewController.settingsButtonTapped(sender:))))
+        actions?[0].addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(UsersListViewController.warnAboutIncorrectAPIResult(sender:))))
         self.tableView.block = self.userSelected(user:)
         self.tableView.primary = primary
         self.tableView.route = route

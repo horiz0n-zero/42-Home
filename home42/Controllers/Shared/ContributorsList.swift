@@ -64,7 +64,7 @@ final class ContributorsListViewController: HomeViewController, UITableViewDeleg
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! SeparatorTableViewCell<UserInfoView>
         let contributor = self.source[indexPath.section][indexPath.row]
-        let user = IntraUserInfo(id: contributor.id, login: contributor.login, image_url: contributor.image_url)
+        let user = IntraUserInfo(id: contributor.id, login: contributor.login, image: contributor.image)
         
         cell.view.update(with: user)
         cell.separator.backgroundColor = HomeDesign.gold

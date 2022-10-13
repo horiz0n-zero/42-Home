@@ -156,7 +156,7 @@ final fileprivate class HolyGraphView: BasicUIView, SelectorViewDelegate, Search
         self.primary = primary
         if isController {
             self.antenneView = AntenneBlurredView(isBreak: false, isAntenneAnimating: true)
-            self.userSearchField = UserSearchFieldView(user: .init(id: user.id, login: user.login, image_url: user.image_url), primary: primary)
+            self.userSearchField = UserSearchFieldView(user: .init(id: user.id, login: user.login, image: user.image), primary: primary)
         }
         else {
             self.antenneView = AntenneBlurredView(isBreak: false, isAntenneAnimating: true)

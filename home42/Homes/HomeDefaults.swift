@@ -100,6 +100,7 @@ public final class HomeDefaults: NSObject {
         HomeDefaults.remove(.cookies)
         HomeDefaults.remove(.controller)
         HomeDefaults.remove(.userEvents)
+        HomeDefaults.remove(.language)
     }
     
     @frozen enum Key: String, CaseIterable {

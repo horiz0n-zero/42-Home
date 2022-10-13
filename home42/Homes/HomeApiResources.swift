@@ -34,7 +34,7 @@ final class HomeApiResources: NSObject {
         
         let id: Int
         let login: String
-        let image_url: String!
+        let image: IntraUser.Image
         let groups: [Group]
     }
     static private(set) var contributors: [String: Contributor]! = nil

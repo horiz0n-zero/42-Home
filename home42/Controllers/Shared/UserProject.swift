@@ -60,7 +60,7 @@ final class UserProjectViewController: HomeViewController, UITableViewDelegate, 
         self.tableView.register(ScaleTeamHeaderTableViewCell.self, forCellReuseIdentifier: "header")
         self.tableView.register(HomeFramingTableViewCell<UserCorrectionsLogsViewController.ScaleTeamView>.self, forCellReuseIdentifier: "scale")
         
-        peopleAction.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(peopleTapped(sender:))))
+        peopleAction.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(UserProjectViewController.peopleTapped(sender:))))
         Task.init(priority: .userInitiated, operation: {
             do {
                 try await self.startGettingProject()
@@ -130,7 +130,7 @@ final class UserProjectViewController: HomeViewController, UITableViewDelegate, 
             if indexPath.row == 0 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: "header", for: indexPath) as! ScaleTeamHeaderTableViewCell
                 
-                cell.update(with: .init(id: self.user.id, login: self.user.login, image_url: self.user.image_url), project: self.userProject, scaleTeams: self.scaleTeams)
+                cell.update(with: .init(id: self.user.id, login: self.user.login, image: self.user.image), project: self.userProject, scaleTeams: self.scaleTeams)
                 return cell
             }
             let cell = tableView.dequeueReusableCell(withIdentifier: "scale", for: indexPath) as! HomeFramingTableViewCell<UserCorrectionsLogsViewController.ScaleTeamView>

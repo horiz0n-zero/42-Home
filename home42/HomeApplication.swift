@@ -130,10 +130,10 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
             let localIdentifier: String
             
             if #available(iOS 16, *) {
-                localIdentifier = Locale.current.language.languageCode?.identifier ?? "en"
+                localIdentifier = (Locale.current.regionCode ?? Locale.current.language.languageCode?.identifier ?? "en").lowercased()
             }
             else {
-                localIdentifier = Locale.current.languageCode ?? "en"
+                localIdentifier = (Locale.current.regionCode ?? Locale.current.languageCode ?? "en").lowercased()
             }
             return HomeApiResources.languages.first(where: { $0.identifier == localIdentifier }) ?? HomeApiResources.languages.first(where: { $0.identifier == "en" })!
         }

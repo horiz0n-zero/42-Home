@@ -95,14 +95,14 @@ final class AlternateLabel: BasicUILabel {
         self.selectedIndex = selectedIndex
         super.init(text: array[selectedIndex])
         self.isUserInteractionEnabled = true
-        self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(changeText)))
+        self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(AlternateLabel.changeText)))
     }
     override init(text: String) {
         self.array = nil
         self.selectedIndex = 0
         super.init(text: text)
         self.isUserInteractionEnabled = true
-        self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(changeText)))
+        self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(AlternateLabel.changeText)))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     

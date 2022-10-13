@@ -38,8 +38,6 @@ final class ClustersViewController: HomeViewController, ClustersBaseViewControll
             #if DEBUG
                 print(error)
             #endif
-            DynamicAlert(contents: [.title(~"clusters.unavailable"), .text("id: \(App.userCampus.campus_id)")],
-                         actions: [.normal(~"general.ok", nil), HomeGuides.alertActionLink()])
             self.clusterView = nil
         }
         super.init()
@@ -49,6 +47,10 @@ final class ClustersViewController: HomeViewController, ClustersBaseViewControll
             clusterView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
             clusterView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
             clusterView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        }
+        else {
+            DynamicAlert(contents: [.title(~"clusters.unavailable"), .text("id: \(App.userCampus.campus_id)")],
+                         actions: [.normal(~"general.ok", nil), HomeGuides.alertActionLink(self)])
         }
     }
     required init?(coder: NSCoder) { fatalError() }
@@ -172,8 +174,7 @@ final fileprivate class ClustersView: BasicUIView {
     private var historicView: HistoricView? = nil
     private var searchView: SearchResultView? = nil
     
-    init(_ clusterDescription: ClustersView.ClusterDescription, campus: IntraUserCampus,
-         primary: UIColor, _ isMainController: Bool) {
+    init(_ clusterDescription: ClustersView.ClusterDescription, campus: IntraUserCampus, primary: UIColor, _ isMainController: Bool) {
         var leadingAction: NSLayoutXAxisAnchor
         let aeraTop: CGFloat
         
@@ -183,9 +184,9 @@ final fileprivate class ClustersView: BasicUIView {
         self.isMainController = isMainController
         self.refreshButton = ActionButtonView(asset: .actionRefresh, color: primary)
         self.searchField = SearchFieldView(placeholder: ~"general.search")
-        self.floorSegment = ClusterSegmentView(values: clusterDescription.floors.map({ $0.name }),
-                                               extraValues: HomeDefaults.read(.clustersExtraValues),
-                                               selectedIndex: HomeDefaults.read(.liveClusterFloor) ?? 0)
+        self.searchField.setPrimary(primary)
+        self.floorSegment = ClusterSegmentView(values: clusterDescription.floors.map({ $0.name }), extraValues: HomeDefaults.read(.clustersExtraValues),
+                                               selectedIndex: HomeDefaults.read(.liveClusterFloor) ?? 0, primary: primary)
         self.friendsButton = ActionButtonView(asset: .actionFriends, color: HomeDesign.actionGreen)
         self.friendsButton.isUserInteractionEnabled = true
         self.friendsButton.tag = People.ListType.friends.rawValue
@@ -326,8 +327,12 @@ final fileprivate class ClustersView: BasicUIView {
     }
     
     static func readDescription(debugFile file: String) throws -> ClusterDescription {
-        let data = try Data(contentsOf: URL(string: file)!)
+        let url = URL(string: file)!
+        let data: Data
         
+        _ = url.startAccessingSecurityScopedResource()
+        data = try Data(contentsOf: url)
+        url.stopAccessingSecurityScopedResource()
         return try JSONDecoder.decoder.decode(ClusterDescription.self, from: data)
     }
     
@@ -358,7 +363,7 @@ final fileprivate class ClustersView: BasicUIView {
         container.trailingAnchor.constraint(equalTo: self.scrollView.trailingAnchor).isActive = true
         container.widthAnchor.constraint(equalToConstant: self.clusterDescription.width).isActive = true
         container.heightAnchor.constraint(equalToConstant: self.clusterDescription.height).isActive = true
-        container.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(scrollViewContentTapped)))
+        container.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ClustersView.scrollViewContentTapped)))
         
         for place in self.clusterDescription.floors[self.floorSegment.selectedIndex].places {
             clusterView = type.init(frame: .init(origin: place.position, size: clusterViewSize), display: place.display)
@@ -993,6 +998,4 @@ extension ClustersView {
         }
         self.historicView = view
     }
-
-    
 }
