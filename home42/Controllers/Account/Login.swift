@@ -133,6 +133,7 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         case connect   = "login.state.connect"
         case waiting   = "login.state.waiting"
         case signin    = "login.state.signin"
+        case signin2FA = "terminal.waiting"
         case authorize = "login.state.authorize"
         case loading   = "login.state.loading"
         case cookie    = "login.state.cookies"
@@ -183,12 +184,14 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
             self.signinHandler = await newSigninHandler()
         })
     }
-    private func loginErrorOccured(_ description: String, apiError: HomeApi.RequestError? = nil) {
-        if let error = apiError {
-            DynamicAlert.presentWith(error: error)
-        }
-        else {
-            DynamicAlert(contents: [.text(description)], actions: [.normal(~"general.ok", nil)])
+    private func loginErrorOccured(_ description: String, apiError: HomeApi.RequestError? = nil, showAlert: Bool = true) {
+        if showAlert {
+            if let error = apiError {
+                DynamicAlert.presentWith(error: error)
+            }
+            else {
+                DynamicAlert(contents: [.text(description)], actions: [.normal(~"general.ok", nil)])
+            }
         }
         self.signinHandler = nil
         self.loginButton.isUserInteractionEnabled = true
@@ -225,6 +228,28 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
             webView.evaluateJavaScript(login, completionHandler: javascriptError(_:error:))
             webView.evaluateJavaScript(passw, completionHandler: javascriptError(_:error:))
             webView.evaluateJavaScript("document.querySelector(\'[name=\"commit\"]\').click();", completionHandler: javascriptError(_:error:))
+        case .signin2FA:
+            let style: DynamicAlert.Style
+            
+            func tryCode(code: Int) {
+                let codeJS = "document.getElementById(\"users_code\").value = \"\(code)\""
+                let commitJS = "document.querySelector(\'[name=\"commit\"]\').click();"
+                
+                webView.evaluateJavaScript(codeJS, completionHandler: javascriptError(_:error:))
+                webView.evaluateJavaScript(commitJS, completionHandler: javascriptError(_:error:))
+            }
+            
+            func cancelAuthentification() {
+                self.loginErrorOccured(~"general.error", showAlert: false)
+            }
+            
+            if !webView.url!.absoluteString.contains("new") {
+                style = .withPrimary(~"general.error", HomeDesign.redError)
+            }
+            else {
+                style = .primary(~"general.warning")
+            }
+            DynamicAlert(style, contents: [.title("Intra 2FA"), .code], actions: [.normal(~"general.cancel", cancelAuthentification), .getCode(tryCode(code:))])
         case .authorize:
             webView.evaluateJavaScript("document.forms[0].submit();", completionHandler: javascriptError(_:error:))
         default:
@@ -263,6 +288,11 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
                 else {
                     self.state = .signin
                 }
+            }
+        }
+        else if path.hasPrefix("https://signin.intra.42.fr/intra_otp_sessions") {
+            DispatchQueue.main.async {
+                self.state = .signin2FA
             }
         }
         else if path.hasPrefix("https://api.intra.42.fr/oauth/authorize") {

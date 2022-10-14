@@ -76,7 +76,7 @@ final class DynamicAlert: DynamicController {
         case getRoulette(String, (Int, String) -> ())
         case getAdvancedSelector((Any) -> ())
         case getIcon(String, (Int, UIImage.Assets) -> ())
-        case getCode(String, (Int) -> ())
+        case getCode((Int) -> ())
         case apiErrorJSON(Data, HomeApi.RequestError)
         
         case slotInterval((Date, Date) -> ())
@@ -84,7 +84,7 @@ final class DynamicAlert: DynamicController {
         
         var isHighligth: Bool {
             switch self {
-            case .highligth(_, _), .getCode(_, _), .getRoulette(_, _), .apiErrorJSON, .slotInterval(_), .getIcon(_, _), .textEditor(_), .getAdvancedSelector(_):
+            case .highligth(_, _), .getCode(_), .getRoulette(_, _), .apiErrorJSON, .slotInterval(_), .getIcon(_, _), .textEditor(_), .getAdvancedSelector(_):
                 return true
             default:
                 return false
@@ -92,9 +92,9 @@ final class DynamicAlert: DynamicController {
         }
         var text: String {
             switch self {
-            case .normal(let txt, _), .highligth(let txt, _), .getCode(let txt, _), .getRoulette(let txt, _), .getIcon(let txt, _):
+            case .normal(let txt, _), .highligth(let txt, _), .getRoulette(let txt, _), .getIcon(let txt, _):
                 return txt
-            case .slotInterval(_), .textEditor(_), .getAdvancedSelector(_):
+            case .slotInterval(_), .textEditor(_), .getAdvancedSelector(_), .getCode(_):
                 return ~"general.select"
             case .apiErrorJSON:
                 return "JSON"
@@ -293,16 +293,14 @@ final class DynamicAlert: DynamicController {
                 icons.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 topAnchor = icons.bottomAnchor
             case .code:
-                let codeView = CodeView(maximum: 6)
+                let codeView = CodeView(maximum: 9)
                 
                 DynamicAlert.codeView = codeView
                 contentView.addSubview(codeView)
                 codeView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: HomeLayout.margins).isActive = true
                 codeView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -HomeLayout.margins).isActive = true
                 codeView.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
-                codeView.heightAnchor.constraint(equalToConstant: HomeLayout.dynamicAlertCodeHeigth).isActive = true
                 topAnchor = codeView.bottomAnchor
-                useKeyboard = true
             case .slotInterval:
                 let selector = SlotIntervalSelector()
                 
@@ -439,7 +437,7 @@ final class DynamicAlert: DynamicController {
         switch (sender.view as! DynamicAlert.Button).action {
         case .normal(_, let block), .highligth(_, let block):
             block?()
-        case .getCode(_, let block):
+        case .getCode(let block):
             block(DynamicAlert.codeView.value)
         case .getAdvancedSelector(let block):
             block(DynamicAlert.advancedSelectorType.value())
@@ -1251,6 +1249,7 @@ extension DynamicAlert {
                 self.layer.borderWidth = HomeLayout.sborder
                 self.layer.borderColor = HomeDesign.blackLayer.cgColor
                 self.isUserInteractionEnabled = true
+                self.heightAnchor.constraint(equalTo: self.widthAnchor, multiplier: HomeLayout.dynamicAlertCodeRatio).isActive = true
             }
             required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
             
@@ -1291,6 +1290,7 @@ extension DynamicAlert {
         
         init(maximum: Int) {
             super.init(frame: .zero)
+            self.translatesAutoresizingMaskIntoConstraints = false
             for index in 0 ..< maximum {
                 self.addArrangedSubview(CodeInputView(position: index, count: maximum))
             }
@@ -1300,9 +1300,7 @@ extension DynamicAlert {
             self.distribution = .fillEqually
             self.spacing = HomeLayout.margin
         }
-        required init(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
+        required init(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
         
         var value: Int {
             var result: Int = 0

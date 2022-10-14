@@ -259,6 +259,9 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
     
     // MARK: -
     private func dataReceived(_ user: IntraUser, coalitions: ContiguousArray<IntraCoalition>) {
+        guard App.userLoggedIn else {
+            return
+        }
         self.user = user
         self.coalitions = coalitions
         self.currentCampus = user.primaryCampus
