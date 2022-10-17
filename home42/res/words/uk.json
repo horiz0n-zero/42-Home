@@ -332,5 +332,6 @@
     "settings.profil-quality.medium": "Середній",
     "settings.profil-quality.small": "мало",
     "settings.profil-quality.micro": "Дуже мало",
-    "settings.desc.cache.profil-quality": "Якість завантаження студентських фото."
+    "settings.desc.cache.profil-quality": "Якість завантаження студентських фото.",
+    "research.clusters": "Доступ до кластерів вибраного кампусу"
 }

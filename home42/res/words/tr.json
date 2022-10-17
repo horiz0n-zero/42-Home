@@ -332,5 +332,6 @@
     "settings.profil-quality.medium": "Orta",
     "settings.profil-quality.small": "Biraz",
     "settings.profil-quality.micro": "Çok küçük",
-    "settings.desc.cache.profil-quality": "Öğrenci fotoğraflarının kalitesini yükleyin."
+    "settings.desc.cache.profil-quality": "Öğrenci fotoğraflarının kalitesini yükleyin.",
+    "research.clusters": "Seçilen bir kampüsün kümelerine erişin"
 }

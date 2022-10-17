@@ -332,5 +332,6 @@
     "settings.profil-quality.medium": "중간",
     "settings.profil-quality.small": "작은",
     "settings.profil-quality.micro": "매우 작은",
-    "settings.desc.cache.profil-quality": "학생 사진의 품질을 업로드합니다."
+    "settings.desc.cache.profil-quality": "학생 사진의 품질을 업로드합니다.",
+    "research.clusters": "선택한 캠퍼스의 클러스터에 액세스"
 }

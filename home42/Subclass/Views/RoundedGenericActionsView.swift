@@ -158,7 +158,7 @@ final class SearchFieldViewWithTimer: SearchFieldView {
         if self.timer != nil {
             self.timer.invalidate()
         }
-        self.timer = Timer.scheduledTimer(timeInterval: 0.6, target: self, selector: #selector(SearchFieldViewWithTimer.timerFired(_:)), userInfo: nil, repeats: false)
+        self.timer = Timer.scheduledTimer(timeInterval: 0.6, target: self, selector: #selector(SearchFieldViewWithTimer.scheduledTimerFired(_:)), userInfo: nil, repeats: false)
         return true
     }
     override func textFieldDidChangeSelection(_ textField: UITextField) { }
@@ -169,7 +169,7 @@ final class SearchFieldViewWithTimer: SearchFieldView {
         return textField.resignFirstResponder()
     }
     
-    @objc private func timerFired(_ timer: Timer) {
+    @objc func scheduledTimerFired(_ timer: Timer) {
         self.delegate.searchFieldTextUpdated(self)
     }
     

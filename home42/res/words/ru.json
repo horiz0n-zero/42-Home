@@ -332,5 +332,6 @@
     "settings.profil-quality.medium": "Середина",
     "settings.profil-quality.small": "Маленький",
     "settings.profil-quality.micro": "Очень маленький",
-    "settings.desc.cache.profil-quality": "Загружайте качественные студенческие фотографии."
+    "settings.desc.cache.profil-quality": "Загружайте качественные студенческие фотографии.",
+    "research.clusters": "Доступ к кластерам выбранного кампуса"
 }

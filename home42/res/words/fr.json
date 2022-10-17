@@ -332,5 +332,6 @@
     "settings.profil-quality.medium": "Medium",
     "settings.profil-quality.small": "Petit",
     "settings.profil-quality.micro": "Très petit",
-    "settings.desc.cache.profil-quality": "Qualité de téléchargement des photos des étudiants."
+    "settings.desc.cache.profil-quality": "Qualité de téléchargement des photos des étudiants.",
+    "research.clusters": "Accéder aux clusters d'un campus sélectionné"
 }

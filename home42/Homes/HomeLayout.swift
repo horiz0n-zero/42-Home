@@ -87,7 +87,7 @@ extension HomeLayout {
     
     static let dynamicAlertHeaderHeigth: CGFloat = 50.0
     static let antenneViewSize: CGFloat = 170.0
-    static let dynamicAlertCodeHeigth: CGFloat = 60.0
+    static let dynamicAlertCodeRatio: CGFloat = 1.3
     static let dynamicAlertActionsHeigth: CGFloat = 40.0
     static let dynamicActionsSheetButtonHeigth: CGFloat = 60.0
     

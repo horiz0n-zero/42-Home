@@ -185,8 +185,13 @@ final fileprivate class ClustersView: BasicUIView {
         self.refreshButton = ActionButtonView(asset: .actionRefresh, color: primary)
         self.searchField = SearchFieldView(placeholder: ~"general.search")
         self.searchField.setPrimary(primary)
-        self.floorSegment = ClusterSegmentView(values: clusterDescription.floors.map({ $0.name }), extraValues: HomeDefaults.read(.clustersExtraValues),
-                                               selectedIndex: HomeDefaults.read(.liveClusterFloor) ?? 0, primary: primary)
+        if campus.campus_id == App.userCampus.campus_id {
+            self.floorSegment = ClusterSegmentView(values: clusterDescription.floors.map({ $0.name }), extraValues: HomeDefaults.read(.clustersExtraValues),
+                                                   selectedIndex: HomeDefaults.read(.liveClusterFloor) ?? 0, primary: primary)
+        }
+        else {
+            self.floorSegment = ClusterSegmentView(values: clusterDescription.floors.map({ $0.name }), extraValues: nil, primary: primary)
+        }
         self.friendsButton = ActionButtonView(asset: .actionFriends, color: HomeDesign.actionGreen)
         self.friendsButton.isUserInteractionEnabled = true
         self.friendsButton.tag = People.ListType.friends.rawValue
@@ -205,7 +210,6 @@ final fileprivate class ClustersView: BasicUIView {
             self.extra2Button = nil
         }
         self.scrollView = BasicUIScrollView()
-        self.scrollView.backgroundColor = UIColor.clear
         if isMainController {
             aeraTop = HomeLayout.safeAeraMain.top
         }
@@ -433,7 +437,9 @@ final fileprivate class ClustersView: BasicUIView {
             self.floorSegment.extraValues = values
             self.refreshButton.isUserInteractionEnabled = true
             self.refreshButton.stopRotate()
-            HomeDefaults.save(values, forKey: .clustersExtraValues)
+            if self.isUserMainCampus {
+                HomeDefaults.save(values, forKey: .clustersExtraValues)
+            }
         }
         
         self.refreshButton.isUserInteractionEnabled = false
@@ -494,7 +500,9 @@ final fileprivate class ClustersView: BasicUIView {
                                         extra1: valuesPeoplesCount[index][People.ListType.extraList1.rawValue],
                                         extra2: valuesPeoplesCount[index][People.ListType.extraList2.rawValue]))
                 }
-                HomeDefaults.save(self.locations, forKey: .liveClusterLocations)
+                if self.isUserMainCampus {
+                    HomeDefaults.save(self.locations, forKey: .liveClusterLocations)
+                }
             }
             catch {
                 DynamicAlert.presentWith(error: error as! HomeApi.RequestError)
@@ -563,7 +571,9 @@ extension ClustersView: UIScrollViewDelegate, ClusterSegmentViewDelegate {
     
     func clusterSegmentViewSelect(_ segmentView: ClusterSegmentView) {
         self.transitionToSelectedFloor()
-        HomeDefaults.save(segmentView.selectedIndex, forKey: .liveClusterFloor)
+        if self.isUserMainCampus {
+            HomeDefaults.save(segmentView.selectedIndex, forKey: .liveClusterFloor)
+        }
     }
     func clusterSegmentViewPeopleCounterSelect(_ segmentView: ClusterSegmentView, listType: People.ListType) { }
     func clusterSegmentViewPlacesCounterSelect(_ segmentView: ClusterSegmentView) { }
@@ -584,7 +594,7 @@ extension ClustersView: UIScrollViewDelegate, ClusterSegmentViewDelegate {
                     historicView.update(host: host, user: user)
                 }
                 else {
-                    self.addHistoricView(host, user: user)
+                    self.addHistoricView(host, user: user, campus: self.campus)
                 }
             }
             
@@ -649,7 +659,9 @@ extension ClustersView: UIScrollViewDelegate, ClusterSegmentViewDelegate {
                                 extra2: valuesPeoplesCount[index][People.ListType.extraList2.rawValue]))
         }
         self.floorSegment.extraValues = values
-        HomeDefaults.save(values, forKey: .clustersExtraValues)
+        if self.isUserMainCampus {
+            HomeDefaults.save(values, forKey: .clustersExtraValues)
+        }
     }
     
     @objc private func peopleButtonTapped(sender: UITapGestureRecognizer) {
@@ -853,13 +865,13 @@ extension ClustersView {
         let closeButton: ActionButtonView
         private let tableView: GenericSingleInfiniteRequestTableView<UserLocationLogTableViewCell, IntraClusterLocation>
         
-        init(host: String, user: IntraUserInfo?) {
+        init(host: String, user: IntraUserInfo?, campus: IntraUserCampus) {
             self.hostLabel = BasicUILabel(text: host)
             self.hostLabel.font = HomeLayout.fontSemiBoldTitle
             self.hostLabel.textColor = HomeDesign.white
             self.hostLabel.adjustsFontSizeToFitWidth = true
             self.closeButton = ActionButtonView(asset: .actionClose, color: HomeDesign.actionRed)
-            self.tableView = .init(.campusWithCampusIdLocations(App.userCampus.campus_id),
+            self.tableView = .init(.campusWithCampusIdLocations(campus.campus_id),
                                    parameters: ["filter[host]": host, "sort": "-begin_at"])
             self.tableView.backgroundColor = UIColor.clear
             super.init()
@@ -981,9 +993,9 @@ extension ClustersView {
         }
     }
     
-    private func addHistoricView(_ host: String, user: IntraUserInfo?) {
+    private func addHistoricView(_ host: String, user: IntraUserInfo?, campus: IntraUserCampus) {
         guard self.historicView == nil else { return }
-        let view = HistoricView(host: host, user: user)
+        let view = HistoricView(host: host, user: user, campus: campus)
         
         self.searchField.isUserInteractionEnabled = false
         self.addSubview(view)

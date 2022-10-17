@@ -48,6 +48,8 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
               selector: #selector(ResearchViewController.seeUsers)),
         .init(titleKey: "research.users-admitted", "research.users-admitted-description",
               selector: #selector(ResearchViewController.seeUsersAdmitted)),
+        .init(titleKey: "title.clusters", "research.clusters",
+              selector: #selector(ResearchViewController.seeCampusClusters)),
         .init(titleKey: "general.users", "research.users-title",
               selector: #selector(ResearchViewController.seeUsersTitle)),
         .init(titleKey: "general.users", "research.users-group",
@@ -181,6 +183,24 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
                      contents: [.title(title), .roulette(months, months.count / 2)],
                      actions: [.normal(~"general.cancel", nil),
                                .getRoulette(~"general.select", selectMonth(index:month:))])
+    }
+    
+    @objc private func seeCampusClusters() {
+        
+        func selectClusterCampus(_ campus: IntraCampus) {
+            do {
+                let vc = try ClustersSharedViewController(campus: .init(campus: campus), coalition: App.userCoalition)
+                
+                self.presentWithBlur(vc)
+            }
+            catch {
+                HomeGuides.alertShowGuides(self)
+            }
+        }
+        
+        DynamicAlert.init(.primary(~"title.clusters"),
+                          contents: [.advancedSelector(.clusters, Array<IntraCampus>(HomeApiResources.campus!), 0)],
+                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectClusterCampus, to: ((Any) -> ()).self))])
     }
     
     @objc private func seeProjectsList() {

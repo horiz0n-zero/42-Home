@@ -701,6 +701,7 @@ extension DynamicAlert {
         case group
         case languages
         case campus
+        case clusters
         
         func view(primaryColor: UIColor, values: [Any], index: Int) -> BasicUIView {
             switch self {
@@ -714,6 +715,8 @@ extension DynamicAlert {
                 return AdvancedSelector<IntraLanguage, AdvancedSelectorViewLanguage>.init(primary: primaryColor, source: values as! [IntraLanguage], selectionIndex: index)
             case .campus:
                 return AdvancedSelector<IntraCampus, AdvancedSelectorViewCampus>.init(primary: primaryColor, source: values as! [IntraCampus], selectionIndex: index)
+            case .clusters:
+                return AdvancedSelector<IntraCampus, AdvancedSelectorViewClusters>.init(primary: primaryColor, source: values as! [IntraCampus], selectionIndex: index)
             }
         }
         func value() -> Any {
@@ -728,6 +731,8 @@ extension DynamicAlert {
                 return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraLanguage, AdvancedSelectorViewLanguage>).selection
             case .campus:
                 return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewCampus>).selection
+            case .clusters:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewClusters>).selection
             }
         }
     }
@@ -930,6 +935,102 @@ extension DynamicAlert {
         }
     }
     
+    final private class AdvancedSelectorViewClusters: AdvancedSelectorViewBase<IntraCampus> {
+        
+        private let label: BasicUILabel
+        private let clusterIcon: BasicUIImageView
+        private var isAvailable: Bool = false
+        
+        override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+            self.label = BasicUILabel(text: "???")
+            self.label.font = HomeLayout.fontSemiBoldMedium
+            self.label.textColor = HomeDesign.black
+            self.label.numberOfLines = 0
+            self.clusterIcon = .init(asset: .controllerClusters)
+            self.clusterIcon.tintColor = HomeDesign.black
+            self.clusterIcon.layer.cornerRadius = HomeLayout.scorner
+            self.clusterIcon.layer.masksToBounds = true
+            super.init(style: style, reuseIdentifier: reuseIdentifier)
+        }
+        required init?(coder: NSCoder) { fatalError() }
+        
+        override func willMove(toSuperview newSuperview: UIView?) {
+            guard newSuperview != nil else { return }
+            
+            super.willMove(toSuperview: newSuperview)
+            self.container.addSubview(self.clusterIcon)
+            self.clusterIcon.topAnchor.constraint(equalTo: self.container.topAnchor, constant: HomeLayout.margin).isActive = true
+            self.clusterIcon.bottomAnchor.constraint(equalTo: self.container.bottomAnchor, constant: -HomeLayout.margin).isActive = true
+            self.clusterIcon.leadingAnchor.constraint(equalTo: self.container.leadingAnchor, constant: HomeLayout.margin).isActive = true
+            self.clusterIcon.heightAnchor.constraint(equalToConstant: HomeLayout.mainSelectionIconSize).isActive = true
+            self.clusterIcon.widthAnchor.constraint(equalToConstant: HomeLayout.mainSelectionIconSize).isActive = true
+            self.container.addSubview(self.label)
+            self.label.centerYAnchor.constraint(equalTo: self.clusterIcon.centerYAnchor).isActive = true
+            self.label.trailingAnchor.constraint(equalTo: self.container.trailingAnchor, constant: -HomeLayout.margin).isActive = true
+            self.label.leadingAnchor.constraint(equalTo: self.clusterIcon.trailingAnchor, constant: HomeLayout.margin).isActive = true
+        }
+        
+        override func setSelectedStyle(animate: Bool, primary: UIColor) {
+            
+            func style() {
+                self.container.backgroundColor = primary
+                self.label.textColor = HomeDesign.white
+                if self.isAvailable {
+                    self.clusterIcon.tintColor = HomeDesign.greenSuccess
+                    self.clusterIcon.backgroundColor = HomeDesign.lightGray
+                }
+                else {
+                    self.clusterIcon.tintColor = HomeDesign.white
+                    self.clusterIcon.backgroundColor = HomeDesign.redError
+                }
+            }
+            
+            if animate {
+                HomeAnimations.animateQuick({
+                    style()
+                }, completion: nil)
+            }
+            else {
+                style()
+            }
+        }
+        override func setUnSelectedStyle(animate: Bool, primary: UIColor) {
+            
+            func style() {
+                self.container.backgroundColor = HomeDesign.lightGray
+                self.label.textColor = HomeDesign.black
+                if self.isAvailable {
+                    self.clusterIcon.tintColor = HomeDesign.greenSuccess
+                    self.clusterIcon.backgroundColor = primary.withAlphaComponent(HomeDesign.alphaLowLayer)
+                }
+                else {
+                    self.clusterIcon.tintColor = HomeDesign.white
+                    self.clusterIcon.backgroundColor = HomeDesign.redError
+                }
+            }
+            
+            if animate {
+                HomeAnimations.animateQuick({
+                    style()
+                }, completion: nil)
+            }
+            else {
+                style()
+            }
+        }
+        override func update(with value: IntraCampus) {
+            self.label.text = value.name
+            self.isAvailable = FileManager.default.fileExists(atPath: HomeResources.applicationDirectory.appendingPathComponent("res/clusters/\(value.id).json").path)
+        }
+        
+        override class func filter(_ source: [IntraCampus], with text: String) -> [IntraCampus] {
+            source.filter({ $0.name.uppercased().contains(text.uppercased()) })
+        }
+        override class func firstIndex(_ array: [IntraCampus], with selection: IntraCampus) -> Int {
+            array.firstIndex(where: { $0.id == selection.id }) ?? 0
+        }
+    }
+    
     final private class AdvancedSelector<G: Equatable, V: AdvancedSelectorViewBase<G>>: BasicUIView, UITableViewDelegate, UITableViewDataSource, SearchFieldViewDelegate {
         
         private let searchField: SearchFieldView
@@ -978,6 +1079,13 @@ extension DynamicAlert {
             }
             if let index = self.currentSource.firstIndex(of: self.selection) {
                 self.selectionIndex = index
+            }
+            else if self.currentSource.count > 0 && self.selectionIndex < self.currentSource.count {
+                self.selection = self.currentSource[self.selectionIndex]
+            }
+            else if self.currentSource.count > 0 {
+                self.selectionIndex = 0
+                self.selection = self.currentSource[0]
             }
             self.tableView.reloadData()
         }

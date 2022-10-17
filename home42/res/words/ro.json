@@ -332,5 +332,6 @@
     "settings.profil-quality.medium": "Mediu",
     "settings.profil-quality.small": "Puțin",
     "settings.profil-quality.micro": "Foarte mic",
-    "settings.desc.cache.profil-quality": "Încărcați fotografii de calitate ale studenților."
+    "settings.desc.cache.profil-quality": "Încărcați fotografii de calitate ale studenților.",
+    "research.clusters": "Accesați clusterele unui campus selectat"
 }

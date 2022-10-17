@@ -604,6 +604,10 @@ extension MainViewController {
     func openClustersDebugFile(_ file: String) {
         
         func selectCampus(_ campus: IntraCampus) {
+            #if DEBUG
+            print(#function)
+            dump(campus)
+            #endif
             App.mainController.controller.dismissToRootController(animated: true) {
                 do {
                     let vc = try ClustersSharedViewController(debugFile: file, campus: .init(campus: campus))
@@ -611,7 +615,10 @@ extension MainViewController {
                     self.presentWithBlur(vc, completion: nil)
                 }
                 catch {
-                    DynamicAlert(contents: [.title(error.localizedDescription)], actions: [.normal(~"general.ok", nil)])
+                    #if DEBUG
+                    print(#function, campus.name, campus.id, error)
+                    #endif
+                    DynamicAlert(contents: [.title(String(describing: error))], actions: [.normal(~"general.ok", nil)])
                 }
             }
         }

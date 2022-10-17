@@ -332,5 +332,6 @@
     "settings.profil-quality.medium": "Միջին",
     "settings.profil-quality.small": "Քիչ",
     "settings.profil-quality.micro": "Շատ փոքր",
-    "settings.desc.cache.profil-quality": "Վերբեռնեք ուսանողների լուսանկարների որակը:"
+    "settings.desc.cache.profil-quality": "Վերբեռնեք ուսանողների լուսանկարների որակը:",
+    "research.clusters": "Մուտք գործեք ընտրված համալսարանի կլաստերները"
 }

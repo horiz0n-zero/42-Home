@@ -332,5 +332,6 @@
     "settings.profil-quality.medium": "中くらい",
     "settings.profil-quality.small": "少し",
     "settings.profil-quality.micro": "非常に少ない",
-    "settings.desc.cache.profil-quality": "学生の写真の品質をアップロードします。"
+    "settings.desc.cache.profil-quality": "学生の写真の品質をアップロードします。",
+    "research.clusters": "選択したキャンパスのクラスターにアクセスする"
 }
