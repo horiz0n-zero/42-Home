@@ -205,7 +205,7 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
             
             self.presentWithBlur(usersList)
         case .achievements:
-            let achievement = self.user.achievements[indexPath.row]
+            let achievement = self.user.achievements[indexPath.row &- 1]
             let usersList = UsersListViewController(.achievementsWithAchievementIdUsers(achievement.id),
                                                     primary: self.currentPrimary,
                                                     extra: .achievement(achievement),
@@ -517,7 +517,9 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
                 let vc = try ClustersSharedViewController(campus: self.currentCampus, coalition: self.currentCoalition)
                 
                 self.presentWithBlur(vc) {
-                    vc.focusOnClusterView(with: self.user.location, animated: true)
+                    if let location = self.user?.location {
+                        vc.focusOnClusterView(with: location, animated: true)
+                    }
                 }
             }
             catch {

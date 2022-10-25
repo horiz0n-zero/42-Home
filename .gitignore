@@ -2,9 +2,7 @@
 home42.xcworkspace/xcuserdata/*
 home42.xcworkspace/xcshareddata/*
 !home42.xcworkspace/xcshareddata/IDETemplateMacros.plist
-home42.xcodeproj/project.xcworkspace/*
 home42.xcodeproj/xcuserdata/*
-home42.xcodeproj/project.pbxproj
 
 # General
 .DS_Store
@@ -14,4 +12,5 @@ Pods/
 Podfile.lock
 
 # Specific Projects files
-home42/Controllers/Hidden/*
+home42/Controllers/Hidden/Corrections.swift
+home42/Controllers/Hidden/Tracker.swift

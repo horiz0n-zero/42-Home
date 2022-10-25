@@ -150,13 +150,10 @@ final fileprivate class ClustersView: BasicUIView {
     
     private let clusterDescription: ClustersView.ClusterDescription
     private let campus: IntraUserCampus
-    private var isUserMainCampus: Bool {
-        return self.campus.campus_id == App.userCampus.campus_id
-    }
     private let isMainController: Bool
     private let primary: UIColor
     
-    private let floorSegment: ClusterSegmentView
+    private let floorSegment: ClusterSelectorView
     private let refreshButton: ActionButtonView
     private let scrollView: BasicUIScrollView
     private let searchField: SearchFieldView
@@ -177,7 +174,24 @@ final fileprivate class ClustersView: BasicUIView {
     init(_ clusterDescription: ClustersView.ClusterDescription, campus: IntraUserCampus, primary: UIColor, _ isMainController: Bool) {
         var leadingAction: NSLayoutXAxisAnchor
         let aeraTop: CGFloat
+        let extraValues: [ClusterSelectorViewExtraValues]?
+        let selectedIndex: Int
+        let values = clusterDescription.floors.map({ $0.name })
         
+        if isMainController {
+            aeraTop = HomeLayout.safeAeraMain.top
+        }
+        else {
+            aeraTop = HomeLayout.headerWithActionViewHeigth + HomeLayout.safeAera.top + HomeLayout.smargin
+        }
+        if campus.isUserMainCampus {
+            extraValues = HomeDefaults.read(.clustersExtraValues)
+            selectedIndex = HomeDefaults.read(.liveClusterFloor) ?? 0
+        }
+        else {
+            extraValues = nil
+            selectedIndex = 0
+        }
         self.clusterDescription = clusterDescription
         self.primary = primary
         self.campus = campus
@@ -185,12 +199,11 @@ final fileprivate class ClustersView: BasicUIView {
         self.refreshButton = ActionButtonView(asset: .actionRefresh, color: primary)
         self.searchField = SearchFieldView(placeholder: ~"general.search")
         self.searchField.setPrimary(primary)
-        if campus.campus_id == App.userCampus.campus_id {
-            self.floorSegment = ClusterSegmentView(values: clusterDescription.floors.map({ $0.name }), extraValues: HomeDefaults.read(.clustersExtraValues),
-                                                   selectedIndex: HomeDefaults.read(.liveClusterFloor) ?? 0, primary: primary)
+        if (clusterDescription.overrideSegmentUseScrollableSegment ?? false) {
+            self.floorSegment = ClusterScrollableSegmentView(values: values, extraValues: extraValues, selectedIndex: selectedIndex, primary: primary)
         }
         else {
-            self.floorSegment = ClusterSegmentView(values: clusterDescription.floors.map({ $0.name }), extraValues: nil, primary: primary)
+            self.floorSegment = ClusterSegmentView(values: values, extraValues: extraValues, selectedIndex: selectedIndex, primary: primary)
         }
         self.friendsButton = ActionButtonView(asset: .actionFriends, color: HomeDesign.actionGreen)
         self.friendsButton.isUserInteractionEnabled = true
@@ -210,12 +223,6 @@ final fileprivate class ClustersView: BasicUIView {
             self.extra2Button = nil
         }
         self.scrollView = BasicUIScrollView()
-        if isMainController {
-            aeraTop = HomeLayout.safeAeraMain.top
-        }
-        else {
-            aeraTop = HomeLayout.headerWithActionViewHeigth + HomeLayout.safeAera.top + HomeLayout.smargin
-        }
         super.init()
         self.addSubview(self.scrollView)
         self.addSubview(self.floorSegment)
@@ -227,19 +234,16 @@ final fileprivate class ClustersView: BasicUIView {
         self.scrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
         self.scrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
         
-        self.floorSegment.delegate = self
-        self.floorSegment.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor,
-                                                   constant: HomeLayout.margin).isActive = true
-        if App.settings.clusterShowCounters {
-            self.floorSegment.topAnchor.constraint(equalTo: self.topAnchor,
-                                                   constant: aeraTop + HomeLayout.margind).isActive = true
+        self.floorSegment.clusterSelectorDelegate = self
+        self.floorSegment.leadingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margin).isActive = true
+        
+        if App.settings.clusterShowCounters && !(clusterDescription.overrideSegmentUseScrollableSegment ?? false) {
+            self.floorSegment.topAnchor.constraint(equalTo: self.topAnchor, constant: aeraTop + HomeLayout.margind).isActive = true
         }
         else {
-            self.floorSegment.topAnchor.constraint(equalTo: self.topAnchor,
-                                                   constant: aeraTop + HomeLayout.margin).isActive = true
+            self.floorSegment.topAnchor.constraint(equalTo: self.topAnchor, constant: aeraTop + HomeLayout.margin).isActive = true
         }
-        self.floorSegment.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor,
-                                                    constant: -HomeLayout.margin).isActive = true
+        self.floorSegment.trailingAnchor.constraint(equalTo: self.safeAreaLayoutGuide.trailingAnchor, constant: -HomeLayout.margin).isActive = true
         
         leadingAction = self.floorSegment.leadingAnchor
         for (index, button) in [self.extra2Button,self.extra1Button,self.friendsButton].compactMap({$0}).enumerated() {
@@ -256,18 +260,16 @@ final fileprivate class ClustersView: BasicUIView {
         }
         self.searchField.delegate = self
         self.searchField.view.adjustsFontSizeToFitWidth = true
-        self.searchField.topAnchor.constraint(equalTo: self.floorSegment.bottomAnchor,
-                                              constant: HomeLayout.smargin).isActive = true
+        self.searchField.topAnchor.constraint(equalTo: self.floorSegment.bottomAnchor, constant: HomeLayout.smargin).isActive = true
         self.searchField.leadingAnchor.constraint(equalTo: leadingAction, constant: HomeLayout.smargin).isActive = true
         self.refreshButton.trailingAnchor.constraint(equalTo: self.floorSegment.trailingAnchor).isActive = true
         self.refreshButton.centerYAnchor.constraint(equalTo: self.searchField.centerYAnchor).isActive = true
-        self.refreshButton.leadingAnchor.constraint(equalTo: self.searchField.trailingAnchor,
-                                                    constant: HomeLayout.smargin).isActive = true
+        self.refreshButton.leadingAnchor.constraint(equalTo: self.searchField.trailingAnchor, constant: HomeLayout.smargin).isActive = true
         self.refreshButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ClustersView.refreshLocations)))
         
         self.peoples = HomeDefaults.read(.peoples) ?? [:]
         self.peoples[App.user.login] = People.me
-        if self.isUserMainCampus {
+        if campus.isUserMainCampus {
             self.locations = HomeDefaults.read(.liveClusterLocations) ?? [:]
         }
         else {
@@ -296,6 +298,9 @@ final fileprivate class ClustersView: BasicUIView {
         let placeHeight: CGFloat
         let elementsCount: Int
         
+        let overrideSegmentUseScrollableSegment: Bool?
+        let overridePlaceRadius: CGFloat?
+        
         struct Floor: Codable {
             
             let name: String
@@ -309,8 +314,23 @@ final fileprivate class ClustersView: BasicUIView {
             }
             let places: [Place]
             let pillars: [CGPoint]
+            let paths: [String]?
+            let pathsTranslationX: CGFloat?
+            let pathsTranslationY: CGFloat?
+            
+            lazy var cgPaths: [CGPath]? = {
+                if let paths = self.paths {
+                    return paths.map({
+                        let path = try! CGPath.from(svgPath: $0)
+                        var transform = CGAffineTransform(translationX: self.pathsTranslationX ?? 0.0, y: self.pathsTranslationY ?? 0.0).scaledBy(x: 1.0, y: -1.0)
+                        
+                        return path.copy(using: &transform)!
+                    })
+                }
+                return nil
+            }()
         }
-        let floors: [Floor]
+        var floors: [Floor]
         
         struct Transition: Codable {
             
@@ -347,19 +367,43 @@ final fileprivate class ClustersView: BasicUIView {
         return try JSONDecoder.decoder.decode(ClusterDescription.self, from: data)
     }
     
+    final private class ClusterContainer: BasicUIView {
+        
+        private unowned(unsafe) let clusterView: ClustersView
+        
+        init(_ clusterView: ClustersView, width: CGFloat, height: CGFloat) {
+            self.clusterView = clusterView
+            super.init()
+            self.frame = .init(x: 0.0, y: 0.0, width: width, height: height)
+            self.backgroundColor = .clear
+        }
+        required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+        
+        override func draw(_ rect: CGRect) {
+            if let paths = self.clusterView.clusterDescription.floors[self.clusterView.floorSegment.selectedIndex].cgPaths, let ctx = UIGraphicsGetCurrentContext() {
+                HomeDesign.lightGray.setFill()
+                HomeDesign.lightGray.setStroke()
+                for path in paths {
+                    ctx.beginPath()
+                    ctx.addPath(path)
+                    ctx.closePath()
+                    ctx.fillPath()
+                }
+            }
+            super.draw(rect)
+        }
+    }
+    
     private func generateClusterViews() {
-        let container: BasicUIView = BasicUIView()
+        let container = ClusterContainer(self, width: self.clusterDescription.width, height: self.clusterDescription.height)
         var clusterView: ClusterView
-        let clusterViewSize: CGSize = .init(width: self.clusterDescription.placeWidth,
-                                            height: self.clusterDescription.placeHeight)
+        let clusterViewSize: CGSize = .init(width: self.clusterDescription.placeWidth, height: self.clusterDescription.placeHeight)
         var clusterPillarView: ClusterPillarView // unowned(unsafe) var where it's needed
         let type = App.settings.clustersPlaceClassType
         let pillarType = App.settings.clustersPillarClassType
         let colors: [CGColor] = People.ListType.allCases.map(\.color.cgColor)
         
         self.clusterViews.reserveCapacity(self.clusterDescription.floors[self.floorSegment.selectedIndex].elementsCount)
-        container.frame = .init(origin: .zero, size: .init(width: self.clusterDescription.width,
-                                                           height: self.clusterDescription.height))
         self.scrollView.addSubview(container)
         container.topAnchor.constraint(equalTo: self.scrollView.topAnchor).isActive = true
         container.bottomAnchor.constraint(equalTo: self.scrollView.bottomAnchor).isActive = true
@@ -408,6 +452,14 @@ final fileprivate class ClustersView: BasicUIView {
                     }
                 }
             }
+            if let radius = self.clusterDescription.overridePlaceRadius {
+                for views in self.viewsForHost {
+                    for (_, clusterView) in views {
+                        clusterView.layer.cornerRadius = radius
+                        clusterView.layer.masksToBounds = true
+                    }
+                }
+            }
         })
     }
     
@@ -433,11 +485,11 @@ final fileprivate class ClustersView: BasicUIView {
             return
         }
         
-        @MainActor func refreshEnded(floorSegmentValues values: [ClusterSegmentView.ExtraValues]) {
+        @MainActor func refreshEnded(floorSegmentValues values: [ClusterSelectorViewExtraValues]) {
             self.floorSegment.extraValues = values
             self.refreshButton.isUserInteractionEnabled = true
             self.refreshButton.stopRotate()
-            if self.isUserMainCampus {
+            if self.campus.isUserMainCampus {
                 HomeDefaults.save(values, forKey: .clustersExtraValues)
             }
         }
@@ -446,18 +498,14 @@ final fileprivate class ClustersView: BasicUIView {
         self.refreshButton.startRotate()
         Task(priority: .high, operation: {
             let route: HomeApi.Routes = .campusWithCampusIdLocations(self.campus.campus_id)
-            let sequence: HomeApi.RequestSequence<IntraClusterLocation> = .init(route: route,
-                                                                                parameters: ["filter[active]": true])
+            let sequence: HomeApi.RequestSequence<IntraClusterLocation> = .init(route: route, parameters: ["filter[active]": true])
             let oldLocationsSet = Set<IntraClusterLocation>.init(self.locations.values)
             let newLocationsSet: Set<IntraClusterLocation>
             var diffLocationsSet: Set<IntraClusterLocation>
             
-            var valuesPlaceCount: Array<Int> = Array(repeating: 0,
-                                                     count: self.clusterDescription.floors.count)
-            var valuesPeoplesCount: Array<Array<Int>> = Array(repeating: Array(repeating: 0,
-                                                                               count: People.ListType.allCases.count),
-                                                              count: self.clusterDescription.floors.count)
-            var values: [ClusterSegmentView.ExtraValues] = []
+            var valuesPlaceCount: Array<Int> = Array(repeating: 0, count: self.clusterDescription.floors.count)
+            var valuesPeoplesCount: Array<Array<Int>> = Array(repeating: Array(repeating: 0, count: People.ListType.allCases.count), count: self.clusterDescription.floors.count)
+            var values: [ClusterSelectorViewExtraValues] = []
             
             values.reserveCapacity(self.clusterDescription.floors.count)
             do {
@@ -500,7 +548,7 @@ final fileprivate class ClustersView: BasicUIView {
                                         extra1: valuesPeoplesCount[index][People.ListType.extraList1.rawValue],
                                         extra2: valuesPeoplesCount[index][People.ListType.extraList2.rawValue]))
                 }
-                if self.isUserMainCampus {
+                if self.campus.isUserMainCampus {
                     HomeDefaults.save(self.locations, forKey: .liveClusterLocations)
                 }
             }
@@ -564,19 +612,25 @@ final fileprivate class ClustersView: BasicUIView {
             self.clusterPillarViews[pillarPosition] = clusterPillarView
             container.addSubview(clusterPillarView)
         }
+        if self.clusterDescription.floors[self.floorSegment.oldSelectedIndex].paths != nil || self.clusterDescription.floors[self.floorSegment.selectedIndex].paths != nil {
+            for view in self.scrollView.subviews where view is ClusterContainer {
+                view.setNeedsDisplay()
+                break
+            }
+        }
     }
 }
 
-extension ClustersView: UIScrollViewDelegate, ClusterSegmentViewDelegate {
+extension ClustersView: UIScrollViewDelegate, ClusterSelectorViewDelegate {
     
-    func clusterSegmentViewSelect(_ segmentView: ClusterSegmentView) {
+    func clusterSegmentViewSelect(_ segmentView: ClusterSelectorView) {
         self.transitionToSelectedFloor()
-        if self.isUserMainCampus {
+        if self.campus.isUserMainCampus {
             HomeDefaults.save(segmentView.selectedIndex, forKey: .liveClusterFloor)
         }
     }
-    func clusterSegmentViewPeopleCounterSelect(_ segmentView: ClusterSegmentView, listType: People.ListType) { }
-    func clusterSegmentViewPlacesCounterSelect(_ segmentView: ClusterSegmentView) { }
+    func clusterSegmentViewPeopleCounterSelect(_ segmentView: ClusterSelectorView, listType: People.ListType) { }
+    func clusterSegmentViewPlacesCounterSelect(_ segmentView: ClusterSelectorView) { }
     
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return self.scrollView.subviews.first
@@ -584,17 +638,17 @@ extension ClustersView: UIScrollViewDelegate, ClusterSegmentViewDelegate {
     @objc private func scrollViewContentTapped(gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: gesture.view)
         
-        func tryInteractionForHost(_ host: String, user: IntraUserInfo?) {
+        func tryInteractionForHost(_ host: String, title: String, user: IntraUserInfo?) {
             guard self.searchView == nil else {
                 return
             }
             
             func showHistoricView() {
                 if let historicView = self.historicView {
-                    historicView.update(host: host, user: user)
+                    historicView.update(host: host, title: title, user: user)
                 }
                 else {
-                    self.addHistoricView(host, user: user, campus: self.campus)
+                    self.addHistoricView(host, title: title, user: user, campus: self.campus)
                 }
             }
             
@@ -612,7 +666,14 @@ extension ClustersView: UIScrollViewDelegate, ClusterSegmentViewDelegate {
         }
         
         if let view = self.clusterViews.values.first(where: { $0.point(inside: $0.convert(location, from: gesture.view!), with: nil) }) {
-            tryInteractionForHost(self.clusterDescription.floors[self.floorSegment.selectedIndex].prefix + view.display, user: view.location?.user)
+            let title = self.clusterDescription.floors[self.floorSegment.selectedIndex].prefix + view.display
+            
+            if let place = self.clusterDescription.floors[self.floorSegment.selectedIndex].places.first(where: { $0.display == view.display }) {
+                tryInteractionForHost(place.host, title: title, user: view.location?.user)
+            }
+            else {
+                tryInteractionForHost(title, title: title, user: view.location?.user)
+            }
         }
     }
     
@@ -620,7 +681,7 @@ extension ClustersView: UIScrollViewDelegate, ClusterSegmentViewDelegate {
         let colors: [CGColor] = People.ListType.allCases.map(\.color.cgColor)
         var valuesPlaceCount: Array<Int> = Array(repeating: 0, count: self.clusterDescription.floors.count)
         var valuesPeoplesCount: Array<Array<Int>> = Array(repeating: Array(repeating: 0, count: People.ListType.allCases.count), count: self.clusterDescription.floors.count)
-        var values: [ClusterSegmentView.ExtraValues] = []
+        var values: [ClusterSelectorViewExtraValues] = []
         
         self.peoples = peoples
         self.peoples[App.user.login] = People.me
@@ -659,7 +720,7 @@ extension ClustersView: UIScrollViewDelegate, ClusterSegmentViewDelegate {
                                 extra2: valuesPeoplesCount[index][People.ListType.extraList2.rawValue]))
         }
         self.floorSegment.extraValues = values
-        if self.isUserMainCampus {
+        if self.campus.isUserMainCampus {
             HomeDefaults.save(values, forKey: .clustersExtraValues)
         }
     }
@@ -865,8 +926,8 @@ extension ClustersView {
         let closeButton: ActionButtonView
         private let tableView: GenericSingleInfiniteRequestTableView<UserLocationLogTableViewCell, IntraClusterLocation>
         
-        init(host: String, user: IntraUserInfo?, campus: IntraUserCampus) {
-            self.hostLabel = BasicUILabel(text: host)
+        init(host: String, title: String, user: IntraUserInfo?, campus: IntraUserCampus) {
+            self.hostLabel = BasicUILabel(text: title)
             self.hostLabel.font = HomeLayout.fontSemiBoldTitle
             self.hostLabel.textColor = HomeDesign.white
             self.hostLabel.adjustsFontSizeToFitWidth = true
@@ -902,8 +963,8 @@ extension ClustersView {
             self.tableView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor).isActive = true
         }
         
-        func update(host: String, user: IntraUserInfo?) {
-            self.hostLabel.text = host
+        func update(host: String, title: String, user: IntraUserInfo?) {
+            self.hostLabel.text = title
             self.tableView.restart(with: ["filter[host]": host, "sort": "-begin_at"])
         }
         
@@ -993,17 +1054,16 @@ extension ClustersView {
         }
     }
     
-    private func addHistoricView(_ host: String, user: IntraUserInfo?, campus: IntraUserCampus) {
+    private func addHistoricView(_ host: String, title: String, user: IntraUserInfo?, campus: IntraUserCampus) {
         guard self.historicView == nil else { return }
-        let view = HistoricView(host: host, user: user, campus: campus)
+        let view = HistoricView(host: host, title: title, user: user, campus: campus)
         
         self.searchField.isUserInteractionEnabled = false
         self.addSubview(view)
         view.topAnchor.constraint(equalTo: self.searchField.bottomAnchor, constant: HomeLayout.margin).isActive = true
         view.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: HomeLayout.margin).isActive = true
         view.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -HomeLayout.margin).isActive = true
-        view.bottomAnchor.constraint(equalTo: self.bottomAnchor,
-                                     constant: -(HomeLayout.safeAeraMain.bottom + HomeLayout.margin)).isActive = true
+        view.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -(HomeLayout.safeAeraMain.bottom + HomeLayout.margin)).isActive = true
         
         view.present { _ in
             view.closeButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ClustersView.removeHistoricView)))

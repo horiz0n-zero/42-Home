@@ -186,6 +186,7 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
     }
     
     @objc private func seeCampusClusters() {
+        let campus = Array<IntraCampus>(HomeApiResources.campus!)
         
         func selectClusterCampus(_ campus: IntraCampus) {
             do {
@@ -199,7 +200,7 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
         }
         
         DynamicAlert.init(.primary(~"title.clusters"),
-                          contents: [.advancedSelector(.clusters, Array<IntraCampus>(HomeApiResources.campus!), 0)],
+                          contents: [.advancedSelector(.clusters, campus.sorted(by: { $0.name < $1.name }), 0)],
                           actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectClusterCampus, to: ((Any) -> ()).self))])
     }
     

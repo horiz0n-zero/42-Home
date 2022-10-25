@@ -332,3 +332,10 @@ final class UserProjectViewController: HomeViewController, UITableViewDelegate, 
         self.presentWithBlur(vc)
     }
 }
+
+
+// Students who can subscribe and never did > https://projects.intra.42.fr/projects/42cursus-particle-system/all_users/can_register
+// [...document.body.getElementsByClassName('student-item student-kind-student')].map(element => element.getAttribute('data-tooltip-login'))
+// Students looking for a team > https://projects.intra.42.fr/projects/42cursus-humangl/all_users/without_team
+// [...document.body.getElementsByClassName('student-item student-kind-student')].map(element => element.getAttribute('data-tooltip-login'))
+

@@ -109,7 +109,6 @@ final class DynamicAlert: DynamicController {
         let contentView = BasicUIView()
         let actionsStack = BasicUIStackView()
         var useKeyboard: Bool = false
-        var keyboardFullScreen: Bool = false
         
         var topAnchor: NSLayoutYAxisAnchor!
         
@@ -169,6 +168,8 @@ final class DynamicAlert: DynamicController {
                 title.textAlignment = .center
                 title.numberOfLines = 0
                 contentView.addSubview(title)
+                title.setContentHuggingPriority(.defaultHigh, for: .vertical)
+                title.setContentHuggingPriority(.defaultHigh, for: .horizontal)
                 title.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 title.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: HomeLayout.smargin).isActive = true
                 title.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -HomeLayout.smargin).isActive = true
@@ -272,7 +273,6 @@ final class DynamicAlert: DynamicController {
                 view.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 topAnchor = view.bottomAnchor
                 useKeyboard = true
-                keyboardFullScreen = true
             case .roulette(let values, let index):
                 let roulette = RouletteView(primary: primaryColor, values: values)
                 
@@ -301,6 +301,7 @@ final class DynamicAlert: DynamicController {
                 codeView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -HomeLayout.margins).isActive = true
                 codeView.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 topAnchor = codeView.bottomAnchor
+                useKeyboard = true
             case .slotInterval:
                 let selector = SlotIntervalSelector()
                 
@@ -327,7 +328,6 @@ final class DynamicAlert: DynamicController {
                 usersSelector.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 topAnchor = usersSelector.bottomAnchor
                 useKeyboard = true
-                keyboardFullScreen = true
             case .textEditor(let txt):
                 let textEditor = TextEditor(defaultText: txt, primary: primaryColor)
                 
@@ -363,21 +363,15 @@ final class DynamicAlert: DynamicController {
             contentView.bottomAnchor.constraint(equalTo: topAnchor).isActive = true
         }
         
-        contentView.heightAnchor.constraint(lessThanOrEqualToConstant: UIScreen.main.bounds.height - (HomeLayout.safeAera.top + HomeLayout.safeAera.bottom + HomeLayout.margin * 2.0)).isActive = true
         contentView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         contentView.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margins).isActive = true
         if useKeyboard {
-            if keyboardFullScreen {
-                contentView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: HomeLayout.safeAera.top + HomeLayout.margin).isActive = true
-                contentView.bottomAnchor.constraint(equalTo: self.view.keyboardLayoutGuide.topAnchor, constant: -HomeLayout.margin).isActive = true
-            }
-            else {
-                contentView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
-                contentView.topAnchor.constraint(greaterThanOrEqualTo: self.view.topAnchor, constant: HomeLayout.safeAera.top + HomeLayout.margin).isActive = true
-                contentView.bottomAnchor.constraint(greaterThanOrEqualTo: self.view.keyboardLayoutGuide.topAnchor, constant: -HomeLayout.margin).isActive = true
-            }
+            contentView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).setPriority(.defaultLow).isActive = true
+            contentView.topAnchor.constraint(greaterThanOrEqualTo: self.view.topAnchor, constant: HomeLayout.safeAera.top + HomeLayout.margin).setPriority(.fittingSizeLevel) .isActive = true
+            contentView.bottomAnchor.constraint(greaterThanOrEqualTo: self.view.keyboardLayoutGuide.topAnchor, constant: -HomeLayout.margin).setPriority(.fittingSizeLevel).isActive = true
         }
         else {
+            contentView.heightAnchor.constraint(lessThanOrEqualToConstant: UIScreen.main.bounds.height - (HomeLayout.safeAera.top + HomeLayout.safeAera.bottom + HomeLayout.margin * 2.0)).isActive = true
             contentView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
         }
         self.present()

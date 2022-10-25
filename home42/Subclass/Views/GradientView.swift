@@ -35,7 +35,7 @@ final class GradientView: BasicUIView {
             return (self.layer as! CAGradientLayer).startPoint
         }
         set {
-            (self.layer as! CAGradientLayer).endPoint = newValue
+            (self.layer as! CAGradientLayer).startPoint = newValue
         }
     }
     var endPoint: CGPoint {

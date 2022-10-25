@@ -46,7 +46,7 @@ final class EventsViewController: HomeViewController {
     
     @MainActor override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if App.userLoggedIn { // FIXME: - app can crash if user disconnect when call like this start
+        if App.userLoggedIn {
             Task.init(priority: .userInitiated, operation: {
                 do {
                     try await self.tableView.userEvents = EventsViewController.refreshUserEvents()
@@ -59,10 +59,12 @@ final class EventsViewController: HomeViewController {
         }
     }
     
-    static func refreshUserEvents() async throws -> ContiguousArray<IntraUserEvent> { // get userEvents for synchro when not going to profil
+    static func refreshUserEvents() async throws -> ContiguousArray<IntraUserEvent> {
+        guard App.userLoggedIn else {
+            return []
+        }
         let today = Date()
-        var events: ContiguousArray<IntraUserEvent> = try await HomeApi.get(.usersWithUserIdEventsUsers(App.user.id),
-                                                                            params: ["sort":"-created_at", "page[size]": 30])
+        var events: ContiguousArray<IntraUserEvent> = try await HomeApi.get(.usersWithUserIdEventsUsers(App.user.id), params: ["sort":"-created_at", "page[size]": 30])
         
         events.removeAll { event in
             return event.event.beginDate < today

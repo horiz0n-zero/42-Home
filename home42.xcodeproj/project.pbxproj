@@ -108,6 +108,7 @@
 		60BB176A2732FBB800F92312 /* ViewRecycler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60BB17692732FBB800F92312 /* ViewRecycler.swift */; };
 		60C5269128C67FCE00B8C104 /* MaskView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60C5269028C67FCE00B8C104 /* MaskView.swift */; };
 		60D2455F290131AA00AFBB21 /* SVGPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D2455E290131AA00AFBB21 /* SVGPath.swift */; };
+		60E687C72905660F001E0194 /* ClustersSegments.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60E687C62905660F001E0194 /* ClustersSegments.swift */; };
 		60F5E0FF2621DD57004E0327 /* HomeApplication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5E0FE2621DD57004E0327 /* HomeApplication.swift */; };
 		60F5E1082621DD57004E0327 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 60F5E1072621DD57004E0327 /* Assets.xcassets */; };
 		60F5E11F2621DF58004E0327 /* Login.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60F5E11E2621DF58004E0327 /* Login.swift */; };
@@ -257,6 +258,7 @@
 		60C5269428C7AD2700B8C104 /* Guides.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Guides.js; sourceTree = "<group>"; };
 		60D2455E290131AA00AFBB21 /* SVGPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVGPath.swift; sourceTree = "<group>"; };
 		60E136DA2830FADE001547D7 /* Contributors.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Contributors.js; sourceTree = "<group>"; };
+		60E687C62905660F001E0194 /* ClustersSegments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClustersSegments.swift; sourceTree = "<group>"; };
 		60F3D61D274A5FCD000D371E /* JSONResources.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = JSONResources.js; sourceTree = "<group>"; };
 		60F5E0FB2621DD56004E0327 /* home42.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = home42.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60F5E0FE2621DD57004E0327 /* HomeApplication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeApplication.swift; sourceTree = "<group>"; };
@@ -341,6 +343,7 @@
 				606C3C88262899AD00A5E652 /* WebView.swift */,
 				605E3054262A0A5F006B0637 /* UserProfilIconView.swift */,
 				605E305A262AC2AA006B0637 /* Segments.swift */,
+				60E687C62905660F001E0194 /* ClustersSegments.swift */,
 				605E305D262ACBA6006B0637 /* ActionButtonView.swift */,
 				605E308F262DFA24006B0637 /* LeftCurvedTitleView.swift */,
 				605E309E2630A2EF006B0637 /* HeaderWithActionsView.swift */,
@@ -855,6 +858,7 @@
 				6099CBF1265047EC003DA85F /* BinaryInteger.swift in Sources */,
 				6034C52326247324003D8B90 /* UIView.swift in Sources */,
 				6034C50126223791003D8B90 /* HomeDefaults.swift in Sources */,
+				60E687C72905660F001E0194 /* ClustersSegments.swift in Sources */,
 				6034C5362624D756003D8B90 /* main.swift in Sources */,
 				605E30BE2632B4DB006B0637 /* UserInfoView.swift in Sources */,
 				6034C4FE26223330003D8B90 /* HomeApi.swift in Sources */,
@@ -1009,7 +1013,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = home42/home42.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 76BYA9T7S3;
 				INFOPLIST_FILE = home42/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "42 Home";
@@ -1039,7 +1043,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = home42/home42.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = 76BYA9T7S3;
 				GCC_OPTIMIZATION_LEVEL = "-Os -whole-module-optimization";
 				INFOPLIST_FILE = home42/Info.plist;

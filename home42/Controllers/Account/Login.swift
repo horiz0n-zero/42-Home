@@ -168,6 +168,12 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
             await Cookies.clearWebsiteData(targettingWebView: webview)
             webview.navigationDelegate = self
             webview.load(HomeApi.oauthAuthorizePath.request)
+            /*self.view.addSubview(webview)
+            webview.translatesAutoresizingMaskIntoConstraints = false
+            webview.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+            webview.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+            webview.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+            webview.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true*/
             return webview
         }
         
@@ -231,7 +237,7 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         case .signin2FA:
             let style: DynamicAlert.Style
             
-            func tryCode(code: Int) {
+            func tryCode(code: String) {
                 let codeJS = "document.getElementById(\"users_code\").value = \"\(code)\""
                 let commitJS = "document.querySelector(\'[name=\"commit\"]\').click();"
                 
@@ -249,7 +255,7 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
             else {
                 style = .primary(~"general.warning")
             }
-            DynamicAlert(style, contents: [.title("Intra 2FA"), .code], actions: [.normal(~"general.cancel", cancelAuthentification), .getCode(tryCode(code:))])
+            DynamicAlert(style, contents: [.title("Intra 2FA"), .textEditor("")], actions: [.normal(~"general.cancel", cancelAuthentification), .textEditor(tryCode(code:))])
         case .authorize:
             webView.evaluateJavaScript("document.forms[0].submit();", completionHandler: javascriptError(_:error:))
         default:

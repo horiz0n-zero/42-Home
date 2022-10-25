@@ -79,7 +79,6 @@ final class Cookies: IntraObject {
     }
     
     init?(httpCookies: ContiguousArray<HTTPCookie>, verifyingWithUser user: IntraUser) async {
-        let parameters: [String: Any] = ["login": user.login, "cursus_id": user.primaryCursus?.cursus_id ?? 1]
         let intraSessionProductionCookies = httpCookies.filter({ $0.name == Cookies.intraSessionProductionKey }).reversed()
         let userIdCookies = httpCookies.filter({ $0.name == Cookies.userIdKey })
         
@@ -94,7 +93,7 @@ final class Cookies: IntraObject {
             self.intraSessionProductionHTTPCookie = cookie
             self.intraSessionProduction = "\(Cookies.intraSessionProductionKey)=\(cookie.value)"
             do {
-                let _: ContiguousArray<IntraNetGraphProject> = try await HomeApi.intranetRequest(.graph, parameters: parameters)
+                let _: Dictionary<String, String> = try await HomeApi.intranetRequest(.locationStats(user.login))
                 return
             }
             catch {

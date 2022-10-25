@@ -31,6 +31,20 @@ final class IntraUserInfo: IntraObject {
         super.init()
     }
     
+    @frozen private enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case login = "login"
+        case image = "image"
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: IntraUserInfo.CodingKeys.self)
+        
+        self.id = try container.decode(Int.self, forKey: .id)
+        self.login = try container.decode(String.self, forKey: .login)
+        self.image = (try? container.decode(IntraUser.Image.self, forKey: .image)) ?? IntraUser.Image(login: self.login)
+    }
+    
     static func ==(lhs: IntraUserInfo, rhs: IntraUserInfo) -> Bool {
         return lhs.id == rhs.id
     }
@@ -93,6 +107,11 @@ final class IntraUser: IntraObject {
         }
         var isValid: Bool {
             return self.link != nil && self.versions.small != nil
+        }
+        
+        init(login: String) {
+            self.link = "https://cdn.intra.42.fr/users/\(login).jpg"
+            self.versions = .init(large: self.link, medium: self.link, micro: self.link, small: self.link)
         }
     }
     
@@ -210,6 +229,10 @@ final class IntraUserCampus: IntraObject {
             return campus
         }
         return nil
+    }
+    
+    var isUserMainCampus: Bool {
+        return self.campus_id == App.userCampus.campus_id
     }
     
     init(campus: IntraCampus) {
@@ -624,7 +647,7 @@ final class IntraScaleTeam: IntraObject {
     var associatedProject: IntraProject? {
         return HomeApiResources.projects.first(where: { $0.id == self.team.project_id })
     }
-    
+        
     private enum CodingKeys: String, CodingKey {
         case id
         case comment

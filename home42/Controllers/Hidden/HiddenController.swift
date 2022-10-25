@@ -105,12 +105,10 @@ WBCsgoa9iT2l+n/nLInIAa/njMXR8l0D6OwnV30SN6NbN0b8oR7ESA==
                     }
                     catch {
                         if error is HomeApi.RequestError {
-                            await DynamicAlert.presentWith(error: error as! HomeApi.RequestError)
+                            DynamicAlert.presentWith(error: error as! HomeApi.RequestError)
                         }
                         else {
-                            await DynamicAlert.init(contents: [.title(~"seecache.error"),
-                                                               .text(String(reflecting: error))],
-                                                    actions: [.normal(~"general.ok", nil)])
+                            DynamicAlert.init(contents: [.title(~"seecache.error"), .text(String(reflecting: error))], actions: [.normal(~"general.ok", nil)])
                         }
                     }
                 })

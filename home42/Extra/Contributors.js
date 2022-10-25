@@ -17,8 +17,8 @@ const https = require('https')
 const querystring = require('querystring')
 const fs = require('fs')
 
-const client_id = 'CLIENT_ID'
-const client_secret = 'CLIENT_SECRET'
+const client_id = 'API_UID'
+const client_secret = 'API_SECRET'
 
 function sleep(millis) {
     return new Promise(resolve => setTimeout(resolve, millis));
@@ -163,11 +163,11 @@ const datas = [
    },
    {
        'login': 'efouille',
-       'groups': [home42Tester]
+       'groups': [home42Tester, home42Spellchecker]
    },
    {
        'login': 'emaugale',
-       'groups': [home42Tester]
+       'groups': [home42Tester, home42HeadHunter]
    },
    {
        'login': 'fgarault',
@@ -251,6 +251,14 @@ const datas = [
    },
    {
        'login': 'gemartin',
+       'groups': [home42Contributor, home42Spellchecker]
+   },
+   {
+       'login': 'malzubai',
+       'groups': [home42Contributor, home42MapBuilder]
+   },
+   {
+       'login': 'hahseo',
        'groups': [home42Contributor, home42Spellchecker]
    }
 ];

@@ -39,7 +39,7 @@ extension HomeApi {
             case .graph:
                 return "https://projects.intra.42.fr/project_data.json"
             case .locationStats(let login):
-                return "https://projects.intra.42.fr/users/\(login)/locations_stats.json"
+                return "https://profile.intra.42.fr/users/\(login)/locations_stats.json"
             case .defenseSlots(let slug):
                 return "https://projects.intra.42.fr/projects/\(slug)/slots.json"
             case .defense(let slug):
