@@ -329,8 +329,13 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         Task.init(priority: .userInitiated, operation: {
             do {
                 try await HomeApi.auth(code)
+                #if false
+                self.user = try await HomeApi.get(.userWithId(128443))
+                self.coalitions = try await HomeApi.get(.usersWithUserIdCoalitions(128443))
+                #else
                 self.user = try await HomeApi.get(.me)
                 self.coalitions = try await HomeApi.get(.usersWithUserIdCoalitions(user.id))
+                #endif
                 try await self.profilLoaded()
             }
             catch {

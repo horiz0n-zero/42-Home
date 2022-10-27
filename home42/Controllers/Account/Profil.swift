@@ -320,8 +320,13 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
     }
     
     @MainActor func setupWithMe() async {
+        #if false
+        async let user: IntraUser = HomeApi.get(.userWithId(128443))
+        async let coalitions: ContiguousArray<IntraCoalition> = HomeApi.get(.usersWithUserIdCoalitions(128443))
+        #else
         async let user: IntraUser = HomeApi.get(.me)
         async let coalitions: ContiguousArray<IntraCoalition> = HomeApi.get(.usersWithUserIdCoalitions(App.user.id))
+        #endif
         let closeButton = ActionButtonView(asset: .actionClose, color: HomeDesign.actionRed)
         let logoutButton = ActionButtonView(asset: .actionLogout, color: HomeDesign.actionOrange)
         let settingsButton = ActionButtonView(asset: .actionSettings, color: HomeDesign.actionGreen)

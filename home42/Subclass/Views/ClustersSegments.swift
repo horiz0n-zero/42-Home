@@ -93,7 +93,7 @@ final class ClusterSegmentView: GenericSegmentView<String, ClusterSegmentViewFlo
         super.willMove(toSuperview: newSuperview)
         guard newSuperview != nil else { return }
         
-        for (index, value) in self.extraValues.enumerated() {
+        for (index, value) in self.extraValues.enumerated() where self.views.count > index {
             self.views[index].update(withValues: value)
         }
     }
@@ -238,7 +238,7 @@ final class ClusterScrollableSegmentView: BasicUIView, ClusterSelectorView, UISc
     }
     var extraValues: [ClusterSelectorViewExtraValues] {
         didSet {
-            for (index, value) in self.extraValues.enumerated() {
+            for (index, value) in self.extraValues.enumerated() where self.views.count > index {
                 self.views[index].update(withExtraValues: value)
             }
         }
