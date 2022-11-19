@@ -17,7 +17,7 @@ const https = require('https')
 const querystring = require('querystring')
 const fs = require('fs')
 
-const client_id = 'API_UID'
+const client_id = 'API_ID'
 const client_secret = 'API_SECRET'
 
 function sleep(millis) {
@@ -135,7 +135,7 @@ const datas = [
    },
    {
        'login': 'asurrel',
-       'groups': [home42Tester, home42Cobay]
+       'groups': [home42Tester, home42Cobay, home42Spellchecker]
    },
    {
        'login': 'bcano',
@@ -259,6 +259,10 @@ const datas = [
    },
    {
        'login': 'hahseo',
+       'groups': [home42Contributor, home42Spellchecker]
+   },
+   {
+       'login': 'dangonza',
        'groups': [home42Contributor, home42Spellchecker]
    }
 ];

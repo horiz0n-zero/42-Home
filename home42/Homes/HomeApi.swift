@@ -21,7 +21,7 @@ import SwiftDate
 
 final class HomeApi: NSObject {
     
-    static private let uid: String =           "API_UID"
+    static private let uid: String =           "API_ID"
     static private let secret: String =        "API_SECRET"
     static private let redirectURI: String =   "https://intra.42.fr"
     static private let scope: String =         "public+forum+projects+profile+elearning+tig"
@@ -412,6 +412,12 @@ extension HomeApi {
     }
     static func post<G: Codable>(_ route: HomeApi.Routes, params: [String: Any]? = nil) async throws -> G {
         return try await HomeApi.request(sendBody: true, method: "POST", path: route.path, params: params)
+    }
+    static func patch<G: Codable>(_ route: HomeApi.Routes, params: [String: Any]? = nil) async throws -> G {
+        return try await HomeApi.request(sendBody: true, method: "PATCH", path: route.path, params: params)
+    }
+    static func put<G: Codable>(_ route: HomeApi.Routes, params: [String: Any]? = nil) async throws -> G {
+        return try await HomeApi.request(sendBody: true, method: "PUT", path: route.path, params: params)
     }
     static func delete(_ route: HomeApi.Routes, params: [String: Any]? = nil) async throws -> Int {
         return try await HomeApi.request(method: "DELETE", path: route.path, params: params)

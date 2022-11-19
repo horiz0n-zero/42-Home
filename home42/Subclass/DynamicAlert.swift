@@ -501,6 +501,12 @@ final class DynamicAlert: DynamicController {
         _ = DynamicAlert.init(contents: [.apiError(error)], actions: actions)
     }
     @MainActor @inlinable static func presentWith(error: Error) {
+        if error.localizedDescription.count == 0 {
+            #if DEBUG
+            print(#function, error)
+            #endif
+            return
+        }
         _ = DynamicAlert.init(contents: [.text(error.localizedDescription)],
                               actions: [.normal(~"general.ok", nil)])
     }

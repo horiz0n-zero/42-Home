@@ -248,6 +248,10 @@ final class IntraUserProject: IntraObject {
     let current_team_id: Int!
     let cursus_ids: [Int]
     let project: ProjectInfo
+    private let validated: Bool?
+    var isValidated: Bool {
+        return self.validated != nil && self.validated!
+    }
     final class ProjectInfo: IntraObject {
         let parent_id: Int!
         let id: Int
@@ -303,6 +307,20 @@ final class IntraUserProject: IntraObject {
         return Date.fromIntraFormat(self.marked_at)
     }()
     
+    @frozen enum CodingKeys: String, CodingKey {
+        case id = "id"
+        case current_team_id = "current_team_id"
+        case cursus_ids = "cursus_ids"
+        case project = "project"
+        case validated = "validated?"
+        case final_mark = "final_mark"
+        case occurrence = "occurrence"
+        case status = "status"
+        case marked = "marked"
+        case created_at = "created_at"
+        case marked_at = "marked_at"
+    }
+    
     var markColor: UIColor {
         switch self.status {
         case .parent, .creatingGroup, .inProgress, .searchingGroup, .waitingForCorrection:
@@ -320,6 +338,14 @@ final class IntraUserProject: IntraObject {
             return HomeDesign.greenSuccess
         default:
             return HomeDesign.gold
+        }
+    }
+    static func finalMarkColorWhereValidated(_ mark: Int) -> UIColor {
+        switch mark {
+        case 125:
+            return HomeDesign.gold
+        default:
+            return HomeDesign.greenSuccess
         }
     }
 }

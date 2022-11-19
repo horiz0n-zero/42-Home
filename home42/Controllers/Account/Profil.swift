@@ -536,8 +536,8 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
             sharedClusterFor(campus: self.currentCampus)
         }
         else {
-            if let cluster = App.mainController.controller as? ClustersViewController {
-                if cluster.focusOnClusterView(with: self.user.location, animated: true) == false {
+            if let cluster = App.mainController.controller as? ClustersViewController, let user = self.user {
+                if cluster.focusOnClusterView(with: user.location, animated: true) == false {
                     DynamicAlert(contents: [.text(String(format: ~"clusters.nofocus-for-host", self.user.login, self.user.location))], actions: [.normal(~"general.i-understand", nil)])
                 }
                 else {
@@ -1498,7 +1498,7 @@ private extension ProfilViewController {
             self.ended.reserveCapacity(user.projects_users.count)
             for project in user.projects_users.filter({ $0.cursus_ids.contains(cursus.cursus_id) && $0.project.parent_id == nil }) {
                 switch project.status {
-                case .creatingGroup, .inProgress, .waitingForCorrection, .searchingGroup:
+                case .creatingGroup, .inProgress, .waitingForCorrection, .waitingToStart, .searchingGroup:
                     self.inrun.append(project)
                 default:
                     self.ended.append(project)
@@ -1577,8 +1577,14 @@ private extension ProfilViewController {
             }
             func updateEndedProject(with project: IntraUserProject) {
                 let mark = project.final_mark ?? 100
-                let markColor = IntraUserProject.finalMarkColor(project.final_mark ?? 100)
+                let markColor: UIColor
                 
+                if project.isValidated {
+                    markColor = IntraUserProject.finalMarkColorWhereValidated(mark)
+                }
+                else {
+                    markColor = IntraUserProject.finalMarkColor(mark)
+                }
                 self.nameLabel.text = project.project.name
                 self.extraLabel.text = "\(mark)"
                 self.extraLabel.font = HomeLayout.fontBoldMedium

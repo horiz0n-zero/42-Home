@@ -134,7 +134,7 @@ final class EvaluationPointsHistoricViewController: HomeViewController, UserSear
             else {
                 color = HomeDesign.blueAccess
             }
-            self.totalLabel.text = "\(element.total)"
+            self.totalLabel.text = "\(element.total + element.sum)"
             self.reasonLabel.text = element.reason
             self.container.backgroundColor = HomeDesign.lightGray
             self.totalLabel.backgroundColor = color.withAlphaComponent(HomeDesign.alphaLayer)

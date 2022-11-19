@@ -429,8 +429,8 @@ final class UserSearchFieldView: RoundedGenericActionsView<UserSearchFieldView.U
     
     @objc private func tapGesture(sender: UITapGestureRecognizer) {
         let block: (IntraUserInfo) -> () = { user in
-            self.delegate?.userSearchFieldViewSelect(view: self, user: user)
             self.update(with: user)
+            self.delegate?.userSearchFieldViewSelect(view: self, user: user)
         }
         
         DynamicAlert(.noneWithPrimary(self.primary), contents: [.usersSelector(self.user, block)], actions: [.normal(~"general.cancel", nil)])

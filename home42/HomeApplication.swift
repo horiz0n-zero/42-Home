@@ -135,7 +135,9 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
             else {
                 localIdentifier = (Locale.current.regionCode ?? Locale.current.languageCode ?? "en").lowercased()
             }
-            return HomeApiResources.languages.first(where: { $0.identifier == localIdentifier }) ?? HomeApiResources.languages.first(where: { $0.identifier == "en" })!
+            return HomeApiResources.languages.first(where: {
+                $0.identifier == localIdentifier && HomeWords.exist($0)
+            }) ?? HomeApiResources.languages.first(where: { $0.identifier == "en" })!
         }
         
         if let language: IntraLanguage = HomeDefaults.read(.language) {
