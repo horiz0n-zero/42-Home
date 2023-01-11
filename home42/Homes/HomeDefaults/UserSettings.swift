@@ -135,6 +135,7 @@ final class UserSettings: IntraObject {
     var graphPreferDarkTheme: Bool
     
     var trackerShowLocationHistoric: Bool
+    var trackerShowLocationOnLogCell: Bool
     
     @frozen enum PeopleListViewControllerSort: String, Codable, SelectorViewSource {
         case createdAt
@@ -226,6 +227,7 @@ final class UserSettings: IntraObject {
         self.graphPreferDarkTheme = false
         
         self.trackerShowLocationHistoric = true
+        self.trackerShowLocationOnLogCell = true
         
         self.peopleListViewControllerSort = .createdAt
         self.peopleWarnWhenRemove = true
@@ -273,6 +275,7 @@ final class UserSettings: IntraObject {
         self.graphPreferDarkTheme = (try? container.decode(Bool.self, forKey: .graphPreferDarkTheme)) ?? false
         
         self.trackerShowLocationHistoric = (try? container.decode(Bool.self, forKey: .trackerShowLocationHistoric)) ?? true
+        self.trackerShowLocationOnLogCell = (try? container.decode(Bool.self, forKey: .trackerShowLocationOnLogCell)) ?? true
         
         self.peopleListViewControllerSort = (try? container.decode(PeopleListViewControllerSort.self, forKey: .peopleListViewControllerSort)) ?? .createdAt
         self.peopleWarnWhenRemove = (try? container.decode(Bool.self, forKey: .peopleWarnWhenRemove)) ?? true

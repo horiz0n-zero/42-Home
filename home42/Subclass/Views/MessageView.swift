@@ -19,7 +19,7 @@ import UIKit
 final class MessageView<G: UIView>: BasicUIView {
     
     private let label: BasicUILabel
-    private var primary: UIColor {
+    var primary: UIColor {
         didSet {
             self.backgroundColor = self.primary.withAlphaComponent(HomeDesign.alphaLowLayer)
         }
@@ -28,7 +28,7 @@ final class MessageView<G: UIView>: BasicUIView {
     
     init(text: String, primary: UIColor, radius: CGFloat, view: G) {
         self.label = BasicUILabel(text: text)
-        self.label.font = HomeLayout.fontThinMedium
+        self.label.font = HomeLayout.fontSemiBoldMedium
         self.label.textColor = HomeDesign.black
         self.label.adjustsFontSizeToFitWidth = true
         self.primary = primary
@@ -49,7 +49,7 @@ final class MessageView<G: UIView>: BasicUIView {
         self.view.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -HomeLayout.dmargin).isActive = true
         self.label.bottomAnchor.constraint(equalTo: self.view.topAnchor, constant: -HomeLayout.dmargin).isActive = true
         self.label.topAnchor.constraint(equalTo: self.topAnchor, constant: HomeLayout.dmargin).isActive = true
-        self.label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: self.layer.cornerRadius / 2.0).isActive = true
+        self.label.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: HomeLayout.margin).isActive = true
         self.label.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -HomeLayout.dmargin).isActive = true
     }
 }

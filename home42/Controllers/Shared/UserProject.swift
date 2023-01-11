@@ -326,8 +326,7 @@ final class UserProjectViewController: HomeViewController, UITableViewDelegate, 
     }
     
     @objc private func peopleTapped(sender: UITapGestureRecognizer) {
-        let vc = UsersListViewController(.projectsWithProjectIdUsers(self.userProject.project.id), primary: self.primary,
-                                         settings: nil, extra: .project(self.userProject.project.id))
+        let vc = UsersListViewController(.projectsWithProjectIdUsers(self.userProject.project.id), settings: nil, extra: .project(self.userProject.project.id), primary: self.primary)
         
         self.presentWithBlur(vc)
     }

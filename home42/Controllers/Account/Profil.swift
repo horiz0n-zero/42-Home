@@ -190,26 +190,19 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
         case .titles:
             guard indexPath.row != 0 else { return }
             let title = self.user.titles[indexPath.row &- 1]
-            let userList = UsersListViewController(.titlesWithTitleIdUsers(title.id),
-                                                   primary: self.currentPrimary,
-                                                   extra: .title(title),
-                                                   warnAboutIncorrectAPIResult: true)
+            let userList = UsersListViewController(.titlesWithTitleIdUsers(title.id), extra: .title(title), primary: self.currentPrimary, warnAboutIncorrectAPIResult: true)
             
             self.presentWithBlur(userList)
         case .expertises:
             guard indexPath.row != 0 else { return }
             let expertise = self.user.expertises_users[indexPath.row &- 1]
-            let usersList = UsersListViewController(.expertisesWithExpertiseIdUsers(expertise.expertise_id),
-                                                    primary: self.currentPrimary,
-                                                    extra: .expertise(expertise.expertise_id))
+            let usersList = UsersListViewController(.expertisesWithExpertiseIdUsers(expertise.expertise_id), extra: .expertise(expertise.expertise_id), primary: self.currentPrimary)
             
             self.presentWithBlur(usersList)
         case .achievements:
             let achievement = self.user.achievements[indexPath.row &- 1]
-            let usersList = UsersListViewController(.achievementsWithAchievementIdUsers(achievement.id),
-                                                    primary: self.currentPrimary,
-                                                    extra: .achievement(achievement),
-                                                    warnAboutIncorrectAPIResult: true)
+            let usersList = UsersListViewController(.achievementsWithAchievementIdUsers(achievement.id), extra: .achievement(achievement),
+                                                    primary: self.currentPrimary, warnAboutIncorrectAPIResult: true)
             
             self.presentWithBlur(usersList)
         default:
@@ -228,9 +221,6 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
         self.tableView.register(HomeFramingTableViewCell<ExpertiseView>.self, forCellReuseIdentifier: "ExpertiseView")
         self.tableView.register(HomeFramingTableViewCell<AchievementView>.self, forCellReuseIdentifier: "AchievementView")
         self.headerCell = HeaderTableViewCell()
-        if App.settings.profilShowLogs {
-            self.userLogsCell = UserLogsTableViewCell.init(style: .default, reuseIdentifier: nil)
-        }
         self.projectsCell = ProjectsTableViewCell.init(style: .default, reuseIdentifier: nil)
         self.skillsCell = SkillsTableViewCell.init(style: .default, reuseIdentifier: nil)
         super.init()
@@ -283,6 +273,10 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
             if self.currentCursus.skills.count > 0 {
                 self.skillsCell.update(with: self.currentCursus.skills, primary: self.currentPrimary)
             }
+        }
+        if App.settings.profilShowLogs && self.userLogsCell == nil {
+            self.userLogsCell = .init(primary: self.currentPrimary)
+            self.userLogsCell.setup(with: user.id)
         }
         self.tableView.reloadData()
     }
@@ -349,6 +343,10 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
             // self.correctionsCell.slotsButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ProfilViewController.correctionSlotsTapped)))
             self.correctionsCell.logsButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ProfilViewController.correctionLogsTapped)))
         }
+        if App.settings.profilShowLogs {
+            self.userLogsCell = UserLogsTableViewCell.init(primary: HomeDesign.primary)
+            self.userLogsCell.setup(with: App.user.id)
+        }
         self.user = App.user
         self.coalitions = App.coalitions
         self.dataReceived(self.user, coalitions: self.coalitions)
@@ -402,6 +400,9 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
             }
             if self.correctionsCell != nil {
                 self.correctionsCell.setPrimary(self.currentPrimary)
+            }
+            if self.userLogsCell != nil {
+                self.userLogsCell.setPrimary(self.currentPrimary)
             }
             self.tableView.reloadData()
         }
@@ -470,7 +471,6 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
         }
         
         if App.settings.peopleExtraList1 != nil || App.settings.peopleExtraList2 != nil {
-            
             if let people = peoples[self.user.login] {
                 DynamicAlert.init(.withPrimary(people.list.title, self.currentPrimary),
                                   contents: [.title(String(format: ~"peoples.remove", people.login))],
@@ -563,16 +563,16 @@ final class ProfilViewController: HomeViewController, UITableViewDataSource, UIT
     }
     
     @objc private func overCampusTapped(sender: UITapGestureRecognizer) {
-        let users = UsersListViewController(.users, primary: self.currentPrimary, settings: [.campus(self.currentCampus.campus_id)])
+        let users = UsersListViewController(.users, settings: [.filterPrimaryCampusId: self.currentCampus.campus_id], primary: self.currentPrimary)
 
         self.presentWithBlur(users, completion: nil)
     }
     
     @objc private func poolButtonTapped(sender: UITapGestureRecognizer) {
-        let users = UsersListViewController(.users, primary: self.currentPrimary,
-                                            settings: [.poolYear(Int(self.user.pool_year) ?? Date().year),
-                                                       .poolMonth(self.user.pool_month),
-                                                       .campus(self.currentCampus.campus_id)])
+        let users = UsersListViewController(.users,
+                                            settings: [.filterPoolYear: Int(self.user.pool_year) ?? Date().year,
+                                                       .filterPoolMonth: self.user.pool_month!, .filterPrimaryCampusId: self.currentCampus.campus_id],
+                                            primary: self.currentPrimary)
 
         self.presentWithBlur(users)
     }
@@ -842,7 +842,12 @@ fileprivate extension ProfilViewController {
                 contents.removeLast(contents.count - 4)
             }
             self.infoView.update(with: contents, primary: primary)
-            self.loginLabel.update(with: [user.login, user.displayname])
+            if let titleUser = user.titles_users.first(where: { $0.selected }), let title = user.titles.first(where: { $0.id == titleUser.title_id }) {
+                self.loginLabel.update(with: [title.name.replacingOccurrences(of: "%login", with: user.login), user.displayname, user.login])
+            }
+            else {
+                self.loginLabel.update(with: [user.displayname, user.login])
+            }
             self.levelBar.update(with: parent.currentCursus?.level ?? 0.0, primary: coalition?.uicolor ?? HomeDesign.primaryDefault)
         }
     }
@@ -1278,146 +1283,255 @@ extension ProfilViewController {
 
 private extension ProfilViewController {
     
-    final private class UserLogsTableViewCell: BasicUITableViewCell {
+    final private class UserLogsTableViewCell: BasicUITableViewCell, CalendarDaysViewDelegate {
         
         private let title: LeftCurvedTitleView
-        private let leftButton: ActionButtonView
-        private let rightButton: ActionButtonView
-        private let dayViewsContainer: BasicUIView
+        private let activity: BasicUIActivityIndicatorView
+        private let calendarView: CalendarDaysView
         
-        private var today: Date = Date()
-        private unowned(unsafe) var primary: UIColor = HomeDesign.primary
+        private unowned(unsafe) var primary: UIColor
+        private var userId: Int = 0
         
-        override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-            self.title = LeftCurvedTitleView(text: ~Date.monthsKeys[self.today.month &- 1], primaryColor: self.primary, addTopCorner: false)
-            self.leftButton = ActionButtonView(asset: .actionArrowLeft, color: self.primary)
-            self.rightButton = ActionButtonView(asset: .actionArrowRight, color: self.primary)
-            self.dayViewsContainer = BasicUIView()
-            super.init(style: style, reuseIdentifier: reuseIdentifier)
-            self.leftButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(UserLogsTableViewCell.leftGesture)))
-            self.rightButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(UserLogsTableViewCell.rightGesture)))
-            self.dayViewsContainer.isUserInteractionEnabled = true
-            self.dayViewsContainer.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(UserLogsTableViewCell.tapGesture(gesture:))))
-        }
-        required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-        
-        func setup(with userId: Int, primary: UIColor) {
-            
-        }
-        
-        @objc private func leftGesture() {
-            
-        }
-        @objc private func rightGesture() {
-            
-        }
-        @objc private func tapGesture(gesture: UITapGestureRecognizer) {
-            let location = gesture.location(in: self.dayViewsContainer)
-            
-            if let _ = self.dayViewsContainer.subviews.first(where: { $0.frame.contains(location) }) {
-                Task.init(priority: .userInitiated, operation: {
-                    do {
-                        let locations: ContiguousArray<IntraClusterLocation> = try await HomeApi.get(.usersWithUserIdLocations(App.user.id), params: ["sort": "begin_at"])
-                        
-                        dump(locations)
-                    }
-                    catch {
-                        
-                    }
-                })
-            }
-        }
-        
-        
-        static private let rowCount: Int = 6
-        static private let colomnCount: Int = 7
-        
-        private func configureCurrentMonth() {
-            var index: Int = 0
-            let offset = self.today.weekday
-            let count = self.today.monthDays
-            
-            print(self.today.weekday, self.today.weekdayOrdinal)
-            for _ in 0 ..< UserLogsTableViewCell.rowCount {
-                for _ in 0 ..< UserLogsTableViewCell.colomnCount {
-                    if index < offset {
-                        (self.dayViewsContainer.subviews[index] as! DayView).text = ""
-                    }
-                    else if index + offset < count {
-                        (self.dayViewsContainer.subviews[index] as! DayView).text = "\(index - offset)"
-                    }
-                    else {
-                        (self.dayViewsContainer.subviews[index] as! DayView).text = ""
-                    }
-                    index &+= 1
+        static private let dayDuration: TimeInterval = 86400
+        private var mostDepthMonthDate: Date = Date()
+        private var isAtEnd: Bool = false
+        private var isLoading: Bool = true {
+            didSet {
+                if self.isLoading {
+                    self.activity.startAnimating()
+                }
+                else {
+                    self.activity.stopAnimating()
                 }
             }
         }
         
-        override func willMove(toSuperview newSuperview: UIView?) {
-            guard newSuperview != nil && self.dayViewsContainer.superview == nil else { return }
-            let width = floor((UIScreen.main.bounds.width - HomeLayout.margin * 2.0 - HomeLayout.smargin * CGFloat(UserLogsTableViewCell.colomnCount - 1)) / CGFloat(UserLogsTableViewCell.colomnCount))
-            var dayView: DayView!
-            var lastDayView: DayView? = nil
-            var top: NSLayoutYAxisAnchor = self.dayViewsContainer.topAnchor
+        private var locationsForStartingMonth: [Int: ContiguousArray<IntraClusterLocation>] = [:]
+        
+        init(primary: UIColor) {
+            self.primary = primary
+            self.calendarView = .init(date: Date(), primary: primary)
+            self.title = LeftCurvedTitleView(text: self.calendarView.date.toString(.logCell), primaryColor: primary, addTopCorner: false)
+            self.activity = .init(primary: primary)
+            self.activity.hidesWhenStopped = true
+            self.activity.startAnimating()
+            super.init(style: .default, reuseIdentifier: nil)
+            self.calendarView.delegate = self
+        }
+        required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+        
+        @MainActor private func getLocationInRange(_ startDate: Date, endDate: Date, pageIndex: Int = 1) async throws -> ContiguousArray<IntraClusterLocation> {
+            let parameters: [String: Any] = ["sort":"-begin_at", "page[number]": pageIndex, "page[size]": 100,
+                                             "range[begin_at]": "\(startDate.toString(.apiShortFormat)),\(endDate.toString(.apiShortFormat))"]
+            let locations: ContiguousArray<IntraClusterLocation> = try await HomeApi.get(.usersWithUserIdLocations(self.userId), params: parameters)
             
+            return locations
+        }
+        
+        @MainActor private func getCompleteMonth(at date: Date) async throws -> ContiguousArray<IntraClusterLocation> {
+            let start = date.dateAt(.startOfMonth)
+            let end = date.dateAt(.endOfMonth)
+            var newLogs: ContiguousArray<IntraClusterLocation> = []
+            var index = 1
+            var lastCount = 0
+            
+            while true {
+                newLogs.append(contentsOf: try await self.getLocationInRange(start, endDate: end, pageIndex: index))
+                if newLogs.count - lastCount < 100 {
+                    break
+                }
+                lastCount = newLogs.count
+                index &+= 1
+            }
+            self.locationsForStartingMonth[start.year * 100 + start.month] = newLogs
+            print(#function, start.toString(.logCell), self.locationsForStartingMonth[start.year * 100 + start.month]?.count)
+            return newLogs
+        }
+        
+        @MainActor private func startRequest() async {
+            do {
+                var newLogs: ContiguousArray<IntraClusterLocation> = try await getCompleteMonth(at: self.calendarView.date)
+                
+                if newLogs.count == 0 {
+                    newLogs = try await HomeApi.get(.usersWithUserIdLocations(self.userId), params: ["sort":"-begin_at", "page[size]": 5])
+                    if newLogs.count == 0 {
+                        self.isAtEnd = true
+                        self.isLoading = false
+                        return // load finish
+                    }
+                    self.setEmptyLocationsForRange(newLogs[0].beginDate.dateAt(.nextMonth), endMonth: self.calendarView.date)
+                    self.calendarView.setNewDate(newLogs[0].beginDate)
+                    self.mostDepthMonthDate = self.calendarView.date
+                    self.title.update(with: self.calendarView.date.toString(.logCell), primaryColor: self.primary)
+                    _ = try await self.getCompleteMonth(at: self.calendarView.date)
+                    self.updateCalendarViewWithAssociatedLocations()
+                }
+                else {
+                    self.title.update(with: self.calendarView.date.toString(.logCell), primaryColor: self.primary)
+                    self.updateCalendarViewWithAssociatedLocations()
+                }
+                self.isLoading = false
+            }
+            catch {
+                DynamicAlert.presentWith(error: error as! HomeApi.RequestError)
+            }
+        }
+
+        private func setEmptyLocationsForRange(_ start: Date, endMonth end: Date) {
+            let diff = end.timeIntervalSince(start).toUnits([.month])[.month] ?? 0
+            var start = start
+            
+            print(#function, start.toString(.logCell), end.toString(.logCell), diff)
+            if diff > 0 {
+                for _ in 0 ..< diff {
+                    self.locationsForStartingMonth[start.year * 100 + start.month] = []
+                    print(start.toString(.logCell))
+                    start = start.dateAt(.nextMonth)
+                }
+            }
+            else {
+                self.locationsForStartingMonth[start.year * 100 + start.month] = []
+                print(start.toString(.logCell))
+            }
+        }
+        
+        func calendarDaysViewSwipeLeft() {
+            guard self.isLoading == false && !(self.calendarView.date.year == Date().year && self.calendarView.date.month == Date().month) else {
+                return
+            }
+            
+            self.calendarView.addMonth()
+            self.title.update(with: self.calendarView.date.toString(.logCell), primaryColor: self.primary)
+            self.updateCalendarViewWithAssociatedLocations()
+        }
+        func calendarDaysViewSwipeRight() {
+            guard self.isLoading == false && !(self.isAtEnd && self.mostDepthMonthDate.year == self.calendarView.date.year && self.mostDepthMonthDate.month == self.calendarView.date.month) else {
+                return
+            }
+            
+            self.calendarView.removeMonth()
+            self.title.update(with: self.calendarView.date.toString(.logCell), primaryColor: self.primary)
+            if self.locationsForStartingMonth[self.calendarView.date.year * 100 + self.calendarView.date.month] == nil {
+                self.isLoading = true
+                Task {
+                    do {
+                        if (try await self.getCompleteMonth(at: self.calendarView.date)).count == 0 {
+                            let range = "2014-01-01,\(self.calendarView.date.dateAt(.endOfMonth).toString(.apiShortFormat))"
+                            let logs: ContiguousArray<IntraClusterLocation> = try await HomeApi.get(.usersWithUserIdLocations(self.userId),
+                                                                                                    params: ["sort": "-begin_at", "page[size]": 5, "range[begin_at]": range])
+                            
+                            if logs.count == 0 {
+                                self.isAtEnd = true
+                                self.mostDepthMonthDate = self.calendarView.date
+                            }
+                            else {
+                                self.mostDepthMonthDate = logs[0].beginDate.dateAt(.startOfMonth)
+                                self.setEmptyLocationsForRange(self.mostDepthMonthDate.dateAt(.nextMonth), endMonth: self.calendarView.date)
+                            }
+                        }
+                        else {
+                            self.updateCalendarViewWithAssociatedLocations()
+                        }
+                    }
+                    catch {
+                        DynamicAlert.presentWith(error: error as! HomeApi.RequestError)
+                    }
+                    self.isLoading = false
+                }
+            }
+            else {
+                self.updateCalendarViewWithAssociatedLocations()
+            }
+        }
+        
+        private func updateCalendarViewWithAssociatedLocations() {
+            let locations = (self.locationsForStartingMonth[self.calendarView.date.year * 100 + self.calendarView.date.month] ?? [])
+            var index = locations.count &- 1
+            var percent: TimeInterval = 0
+            
+            func handler(_ dayView: CalendarDaysView.DayView, date: Date) {
+                percent = 0
+                while index >= 0 && locations[index].beginDate.day == date.day {
+                    percent += locations[index].duration
+                    index &-= 1
+                }
+                if percent == 0.0 {
+                    dayView.backgroundColor = HomeDesign.lightGray
+                    dayView.label.textColor = HomeDesign.black
+                }
+                else {
+                    dayView.backgroundColor = self.primary.withAlphaComponent(HomeDesign.alphaLow + (min(1.0, CGFloat(percent / Self.dayDuration)) * (1.0 - HomeDesign.alphaLow)))
+                    dayView.label.textColor = HomeDesign.white
+                }
+            }
+            
+            self.calendarView.enumerateDayViews(handler(_:date:))
+        }
+        
+        func setup(with userId: Int) {
+            print("UserLogsTableViewCell", #function)
+            self.userId = userId
+            Task {
+                await self.startRequest()
+            }
+        }
+
+        func setPrimary(_ color: UIColor) {
+            self.primary = color
+            self.activity.tintColor = color
+            self.title.update(with: self.title.text!, primaryColor: color)
+            self.updateCalendarViewWithAssociatedLocations()
+        }
+        
+        func calendarDaysViewSelect(dayView: CalendarDaysView.DayView, date: Date) {
+            guard dayView.label.textColor == HomeDesign.white else {
+                return
+            }
+            var duration: TimeInterval = 0
+            let result: String
+            var locations: ContiguousArray<IntraClusterLocation> = []
+            
+            for location in self.locationsForStartingMonth[date.year * 100 + date.month]! where location.beginDate.day == date.day {
+                duration += location.duration
+                locations.append(location)
+            }
+            if duration > Self.dayDuration {
+                duration = Self.dayDuration
+            }
+            result = duration.toString {
+                $0.unitsStyle = .abbreviated
+                $0.collapsesLargestUnit = false
+                $0.allowedUnits = [.hour, .minute]
+                $0.locale = SwiftDate.defaultRegion.locale
+            }
+            self.title.update(with: "\(date.toString(.logCellWithDay)): \(result)", primaryColor: self.primary)
+            if App.settings.trackerShowLocationOnLogCell && TrackerViewController.checkDefaultsValue() {
+                self.parentHomeViewController?.presentWithBlur(TrackerViewController.TrackerLocationsListViewController(title: self.title.text!, locations: locations))
+            }
+        }
+        
+        func calendarDaysViewUpdated(dayView: CalendarDaysView.DayView, newDate: Date) {
+            dayView.backgroundColor = HomeDesign.lightGray
+            dayView.label.textColor = HomeDesign.black
+        }
+        
+        override func willMove(toSuperview newSuperview: UIView?) {
+            guard newSuperview != nil else { return }
+
             self.contentView.addSubview(self.title)
             self.title.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor).isActive = true
             self.title.topAnchor.constraint(equalTo: self.contentView.topAnchor).isActive = true
             self.title.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
-            self.contentView.addSubview(self.rightButton)
-            self.rightButton.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -HomeLayout.smargin).isActive = true
-            self.rightButton.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: LeftCurvedTitleView.minHeight).isActive = true
-            self.contentView.addSubview(self.leftButton)
-            self.leftButton.centerYAnchor.constraint(equalTo: self.rightButton.centerYAnchor).isActive = true
-            self.leftButton.trailingAnchor.constraint(equalTo: self.rightButton.leadingAnchor, constant: -HomeLayout.dmargin).isActive = true
-            self.contentView.addSubview(self.dayViewsContainer)
-            self.dayViewsContainer.centerXAnchor.constraint(equalTo: self.contentView.centerXAnchor).isActive = true
-            self.dayViewsContainer.topAnchor.constraint(equalTo: self.title.bottomAnchor, constant: HomeLayout.margins).isActive = true
-            self.dayViewsContainer.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -HomeLayout.smargin).isActive = true
-            for _ in 0 ..< UserLogsTableViewCell.rowCount {
-                for _ in 0 ..< UserLogsTableViewCell.colomnCount {
-                    dayView = DayView()
-                    self.dayViewsContainer.addSubview(dayView)
-                    dayView.topAnchor.constraint(equalTo: top, constant: HomeLayout.smargin).isActive = true
-                    dayView.widthAnchor.constraint(equalToConstant: width).isActive = true
-                    dayView.heightAnchor.constraint(equalToConstant: width).isActive = true
-                    if let last = lastDayView {
-                        dayView.leadingAnchor.constraint(equalTo: last.trailingAnchor, constant: HomeLayout.smargin).isActive = true
-                    }
-                    else {
-                        dayView.leadingAnchor.constraint(equalTo: self.dayViewsContainer.leadingAnchor).isActive = true
-                    }
-                    lastDayView = dayView
-                }
-                lastDayView!.trailingAnchor.constraint(equalTo: self.dayViewsContainer.trailingAnchor).isActive = true
-                lastDayView = nil
-                top = dayView.bottomAnchor
-            }
-            dayView.bottomAnchor.constraint(equalTo: self.dayViewsContainer.bottomAnchor).isActive = true
-            self.configureCurrentMonth()
-        }
-        
-        final private class DayView: BasicUILabel {
-            
-            init() {
-                super.init(text: "?")
-                self.textAlignment = .center
-                self.layer.masksToBounds = true
-                self.layer.cornerRadius = HomeLayout.scorner
-                self.font = HomeLayout.fontSemiBoldNormal
-                self.textColor = HomeDesign.black
-                // self.layer.maskedCorners = [.layerMaxXMaxYCorner, .layerMinXMinYCorner]
-                self.backgroundColor = HomeDesign.lightGray
-            }
-            required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-        }
-        
-        func setPrimary(_ color: UIColor) {
-            if self.primary != color {
-                self.primary = color
-                // update
-            }
+            self.contentView.addSubview(self.activity)
+            self.activity.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -HomeLayout.smargin).isActive = true
+            self.activity.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: LeftCurvedTitleView.minHeight).isActive = true
+            self.activity.heightAnchor.constraint(equalToConstant: HomeLayout.actionButtonSize).isActive = true
+            self.activity.widthAnchor.constraint(equalToConstant: HomeLayout.actionButtonSize).isActive = true
+            self.contentView.addSubview(self.calendarView)
+            self.calendarView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: HomeLayout.smargin).isActive = true
+            self.calendarView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -HomeLayout.smargin).isActive = true
+            self.calendarView.topAnchor.constraint(equalTo: self.title.bottomAnchor, constant: HomeLayout.margins).isActive = true
+            self.calendarView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -HomeLayout.smargin).isActive = true
         }
     }
 }

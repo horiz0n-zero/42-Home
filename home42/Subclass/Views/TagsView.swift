@@ -84,10 +84,8 @@ final class TagsView: BasicUICollectionView, GenericTableViewCellView, UICollect
         let primary = (parent as? ProfilViewController)?.currentPrimary ?? HomeDesign.primary
         
         if tag.isLocal == false {
-            vc = UsersListViewController(.groupsWithGroupIdUsers(tag.id),
-                                         primary: primary,
-                                         extra: .group(tag),
-                                         warnAboutIncorrectAPIResult: true)
+            vc = UsersListViewController(.groupsWithGroupIdUsers(tag.id), extra: .group(tag),
+                                         primary: primary, warnAboutIncorrectAPIResult: true)
             vc.headerTitle = tag.name
             parent.presentWithBlur(vc)
         }

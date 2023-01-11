@@ -160,6 +160,25 @@ final class CoalitionHeaderWithActionsView: HeaderWithActionsBase {
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
+    func setCoalition(_ coalition: IntraCoalition) {
+        self.titleLabel.text = coalition.name
+        self.titleLabel.textColor = coalition.uicolor
+        self.imageView.tintColor = coalition.uicolor
+        if let image = HomeResources.storageSVGCoalition.get(coalition) {
+            self.imageView.image = image
+        }
+        else {
+            Task.init(priority: .userInitiated, operation: {
+                if let (coa, image) = await HomeResources.storageSVGCoalition.obtain(coalition), coa.id==coalition.id {
+                    self.imageView.image = image
+                }
+                else {
+                    self.imageView.image = UIImage.Assets.svgFactionless.image
+                }
+            })
+        }
+    }
+    
     override func willMove(toSuperview newSuperview: UIView?) {
         guard newSuperview != nil else { return }
         

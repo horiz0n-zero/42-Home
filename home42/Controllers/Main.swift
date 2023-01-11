@@ -414,16 +414,9 @@ fileprivate extension MainViewController {
                 let color: UIColor
                 
                 if representation.isHidden {
-                    if (representation.type as! HiddenViewController.Type).checkDefaultsValue() == false {
-                        asset = UIImage.Assets.controllerMystere
-                        text = "???"
-                        color = HomeDesign.primary
-                    }
-                    else {
-                        asset = representation.icon
-                        text = ~representation.title
-                        color = HomeDesign.gold
-                    }
+                    asset = representation.icon
+                    text = ~representation.title
+                    color = HomeDesign.gold
                 }
                 else {
                     asset = representation.icon
@@ -479,7 +472,9 @@ fileprivate extension MainViewController {
 
         
         required init() {
-            self.selectionViews = MainViewController.controllerRepresentations.map({SelectionView(representation: $0)})
+            self.selectionViews = MainViewController.controllerRepresentations.filter({ !$0.isHidden || ($0.type as! HiddenViewController.Type).checkDefaultsValue() }).map {
+                SelectionView(representation: $0)
+            }
             self.closeButton = ActionButtonView(asset: .actionClose, color: HomeDesign.actionRed)
             self.closeButton.alpha = 0.0
             super.init()
@@ -603,7 +598,7 @@ extension MainViewController {
     // MARK: - Files
     func openClustersDebugFile(_ file: String) {
         
-        func selectCampus(_ campus: IntraCampus) {
+        func selectCampus(_ index: Int, _ campus: IntraCampus) {
             #if DEBUG
             print(#function)
             dump(campus)
@@ -623,12 +618,8 @@ extension MainViewController {
             }
         }
         
-        DynamicAlert(contents: [
-                        .text(~"clusters.debugfile"),
-                        .advancedSelector(.campus, Array<IntraCampus>(HomeApiResources.campus!), 0)],
-                     actions: [
-                        .normal(~"general.cancel", nil),
-                        .getAdvancedSelector(unsafeBitCast(selectCampus, to: ((Any) -> ()).self))])
+        DynamicAlert(contents: [.text(~"clusters.debugfile"), .advancedSelector(.campus, Array<IntraCampus>(HomeApiResources.campus!), 0)],
+                     actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectCampus, to: ((Int, Any) -> ()).self))])
     }
     
     // MARK: - Deeplinks
@@ -664,15 +655,11 @@ extension MainViewController {
     }
     
     @objc func deeplinkTrackerQRCode(parameters: [String: Any]) {
-        let data = parameters[HomeDeeplinks.Parameter.data.rawValue] as! String
-        
-        deeplinkUnlock(TrackerViewController.self, data: data)
+        deeplinkUnlock(TrackerViewController.self, data: parameters[HomeDeeplinks.Parameter.data.rawValue] as! String)
     }
     
     @objc func deeplinkCorrectionsQRCode(parameters: [String: Any]) {
-        let data = parameters[HomeDeeplinks.Parameter.data.rawValue] as! String
-        
-        deeplinkUnlock(CorrectionsViewController.self, data: data)
+        deeplinkUnlock(CorrectionsViewController.self, data: parameters[HomeDeeplinks.Parameter.data.rawValue] as! String)
     }
         
     @objc func deeplinkEvents(parameters: [String: Any]) {
@@ -682,13 +669,18 @@ extension MainViewController {
             do {
                 let event: IntraEvent = try await HomeApi.get(.eventWithId(id))
                 
-                DynamicAlert.init(.event(event),
-                                  contents: [.text(event.eventDescription)],
-                                  actions: [.normal(~"general.ok", nil)])
+                DynamicAlert.init(.event(event), contents: [.text(event.eventDescription)], actions: [.normal(~"general.ok", nil)])
             }
             catch {
                 DynamicAlert.presentWith(error: error as! HomeApi.RequestError)
             }
         })
+    }
+    
+    @objc func deeplinkDatabaseRemove(parameters: [String: Any]) {
+        let key = parameters[HomeDeeplinks.Parameter.key.rawValue] as! String
+        
+        HomeDefaults.remove(key)
+        DynamicAlert(contents: [.title(~"general.remove"), .text(key)], actions: [.normal(~"general.ok", nil)])
     }
 }

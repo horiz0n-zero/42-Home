@@ -128,6 +128,7 @@ final class IntraNetGraphProject: IntraObject {
         case done
         case fail
         case inProgress = "in_progress"
+        case notRecommended = "not_recommended"
     }
     @frozen enum Kind: String, Codable {
         case project
@@ -154,7 +155,8 @@ final class IntraNetGraphProject: IntraObject {
             return ~"general.available"
         case .inProgress:
             return ~"project.status.in-progress"
-            
+        case .notRecommended:
+            return ~"project.status.not-recommended"
         }
     }
     var stateColor: UIColor {
@@ -166,7 +168,7 @@ final class IntraNetGraphProject: IntraObject {
             return HomeDesign.redError
         case .unavailable, .fail:
             return HomeDesign.redError
-        case .inProgress, .available:
+        case .inProgress, .available, .notRecommended:
             return HomeDesign.blueAccess
         }
     }

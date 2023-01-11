@@ -44,12 +44,9 @@ final class ProjectListViewController: HomeViewController, UITableViewDelegate, 
         self.header.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         self.view.addSubview(self.searchField)
         self.searchField.delegate = self
-        self.searchField.topAnchor.constraint(equalTo: self.header.bottomAnchor,
-                                              constant: HomeLayout.margin).isActive = true
-        self.searchField.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor,
-                                                  constant: HomeLayout.margin).isActive = true
-        self.searchField.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor,
-                                                   constant: -HomeLayout.margin).isActive = true
+        self.searchField.topAnchor.constraint(equalTo: self.header.bottomAnchor, constant: HomeLayout.margin).isActive = true
+        self.searchField.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margin).isActive = true
+        self.searchField.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -HomeLayout.margin).isActive = true
         self.view.insertSubview(self.tableView, belowSubview: self.searchField)
         self.tableView.delegate = self
         self.tableView.dataSource = self
@@ -105,7 +102,7 @@ final class ProjectListViewController: HomeViewController, UITableViewDelegate, 
             self.presentWithBlur(ProjectListViewController(projects: project.childrenProjects, parentProject: project))
         }
         else {
-            self.presentWithBlur(UsersListViewController(.projectsWithProjectIdUsers(project.id), primary: HomeDesign.primary, extra: .project(project.id)))
+            self.presentWithBlur(UsersListViewController(.projectsWithProjectIdUsers(project.id), extra: .project(project.id), primary: HomeDesign.primary))
         }
     }
     

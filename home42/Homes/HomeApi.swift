@@ -121,7 +121,19 @@ final class HomeApi: NSObject {
             case .internal:
                 return "internal error \(self.serverMessage) \(self.path)\n\(paramsJSON)"
             case .flowError(let details):
-                return "\(details) \(self.serverMessage) \(self.path)\n\(paramsJSON)"
+                switch details {
+                case .cookiesUpdate(let reason):
+                    switch reason {
+                    case .passwdIncorrect:
+                        return ~"login.error.passwd-incorrect"
+                    case .cancelled:
+                        return ~"login.reconnect"
+                    default:
+                        return "\(reason)"
+                    }
+                case .oauthRefreshFailure:
+                    return "\(details) \(self.serverMessage) \(self.path)\n\(paramsJSON)"
+                }
             }
         }
         
@@ -161,12 +173,11 @@ final class HomeApi: NSObject {
             }
         }
         init(cookiesReason: Status.FlowError.CookiesReason) {
-            fatalError()
-            /*self.status = .flowError(.cookiesUpdate(cookiesReason))
-            switch cookiesReason {
-            case .passwdIncorrect
-                self.serverMessage = ~""
-            }*/
+            self.status = .flowError(.cookiesUpdate(cookiesReason))
+            self.path = ""
+            self.data = nil
+            self.parameters = [:]
+            self.serverMessage = ""
         }
     }
 }
@@ -514,8 +525,9 @@ extension HomeApi {
         case projectsWithProjectIdScaleTeams(Int)
         case projectsWithProjectIdUsers(Int)
         case expertisesWithExpertiseIdUsers(Int)
-        case achievementsWithAchievementIdAchievementsUsers(Int)
+        case achievements
         case achievementsWithAchievementIdUsers(Int)
+        case campusWithCampusIdAchievements(Int)
         case staff
         case groupsWithGroupIdUsers(Int)
         case scaleTeams
@@ -537,6 +549,8 @@ extension HomeApi {
         case eventsWithEventIdUsers(Int)
         case eventsUsersWithId(Int)
         case eventsUsers
+        case events
+        case cursusWithCursusIdEvents(Int)
         case eventsWithEventIdFeedbacks(Int)
         case eventWithId(Int)
         case feedbacks
@@ -599,10 +613,12 @@ extension HomeApi {
                 return HomeApi.apiRoot + "projects/\(id)/scale_teams"
             case .expertisesWithExpertiseIdUsers(let id):
                 return HomeApi.apiRoot + "expertises/\(id)/users"
-            case .achievementsWithAchievementIdAchievementsUsers(let id):
-                return HomeApi.apiRoot + "achievements/\(id)/achievements_users"
+            case .achievements:
+                return HomeApi.apiRoot + "achievements"
             case .achievementsWithAchievementIdUsers(let id):
                 return HomeApi.apiRoot + "achievements/\(id)/users"
+            case .campusWithCampusIdAchievements(let id):
+                return HomeApi.apiRoot + "campus/\(id)/achievements"
             case .staff:
                 return HomeApi.apiRoot + "staff"
             case .groupsWithGroupIdUsers(let id):
@@ -645,6 +661,10 @@ extension HomeApi {
                 return HomeApi.apiRoot + "events_users/\(id)"
             case .eventsUsers:
                 return HomeApi.apiRoot + "events_users"
+            case .events:
+                return HomeApi.apiRoot + "events"
+            case .cursusWithCursusIdEvents(let id):
+                return HomeApi.apiRoot + "cursus/\(id)/events"
             case .eventsWithEventIdFeedbacks(let id):
                 return HomeApi.apiRoot + "events/\(id)/feedbacks"
             case .eventWithId(let id):
@@ -686,6 +706,43 @@ extension HomeApi {
             case .test(let test):
                 return HomeApi.apiRoot + test
             }
+        }
+    }
+}
+
+// MARK: - Parameters
+extension HomeApi {
+    
+    @frozen enum Parameter: String {
+        case filterPoolYear = "filter[pool_year]"
+        case filterPoolMonth = "filter[pool_month]"
+        case filterPrimaryCampusId = "filter[primary_campus_id]"
+        case filterCursusId = "filter[cursus_id]"
+        case filterVisible = "filter[visible]"
+        case filterFuture = "filter[future]"
+        case filterRemote = "filter[remote]"
+        case filterBeginAt = "filter[begin_at]"
+        case filterEndAt = "filter[end_at]"
+        case filterCreatedAt = "filter[created_at]"
+        case filterUpdatedAt = "filter[updated_at]"
+        case sort = "sort"
+        case searchLogin = "search[login]"
+        case searchName = "search[name]"
+        case searchDescription = "search[description]"
+        case searchLocation = "search[location]"
+        case searchMaxPeople = "search[max_people]"
+        case isAlumni = "alumni?"
+        case isStaff = "staff?"
+    }
+}
+extension Dictionary where Self.Key == String {
+    
+    subscript(_ parameter: HomeApi.Parameter) -> Self.Value? {
+        get {
+            return self[parameter.rawValue]
+        }
+        set {
+            self[parameter.rawValue] = newValue
         }
     }
 }

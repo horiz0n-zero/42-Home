@@ -44,20 +44,16 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
         }
     }
     static private let items: [ResearchItem] = [
-        .init(titleKey: "general.users", "research.users",
-              selector: #selector(ResearchViewController.seeUsers)),
-        .init(titleKey: "research.users-admitted", "research.users-admitted-description",
-              selector: #selector(ResearchViewController.seeUsersAdmitted)),
-        .init(titleKey: "title.clusters", "research.clusters",
-              selector: #selector(ResearchViewController.seeCampusClusters)),
-        .init(titleKey: "general.users", "research.users-title",
-              selector: #selector(ResearchViewController.seeUsersTitle)),
-        .init(titleKey: "general.users", "research.users-group",
-              selector: #selector(ResearchViewController.seeUsersGroup)),
-        .init(titleKey: "general.users", "research.users-campus",
-              selector: #selector(ResearchViewController.seeUsersCampus)),
-        .init(titleKey: "general.projects", "research.projects",
-              selector: #selector(ResearchViewController.seeProjectsList))
+        .init(titleKey: "general.users", "research.users", selector: #selector(ResearchViewController.seeUsers)),
+        .init(titleKey: "research.users-admitted", "research.users-admitted-description", selector: #selector(ResearchViewController.seeUsersAdmitted)),
+        .init(titleKey: "title.clusters", "research.clusters", selector: #selector(ResearchViewController.seeCampusClusters)),
+        .init(titleKey: "general.users", "research.users-title", selector: #selector(ResearchViewController.seeUsersTitle)),
+        .init(titleKey: "general.users", "research.users-group", selector: #selector(ResearchViewController.seeUsersGroup)),
+        .init(titleKey: "general.users", "research.users-campus", selector: #selector(ResearchViewController.seeUsersCampus)),
+        // campusList with advanced filters
+        .init(titleKey: "general.projects", "research.projects", selector: #selector(ResearchViewController.seeProjectsList)),
+        .init(titleKey: "title.events", "research.events", selector: #selector(ResearchViewController.seeEvents)),
+        .init(titleKey: "title.achievements", "research.achievements", selector: #selector(ResearchViewController.seeAchievements))
         // .init(titleKey: "title.coalitions", "research.coalitions", selector: #selector(ResearchViewController.seeCoalitions))
     ]
     
@@ -126,39 +122,32 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
     }
     
     @objc private func seeUsersTitle() {
-        func selectTitle(_ title: IntraTitle) {
-            self.presentWithBlur(UsersListViewController.init(.titlesWithTitleIdUsers(title.id),
-                                                              primary: HomeDesign.primary,
-                                                              extra: .title(title),
-                                                              warnAboutIncorrectAPIResult: true))
+        func selectTitle(_index: Int, _ title: IntraTitle) {
+            self.presentWithBlur(UsersListViewController.init(.titlesWithTitleIdUsers(title.id), extra: .title(title),
+                                                              primary: HomeDesign.primary, warnAboutIncorrectAPIResult: true))
         }
 
-        DynamicAlert.init(.primary(~"title.titles"),
-                          contents: [.advancedSelector(.title, Array<IntraTitle>(HomeApiResources.titles!), 0)],
-                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectTitle, to: ((Any) -> ()).self))])
+        DynamicAlert.init(.primary(~"title.titles"), contents: [.advancedSelector(.title, Array<IntraTitle>(HomeApiResources.titles!), 0)],
+                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectTitle, to: ((Int, Any) -> ()).self))])
     }
     
     @objc private func seeUsersGroup() {
-        func selectGroup(_ group: IntraGroup) {
-            self.presentWithBlur(UsersListViewController.init(.groupsWithGroupIdUsers(group.id),
-                                                              primary: HomeDesign.primary,
-                                                              extra: .group(group),
-                                                              warnAboutIncorrectAPIResult: true))
+        func selectGroup(_ index: Int, _ group: IntraGroup) {
+            self.presentWithBlur(UsersListViewController.init(.groupsWithGroupIdUsers(group.id), extra: .group(group),
+                                                              primary: HomeDesign.primary, warnAboutIncorrectAPIResult: true))
         }
 
-        DynamicAlert.init(.primary(~"title.groups"),
-                          contents: [.advancedSelector(.group, Array<IntraGroup>(HomeApiResources.groups!), 0)],
-                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectGroup, to: ((Any) -> ()).self))])
+        DynamicAlert.init(.primary(~"title.groups"), contents: [.advancedSelector(.group, Array<IntraGroup>(HomeApiResources.groups!), 0)],
+                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectGroup, to: ((Int, Any) -> ()).self))])
     }
     
     @objc private func seeUsersCampus() {
-        func selectCampus(_ campus: IntraCampus) {
-            self.presentWithBlur(UsersListViewController.init(.users, primary: HomeDesign.primary, settings: [.campus(campus.id)]))
+        func selectCampus(_ index: Int, _ campus: IntraCampus) {
+            self.presentWithBlur(UsersListViewController.init(.users, settings: [.filterPrimaryCampusId: campus.id], primary: HomeDesign.primary))
         }
 
-        DynamicAlert.init(.primary(~"profil.info.campus"),
-                          contents: [.advancedSelector(.campus, Array<IntraCampus>(HomeApiResources.campus!), 0)],
-                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectCampus, to: ((Any) -> ()).self))])
+        DynamicAlert.init(.primary(~"profil.info.campus"), contents: [.advancedSelector(.campus, Array<IntraCampus>(HomeApiResources.campus!), 0)],
+                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectCampus, to: ((Int, Any) -> ()).self))])
     }
     
     @objc private func seeUsersAdmitted() {
@@ -169,11 +158,8 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
         
         func selectMonth(index: Int, month: String) {
             let vc = UsersListViewController(.achievementsWithAchievementIdUsers(1),
-                                             primary: HomeDesign.primary,
-                                             settings: [.campus(App.userCampus.campus_id),
-                                                        .poolMonth(Date.apiMonths[index]),
-                                                        .poolYear(date.year)],
-                                             extra: nil)
+                                             settings: [.filterPrimaryCampusId: App.userCampus.campus_id, .filterPoolMonth: Date.apiMonths[index], .filterPoolYear: date.year],
+                                             extra: nil, primary: HomeDesign.primary)
             
             vc.headerTitle = title
             self.presentWithBlur(vc, completion: nil)
@@ -188,7 +174,7 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
     @objc private func seeCampusClusters() {
         let campus = Array<IntraCampus>(HomeApiResources.campus!)
         
-        func selectClusterCampus(_ campus: IntraCampus) {
+        func selectClusterCampus(_ index: Int, _ campus: IntraCampus) {
             do {
                 let vc = try ClustersSharedViewController(campus: .init(campus: campus), coalition: App.userCoalition)
                 
@@ -201,11 +187,19 @@ final class ResearchViewController: HomeViewController, UITableViewDelegate, UIT
         
         DynamicAlert.init(.primary(~"title.clusters"),
                           contents: [.advancedSelector(.clusters, campus.sorted(by: { $0.name < $1.name }), 0)],
-                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectClusterCampus, to: ((Any) -> ()).self))])
+                          actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectClusterCampus, to: ((Int, Any) -> ()).self))])
     }
     
     @objc private func seeProjectsList() {
         self.presentWithBlur(ProjectListViewController())
+    }
+    
+    @objc private func seeEvents() {
+        self.presentWithBlur(EventsListViewController())
+    }
+    
+    @objc private func seeAchievements() {
+        self.presentWithBlur(AchievementsListViewController())
     }
     
     @objc private func seeCoalitions() {

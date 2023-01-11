@@ -132,6 +132,7 @@ final class Cookies: IntraObject {
     private final class CookiesRefresherAlert: DynamicController, UITextFieldDelegate {
         
         private let container: CoalitionBackgroundWithParallaxImageView
+        private let explainLabel: BasicUILabel
         private let loginLabel: LoginViewController.LoginTextFieldUpperText
         private let loginTextField: LoginViewController.LoginTextField
         private let passwdLabel: LoginViewController.LoginTextFieldUpperText
@@ -144,6 +145,11 @@ final class Cookies: IntraObject {
         
         @discardableResult init(continuation: UnsafeContinuation<Cookies, Error>) {
             self.container = CoalitionBackgroundWithParallaxImageView()
+            self.explainLabel = .init(text: ~"login.reconnect")
+            self.explainLabel.textColor = HomeDesign.white
+            self.explainLabel.textAlignment = .left
+            self.explainLabel.font = HomeLayout.fontSemiBoldMedium
+            self.explainLabel.numberOfLines = 0
             self.loginLabel = LoginViewController.LoginTextFieldUpperText(.login)
             self.loginTextField = LoginViewController.LoginTextField(.login)
             self.loginTextField.text = App.user.login
@@ -166,9 +172,17 @@ final class Cookies: IntraObject {
             self.container.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margins).isActive = true
             self.container.clipsToBounds = true
             self.container.layer.cornerRadius = HomeLayout.corners
+            self.container.addSubview(self.explainLabel)
+            self.explainLabel.leadingAnchor.constraint(equalTo: self.container.leadingAnchor, constant: HomeLayout.margin).isActive = true
+            self.explainLabel.trailingAnchor.constraint(equalTo: self.container.trailingAnchor, constant: -HomeLayout.margin).isActive = true
+            self.explainLabel.topAnchor.constraint(equalTo: self.container.topAnchor, constant: HomeLayout.margin).isActive = true
+            self.explainLabel.heightAnchor.constraint(equalToConstant: ceil(self.explainLabel.textRect(forBounds: .init(origin: .zero,
+                                                                                                                        size: .init(width: UIScreen.main.bounds.width - HomeLayout.margins - HomeLayout.margin,
+                                                                                                                                    height: .infinity)),
+                                                                                                       limitedToNumberOfLines: 0).height)).isActive = true
             self.container.addSubview(self.loginLabel)
             self.loginLabel.leadingAnchor.constraint(equalTo: self.container.leadingAnchor, constant: HomeLayout.margin + HomeLayout.dmargin).isActive = true
-            self.loginLabel.topAnchor.constraint(equalTo: self.container.topAnchor, constant: HomeLayout.margin).isActive = true
+            self.loginLabel.topAnchor.constraint(equalTo: self.explainLabel.bottomAnchor, constant: HomeLayout.margin).isActive = true
             self.container.addSubview(self.loginTextField)
             self.loginTextField.leadingAnchor.constraint(equalTo: self.container.leadingAnchor, constant: HomeLayout.margin).isActive = true
             self.loginTextField.trailingAnchor.constraint(equalTo: self.container.trailingAnchor, constant: -HomeLayout.margin).isActive = true
@@ -251,7 +265,7 @@ final class Cookies: IntraObject {
                 
         private func cookiesRefresherFailed(_ error: HomeApi.RequestError) {
             DispatchQueue.main.async {
-                DynamicAlert.presentWith(error: error)
+                DynamicAlert(.withPrimary(~"general.error", HomeDesign.primaryDefault), contents: [.apiError(error)], actions: [.normal(~"general.ok", nil)])
                 self.enabledButtons()
                 self.cookiesRefresher = nil
             }

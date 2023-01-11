@@ -70,6 +70,8 @@ extension UIImage {
         case actionText = "action_text"
         case actionLocation = "action_location"
         case actionFeedbacks = "action_feedbacks"
+        case actionShare = "action_share"
+        case actionCalendar = "action_calendar"
         
         case controllerMystere  = "controller_mystere"
         case controllerClusters = "controller_clusters"

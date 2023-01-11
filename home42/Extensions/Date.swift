@@ -77,10 +77,19 @@ extension Date {
     }
     
     func newDiffTime(to toDate: Date) -> String {
-        let diff = DateInRegion(toDate).timeIntervalSince(DateInRegion(self))
+        return DateInRegion(toDate).toRelative(since: DateInRegion(self))
+        /*let diff = DateInRegion(toDate).timeIntervalSince(DateInRegion(self))
         let date = Date() - diff
         
-        return date.toRelative(style: RelativeFormatter.timeStyle())
+        date.toRelative(since: )
+        return date.toRelative(style: RelativeFormatter.timeStyle())*/
+    }
+    
+    func monthRemove() -> Date {
+        return Calendar.current.date(byAdding: .month, value: -1, to: self)!
+    }
+    func monthAdd() -> Date {
+        return Calendar.current.date(byAdding: .month, value: 1, to: self)!
     }
 }
 
@@ -92,6 +101,11 @@ extension DateToStringStyles {
     static let historicWithYear: DateToStringStyles = .custom("EEEE dd MMM yyyy HH:mm")
     static let comprehensive: DateToStringStyles = .custom("dd/MM/yyyy HH:mm")
     static let comprehensiveShort: DateToStringStyles = .custom("dd/MM/yyyy")
+    static let dateSelector: DateToStringStyles = .custom("EEEE dd MMMM yyyy")
+    static let dateSelectorWithSlashs: DateToStringStyles = .custom("dd/MM/yy")
+    static let apiShortFormat: DateToStringStyles = .custom("yyyy-MM-dd")
+    static let logCell: DateToStringStyles = .custom("MMMM yyyy")
+    static let logCellWithDay: DateToStringStyles = .custom("dd MMMM yyyy")
 }
 
 extension Array where Element == Date {

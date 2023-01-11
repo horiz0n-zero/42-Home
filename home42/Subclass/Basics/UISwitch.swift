@@ -93,7 +93,7 @@ final class HomeSwitch: BasicUIView {
         super.init()
         self.layer.cornerRadius = HomeLayout.switchRadius
         self.layer.borderWidth = HomeLayout.border
-        self.layer.borderColor = HomeDesign.primary.cgColor
+        self.layer.borderColor = primary.cgColor
         self.updateState()
         self.isUserInteractionEnabled = true
         self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(HomeSwitch.tapGesture(sender:))))
@@ -163,5 +163,11 @@ final class HomeSwitch: BasicUIView {
             self.isUserInteractionEnabled = true
         })
         self.delegate?.switchValueChanged(switch: self)
+    }
+    
+    func setPrimary(_ primary: UIColor) {
+        self.primary = primary
+        self.updateState()
+        self.layer.borderColor = primary.cgColor
     }
 }

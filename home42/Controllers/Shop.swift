@@ -29,8 +29,7 @@ final class ShopViewController: HomeViewController, UITableViewDataSource, UITab
         self.products = try! JSONDecoder.decoder.decode(ContiguousArray<IntraProduct>.self, from: data)
         self.cache = CachingInterface()
         self.tableView = .init()
-        self.tableView.register(HomeFramingTableViewCell<ShopViewController.ProductView>.self,
-                                forCellReuseIdentifier: "cell")
+        self.tableView.register(HomeFramingTableViewCell<ShopViewController.ProductView>.self, forCellReuseIdentifier: "cell")
         self.tableView.contentInsetAdjustTopAndBottom()
         super.init()
         self.tableView.delegate = self
@@ -39,10 +38,8 @@ final class ShopViewController: HomeViewController, UITableViewDataSource, UITab
         self.view.addSubview(self.tableView)
         self.tableView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
         self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        self.tableView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor,
-                                                constant: HomeLayout.safeAeraMain.left).isActive = true
-        self.tableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor,
-                                                 constant: HomeLayout.safeAeraMain.right).isActive = true
+        self.tableView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: HomeLayout.safeAeraMain.left).isActive = true
+        self.tableView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: HomeLayout.safeAeraMain.right).isActive = true
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
@@ -60,17 +57,20 @@ final class ShopViewController: HomeViewController, UITableViewDataSource, UITab
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let product = self.products[indexPath.row]
         
-        DynamicAlert(.none, contents: [.title(product.name), .text(product.productDescription)],
-                     actions: [.normal(~"general.ok", nil)])
+        DynamicAlert(.none, contents: [.title(product.name), .text(product.productDescription)], actions: [.normal(~"general.ok", nil)])
     }
     
     final private class ProductView: BasicUIView, HomeFramingTableViewCellView {
-        static var edges: UIEdgeInsets = .init(top: HomeLayout.smargin, left: HomeLayout.margin,
-                                               bottom: HomeLayout.smargin, right: HomeLayout.margin)
+        static var edges: UIEdgeInsets = .init(top: HomeLayout.smargin, left: HomeLayout.margin, bottom: HomeLayout.smargin, right: HomeLayout.margin)
         
         private let titleLabel: CoalitionBackgroundWithParallaxLabel
         private let imageView: BasicUIImageView
         private let walletLabel: HomeInsetsLabel
+        private let locationLabel: HomeInsetsLabel
+        
+        var image: UIImage? {
+            return self.imageView.image
+        }
         
         override init() {
             self.titleLabel = CoalitionBackgroundWithParallaxLabel(text: "???")
@@ -85,6 +85,13 @@ final class ShopViewController: HomeViewController, UITableViewDataSource, UITab
             self.walletLabel.font = HomeLayout.fontBoldMedium
             self.walletLabel.layer.cornerRadius = HomeLayout.scorner
             self.walletLabel.layer.masksToBounds = true
+            self.locationLabel = .init(text: "???", inset: .init(width: HomeLayout.margin, height: HomeLayout.smargin))
+            self.locationLabel.backgroundColor = HomeDesign.black
+            self.locationLabel.textColor = HomeDesign.white
+            self.locationLabel.font = HomeLayout.fontBoldMedium
+            self.locationLabel.layer.cornerRadius = HomeLayout.scorner
+            self.locationLabel.layer.masksToBounds = true
+            self.locationLabel.adjustsFontSizeToFitWidth = true
             super.init()
             self.backgroundColor = HomeDesign.white
             self.layer.cornerRadius = HomeLayout.corner
@@ -103,14 +110,15 @@ final class ShopViewController: HomeViewController, UITableViewDataSource, UITab
             self.imageView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
             self.imageView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
             self.imageView.heightAnchor.constraint(equalTo: self.imageView.widthAnchor, multiplier: HomeLayout.imageViewHeightRatio).isActive = true
-            self.imageView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor,
-                                                constant: HomeLayout.smargin).isActive = true
+            self.imageView.topAnchor.constraint(equalTo: self.titleLabel.bottomAnchor, constant: HomeLayout.smargin).isActive = true
             self.imageView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
             self.imageView.addSubview(self.walletLabel)
-            self.walletLabel.trailingAnchor.constraint(equalTo: self.imageView.trailingAnchor,
-                                                       constant: -HomeLayout.smargin).isActive = true
-            self.walletLabel.bottomAnchor.constraint(equalTo: self.imageView.bottomAnchor,
-                                                     constant: -HomeLayout.smargin).isActive = true
+            self.walletLabel.trailingAnchor.constraint(equalTo: self.imageView.trailingAnchor, constant: -HomeLayout.smargin).isActive = true
+            self.walletLabel.bottomAnchor.constraint(equalTo: self.imageView.bottomAnchor, constant: -HomeLayout.smargin).isActive = true
+            self.imageView.addSubview(self.locationLabel)
+            self.locationLabel.bottomAnchor.constraint(equalTo: self.walletLabel.bottomAnchor).isActive = true
+            self.locationLabel.leadingAnchor.constraint(equalTo: self.imageView.leadingAnchor, constant: HomeLayout.smargin).isActive = true
+            self.locationLabel.trailingAnchor.constraint(lessThanOrEqualTo: self.walletLabel.leadingAnchor, constant: -HomeLayout.smargin).isActive = true
         }
         
         private var product: IntraProduct!
@@ -118,6 +126,7 @@ final class ShopViewController: HomeViewController, UITableViewDataSource, UITab
             self.product = product
             self.titleLabel.text = product.name
             self.walletLabel.text = "\(product.price) ₳"
+            self.locationLabel.text = product.campus_name
             if product.is_unic != nil && product.is_unic {
                 self.layer.borderWidth = HomeLayout.border
                 self.layer.borderColor = HomeDesign.gold.cgColor

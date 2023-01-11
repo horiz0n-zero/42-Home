@@ -59,8 +59,9 @@ final class CoalitionsListViewController: HomeViewController, UITableViewDelegat
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let coalition = HomeApiResources.blocs[indexPath.section].coalitions[indexPath.row]
-        let userList = UsersListViewController.init(.coalitionsWithCoalitionIdUsers(coalition.id), primary: coalition.uicolor, extra: .coalition(coalition))
+        let bloc = HomeApiResources.blocs[indexPath.section]
+        let coalition = bloc.coalitions[indexPath.row]
+        let userList = UsersListViewController(.coalitionsWithCoalitionIdUsers(coalition.id), extra: .coalitions(coalition, bloc), primary: coalition.uicolor)
         
         self.presentWithBlur(userList)
     }

@@ -555,6 +555,7 @@ final class IntraEvent: IntraObject {
         case extern = "extern"
         case partnership = "partnership"
         case other = "other"
+        case rush = "rush"
     }
     let kind: IntraEvent.Kind
     lazy var kindKey: String = {
@@ -589,11 +590,13 @@ final class IntraEvent: IntraObject {
             return "event.kind.partnership"
         case .other:
             return "event.kind.other"
+        case .rush:
+            return "event.kind.rush"
         }
     }()
     lazy var uicolor: UIColor = {
         switch self.kind {
-        case .exam, .hackathon, .piscine:
+        case .exam, .hackathon, .piscine, .rush:
             return HomeDesign.eventColorT1
         case .association:
             return HomeDesign.eventColorT5
@@ -758,6 +761,13 @@ final class IntraClusterLocation: IntraObject {
         return Date.fromIntraFormat(self.end_at)
     }()
     let user: IntraUserInfo
+    
+    var duration: TimeInterval {
+        if self.end_at == nil {
+            return (Date() - self.beginDate).timeInterval
+        }
+        return (self.endDate - self.beginDate).timeInterval
+    }
     
     override var hash: Int {
         return self.host.hashValue
@@ -1018,6 +1028,8 @@ final class IntraProduct: IntraObject {
     var imageUrl: String {
         return "https://cdn.intra.42.fr/\(self.image.replacingOccurrences(of: "/uploads/", with: ""))"
     }
+    let campus_id: Int
+    let campus_name: String
     
     @frozen private enum CodingKeys: String, CodingKey {
         case id = "id"
@@ -1027,6 +1039,8 @@ final class IntraProduct: IntraObject {
         case quantity = "quantity"
         case is_unic = "is_uniq"
         case image = "image"
+        case campus_id = "campus_id"
+        case campus_name = "campus_name"
     }
     @frozen private enum ImageCodingKeys: String, CodingKey {
         case url
@@ -1041,8 +1055,9 @@ final class IntraProduct: IntraObject {
         self.price = try container.decode(Int.self, forKey: .price)
         self.quantity = try container.decodeIfPresent(Int.self, forKey: .price)
         self.is_unic = try container.decodeIfPresent(Bool.self, forKey: .is_unic)
-        self.image = try container.nestedContainer(keyedBy: IntraProduct.ImageCodingKeys.self,
-                                                   forKey: .image).decode(String.self, forKey: .url)
+        self.image = try container.nestedContainer(keyedBy: IntraProduct.ImageCodingKeys.self, forKey: .image).decode(String.self, forKey: .url)
+        self.campus_id = try container.decode(Int.self, forKey: .campus_id)
+        self.campus_name = try container.decode(String.self, forKey: .campus_name)
     }
 }
 
@@ -1085,6 +1100,12 @@ final class IntraFeedback: IntraObject {
         let kind: IntraFeedbackDetail.Kind
         let rate: Int
     }
+}
+
+final class IntraFlag: IntraObject {
+    
+    let id: Int
+    let name: String
 }
 
 final class IntraTokenInformation: IntraObject {

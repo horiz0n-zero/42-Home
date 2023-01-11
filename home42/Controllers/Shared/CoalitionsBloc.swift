@@ -172,7 +172,7 @@ final class CoalitionsBlocViewController: HomeViewController, UITableViewDelegat
         guard let cell = tableView.cellForRow(at: indexPath) as? CoalitionTableViewCell, cell.coalition != nil else {
             return
         }
-        let usersList = UsersListViewController(.coalitionsWithCoalitionIdUsers(cell.coalition.id), primary: cell.coalition.uicolor, settings: nil, extra: .coalition(cell.coalition))
+        let usersList = UsersListViewController(.coalitionsWithCoalitionIdUsers(cell.coalition.id), settings: nil, extra: .coalitions(cell.coalition, self.bloc), primary: cell.coalition.uicolor)
         
         self.presentWithBlur(usersList)
     }

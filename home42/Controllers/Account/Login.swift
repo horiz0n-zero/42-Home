@@ -32,6 +32,7 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
     private let loginButton: LoginButton
     
     private let conditionsLabel: BasicUILabel
+    private let sourceCodeLabel: BasicUILabel
     
     required init() {
         self.background = BasicUIImageView(asset: .coalitionDefaultBackground)
@@ -50,9 +51,13 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.loginButton = LoginButton()
         
         self.conditionsLabel = BasicUILabel(attribute: NSAttributedString.init(string: ~"login.cgu", attributes: [
-                                                                                    .underlineStyle: NSUnderlineStyle.single.rawValue,
-                                                                                        .font: HomeLayout.fontThinMedium,
-                                                                                        .foregroundColor: HomeDesign.white]))
+                                                                                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                                                                                .font: HomeLayout.fontThinMedium,
+                                                                                .foregroundColor: HomeDesign.white]))
+        self.sourceCodeLabel = BasicUILabel(attribute: NSAttributedString.init(string: ~"settings.extra.code", attributes: [
+                                                                                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                                                                                .font: HomeLayout.fontThinMedium,
+                                                                                .foregroundColor: HomeDesign.white]))
         super.init()
         self.modalPresentationStyle = .fullScreen
         self.view.addSubview(self.background)
@@ -107,6 +112,9 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.view.addSubview(self.conditionsLabel)
         self.conditionsLabel.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -HomeLayout.margin).isActive = true
         self.conditionsLabel.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor, constant: -HomeLayout.margin).isActive = true
+        self.view.addSubview(self.sourceCodeLabel)
+        self.sourceCodeLabel.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margin).isActive = true
+        self.sourceCodeLabel.bottomAnchor.constraint(equalTo: self.conditionsLabel.bottomAnchor).isActive = true
         
         self.formContainer.isUserInteractionEnabled = true
         self.loginButton.addTarget(self, action: #selector(LoginViewController.loginButtonTapped), for: .touchUpInside)
@@ -114,6 +122,8 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.passwdTextField.delegate = self
         self.conditionsLabel.isUserInteractionEnabled = true
         self.conditionsLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LoginViewController.termButtonTapped(sender:))))
+        self.sourceCodeLabel.isUserInteractionEnabled = true
+        self.sourceCodeLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LoginViewController.sourceCodeTapped(sender:))))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
@@ -127,6 +137,9 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
 
     @objc private func termButtonTapped(sender: UITapGestureRecognizer) {
         self.present(SafariWebView(URL(string: "https://signin.intra.42.fr/legal")!), animated: true, completion: nil)
+    }
+    @objc private func sourceCodeTapped(sender: UITapGestureRecognizer) {
+        DynamicActionsSheet.presentWithWebLink("https://github.com/horiz0n-zero/42-Home", title: ~"github.title", text: ~"github.text", primary: HomeDesign.primary, parentViewController: self)
     }
     
     @frozen private enum State: String {

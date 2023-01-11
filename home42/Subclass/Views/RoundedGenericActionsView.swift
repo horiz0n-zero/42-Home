@@ -108,11 +108,16 @@ class SearchFieldView: RoundedGenericActionsView<BasicUITextField, ActionButtonV
     }
     final unowned(unsafe) var delegate: SearchFieldViewDelegate!
     
-    init(placeholder: String = ~"general.search") {
+    init(placeholder: String = ~"general.search", actions: [ActionButtonView]? = nil) {
         let textField = BasicUITextField()
         let searchAction = ActionButtonView(asset: .actionSearch, color: HomeDesign.primary)
         
-        super.init(textField, initialActions: [searchAction])
+        if actions != nil {
+            super.init(textField, initialActions: [searchAction] + actions!)
+        }
+        else {
+            super.init(textField, initialActions: [searchAction])
+        }
         textField.attributedPlaceholder = .init(string: placeholder, attributes: [.foregroundColor: HomeDesign.gray, .font: HomeLayout.fontRegularMedium])
         textField.delegate = self
         searchAction.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SearchFieldView.searchButtonTapped(sender:))))
@@ -154,6 +159,11 @@ final class SearchFieldViewWithTimer: SearchFieldView {
     
     var timer: Timer! = nil
     
+    override init(placeholder: String = ~"general.search", actions: [ActionButtonView]? = nil) {
+        super.init(placeholder: placeholder, actions: actions)
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         if self.timer != nil {
             self.timer.invalidate()
@@ -189,19 +199,41 @@ protocol SelectorViewSource: RawRepresentable, Equatable {
     static var allValues: [Self] { get }
     static var allKeys: [String] { get }
 }
+protocol SelectorViewAdvancedSelectorCompatible: AnyObject {
+    
+    static var advancedSelectorType: DynamicAlert.AdvancedSelectorViewType { get }
+    var advancedSelectorText: String { get }
+}
+extension IntraTitle: SelectorViewAdvancedSelectorCompatible {
+    static let advancedSelectorType: DynamicAlert.AdvancedSelectorViewType = .title
+    var advancedSelectorText: String { return self.name }
+}
+extension IntraCampus: SelectorViewAdvancedSelectorCompatible {
+    static let advancedSelectorType: DynamicAlert.AdvancedSelectorViewType = .campus
+    var advancedSelectorText: String { return self.name }
+}
+extension IntraLanguage: SelectorViewAdvancedSelectorCompatible {
+    static let advancedSelectorType: DynamicAlert.AdvancedSelectorViewType = .languages
+    var advancedSelectorText: String { return self.name }
+}
+extension IntraGroup: SelectorViewAdvancedSelectorCompatible {
+    static let advancedSelectorType: DynamicAlert.AdvancedSelectorViewType = .group
+    var advancedSelectorText: String { return self.name }
+}
 
 final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButtonView> {
     
     weak var delegate: SelectorViewDelegate!
-    private var selectedIndex: Int
+    private var selectedIndex: Int?
     private let selectNoneString: String?
-    var value: E!
+    private(set) var value: E!
     
     private var keys: [String]
     private var values: [E]
-    
-    init(keys: [String], values: [E], selectedIndex: Int = 0, selectNoneString: String? = nil) {
+        
+    init(keys: [String], values: [E], selectedIndex: Int? = nil, selectNoneString: String? = nil) {
         let selectButton = ActionButtonView(asset: .actionSelect, color: HomeDesign.primary)
+        let removeButton: ActionButtonView!
         let text: String
 
         self.keys = keys
@@ -210,48 +242,96 @@ final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButto
         self.selectNoneString = selectNoneString
         if selectNoneString != nil {
             self.keys.insert(selectNoneString!, at: 0)
-            self.value = selectedIndex == 0 ? nil : values[selectedIndex - 1]
-            text = selectedIndex == 0 ? selectNoneString! : keys[selectedIndex - 1]
+            if selectedIndex != nil {
+                self.value = values[selectedIndex!]
+                text = keys[selectedIndex!]
+            }
+            else {
+                text = selectNoneString!
+            }
         }
         else {
             if keys.count > 0 {
-                self.value = values[selectedIndex]
-                text = keys[selectedIndex]
+                self.value = values[selectedIndex ?? 0]
+                text = keys[selectedIndex ?? 0]
             }
             else {
                 self.value = nil
                 text = "---"
             }
         }
-        super.init(BasicUILabel(text: text), initialActions: [selectButton])
+        if selectNoneString != nil && E.self is any SelectorViewAdvancedSelectorCompatible.Type {
+            removeButton = .init(asset: .actionClose, color: HomeDesign.primary)
+            removeButton.isHidden = selectedIndex == nil
+            super.init(BasicUILabel(text: text), initialActions: [removeButton, selectButton])
+        }
+        else {
+            removeButton = nil
+            super.init(BasicUILabel(text: text), initialActions: [selectButton])
+        }
         self.view.adjustsFontSizeToFitWidth = true
         self.view.textColor = HomeDesign.black
         selectButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SelectorView<E>.selectButtonTapped(sender:))))
+        removeButton?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(SelectorView<E>.closeButtonTapped(sender:))))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-    
+        
     @objc private func selectButtonTapped(sender: UITapGestureRecognizer) {
-        let primary = (self.actionsStack.arrangedSubviews[0] as! ActionButtonView).primary
+        let primary = self.actionViews[0].primary
         
         if self.keys.count == 0 {
             DynamicAlert.init(.withPrimary(~"general.impossible", primary), contents: [.text(~"no-selection-available")], actions: [.normal(~"general.ok", nil)])
         }
-        else {
-            DynamicAlert.init(.noneWithPrimary(primary), contents: [.roulette(self.keys, self.selectedIndex)], actions: [.getRoulette(~"general.select", { index, text in
+        else if E.self is any SelectorViewAdvancedSelectorCompatible.Type {
+            let actions: [DynamicAlert.Action]
+            
+            func selectValue(_ index: Int, _ value: E) {
+                self.value = value
                 self.selectedIndex = index
+                self.view.text = (value as! any SelectorViewAdvancedSelectorCompatible).advancedSelectorText
                 if self.selectNoneString != nil {
-                    self.value = index == 0 ? nil : self.values[index - 1]
+                    self.actionViews[0].isHidden = false
+                }
+                self.delegate?.selectorSelect(self)
+            }
+            
+            if self.selectNoneString == nil {
+                actions = [.getAdvancedSelector(unsafeBitCast(selectValue, to: ((Int, Any) -> ()).self))]
+            }
+            else {
+                actions = [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectValue, to: ((Int, Any) -> ()).self))]
+            }
+            DynamicAlert.init(.noneWithPrimary(primary),
+                              contents: [.advancedSelector((E.self as! any SelectorViewAdvancedSelectorCompatible.Type).advancedSelectorType, self.values, self.selectedIndex ?? 0)],
+                              actions: actions)
+        }
+        else {
+            DynamicAlert.init(.noneWithPrimary(primary), contents: [.roulette(self.keys, self.selectedIndex ?? 0)], actions: [.getRoulette(~"general.select", { index, text in
+                if self.selectNoneString != nil && index == 0 {
+                    self.value = nil
+                    self.selectedIndex = nil
+                    self.view.text = self.selectNoneString
+                    self.delegate?.selectorSelect(self)
                 }
                 else {
-                    self.value = self.values[index]
+                    self.selectedIndex = index
+                    self.value = self.values[self.selectNoneString == nil ? index : index - 1]
+                    self.view.text = text
+                    self.delegate?.selectorSelect(self)
                 }
-                self.view.text = text
-                self.delegate.selectorSelect(self)
             })])
         }
     }
     
-    func update(keys: [String], values: [E], selectedIndex: Int = 0) {
+    @objc private func closeButtonTapped(sender: UITapGestureRecognizer) {
+        self.value = nil
+        self.selectedIndex = nil
+        self.view.text = self.selectNoneString
+        sender.view!.isHidden = true
+        self.delegate?.selectorSelect(self)
+    }
+    
+    func update(keys: [String], values: [E], selectedIndex: Int? = nil) {
         let text: String
         
         self.keys = keys
@@ -259,13 +339,22 @@ final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButto
         self.selectedIndex = selectedIndex
         if selectNoneString != nil {
             self.keys.insert(selectNoneString!, at: 0)
-            self.value = selectedIndex == 0 ? nil : values[selectedIndex - 1]
-            text = selectedIndex == 0 ? selectNoneString! : keys[selectedIndex - 1]
+            if selectedIndex != nil {
+                self.value = values[selectedIndex!]
+                text = keys[selectedIndex! - 1]
+            }
+            else {
+                self.value = nil
+                text = selectNoneString!
+            }
+            if E.self is any SelectorViewAdvancedSelectorCompatible.Type {
+                self.actionViews[0].isHidden = self.selectedIndex != nil
+            }
         }
         else {
             if keys.count > 0 {
-                self.value = values[selectedIndex]
-                text = keys[selectedIndex]
+                self.value = values[selectedIndex ?? 0]
+                text = keys[selectedIndex ?? 0]
             }
             else {
                 self.value = nil
@@ -492,5 +581,68 @@ final class UserSearchFieldView: RoundedGenericActionsView<UserSearchFieldView.U
                 self.icon.reset()
             }
         }
+    }
+}
+
+protocol DateSelectorViewDelegate: AnyObject {
+    
+    func dateSelectorViewSelect(_ date: Date!)
+}
+
+final class DateSelectorView: RoundedGenericActionsView<BasicUILabel, ActionButtonView> {
+    
+    static private let emptyDateString: String = "--/--/--"
+ 
+    private let closeAction: ActionButtonView!
+    private let dateAction: ActionButtonView
+    
+    var date: Date! {
+        didSet {
+            self.view.text = self.date?.toString(.dateSelectorWithSlashs) ?? Self.emptyDateString
+            self.closeAction?.isHidden = date == nil
+        }
+    }
+    weak var delegate: DateSelectorViewDelegate? = nil
+    
+    init(date: Date!, canBeNull: Bool, primary: UIColor = HomeDesign.primary) {
+        self.dateAction = .init(asset: .actionCalendar, color: primary)
+        self.date = date
+        if canBeNull {
+            self.closeAction = .init(asset: .actionClose, color: primary)
+            self.closeAction.isHidden = date == nil
+            super.init(BasicUILabel(text: date?.toString(.dateSelectorWithSlashs) ?? Self.emptyDateString), initialActions: [closeAction, dateAction], primary: primary)
+        }
+        else {
+            self.closeAction = nil
+            super.init(BasicUILabel(text: date.toString(.dateSelectorWithSlashs)), initialActions: [dateAction], primary: primary)
+        }
+        self.view.textColor = HomeDesign.black
+        if canBeNull {
+            self.closeAction.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(DateSelectorView.closeActionTapped)))
+        }
+        self.dateAction.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(DateSelectorView.dateActionTapped)))
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    @objc private func closeActionTapped() {
+        self.date = nil
+        self.view.text = Self.emptyDateString
+        self.closeAction.isHidden = true
+        self.delegate?.dateSelectorViewSelect(nil)
+    }
+    
+    private func dateSelected(_ date: Date) {
+        print(#function, date.toString(.comprehensive))
+        self.date = date
+        self.view.text = date.toString(.dateSelectorWithSlashs)
+        self.delegate?.dateSelectorViewSelect(date)
+    }
+    
+    @objc private func dateActionTapped() {
+        DynamicAlert(.none, contents: [.dateSelector(self.date ?? Date())], actions: [.normal(~"general.cancel", nil), .dateSelector(self.dateSelected(_:))])
+    }
+    
+    override func setPrimary(_ color: UIColor) {
+        super.setPrimary(color)
     }
 }

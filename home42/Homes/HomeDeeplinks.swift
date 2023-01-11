@@ -23,26 +23,26 @@ final class HomeDeeplinks: NSObject {
     @frozen enum Path: String {
         case unlock
         case events
+        case databaseRemove
     }
     
     @frozen enum Parameter: String {
         case controller
         case data
         case id
+        case key
     }
     
     static private let descriptions: [HomeDeeplinks.Path: [DeeplinkDescription]] = [
         .unlock: [
-            .init([.init(.controller, .string, constraint: .string(CorrectionsViewController.id)),
-                   .init(.data, .string)],
-                  endpoint: #selector(MainViewController.deeplinkCorrectionsQRCode)),
-            .init([.init(.controller, .string, constraint: .string(TrackerViewController.id)),
-                   .init(.data, .string)],
-                  endpoint: #selector(MainViewController.deeplinkTrackerQRCode))
+            .init([.init(.controller, .string, constraint: .string(CorrectionsViewController.id)), .init(.data, .string)], endpoint: #selector(MainViewController.deeplinkCorrectionsQRCode)),
+            .init([.init(.controller, .string, constraint: .string(TrackerViewController.id)), .init(.data, .string)], endpoint: #selector(MainViewController.deeplinkTrackerQRCode))
         ],
         .events: [
-            .init([.init(.id, .int, constraint: .required)],
-                  endpoint: #selector(MainViewController.deeplinkEvents))
+            .init([.init(.id, .int, constraint: .required)], endpoint: #selector(MainViewController.deeplinkEvents))
+        ],
+        .databaseRemove: [
+            .init([.init(.key, .string, constraint: .required)], endpoint: #selector(MainViewController.deeplinkDatabaseRemove))
         ]
     ]
     private struct DeeplinkDescription {

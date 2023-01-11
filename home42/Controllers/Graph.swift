@@ -593,7 +593,7 @@ private extension HolyGraphView {
         }
         
         @objc private func seePeopleButtonTapped(sender: UITapGestureRecognizer) {
-            let userList = UsersListViewController(.projectsWithProjectIdUsers(self.intraNetProject.projectId), primary: self.primary, extra: .project(self.intraNetProject.projectId))
+            let userList = UsersListViewController(.projectsWithProjectIdUsers(self.intraNetProject.projectId), extra: .project(self.intraNetProject.projectId), primary: self.primary)
             
             self.parentHomeViewController?.presentWithBlur(userList)
         }
@@ -690,7 +690,7 @@ private extension HolyGraphView {
                     self.layer.borderWidth = HomeLayout.borders
                     self.layer.borderColor = HomeDesign.blackGray.cgColor
                     self.nameLabel.textColor = HomeDesign.lightGray
-                case .available:
+                case .available, .notRecommended:
                     self.backgroundColor = HomeDesign.black
                     self.layer.borderWidth = HomeLayout.borders
                     self.layer.borderColor = HomeDesign.blackGray.cgColor
@@ -719,7 +719,7 @@ private extension HolyGraphView {
                     self.layer.borderWidth = HomeLayout.borders
                     self.layer.borderColor = HomeDesign.lightGray.cgColor
                     self.nameLabel.textColor = HomeDesign.white
-                case .available:
+                case .available, .notRecommended:
                     self.backgroundColor = HomeDesign.gray
                     self.layer.borderWidth = HomeLayout.borders
                     self.layer.borderColor = HomeDesign.lightGray.cgColor

@@ -264,6 +264,10 @@ const datas = [
    {
        'login': 'dangonza',
        'groups': [home42Contributor, home42Spellchecker]
+   },
+   {
+       'login': "mgraf',
+       'groups': [home42Contributor, home42Spellchecker]
    }
 ];
 

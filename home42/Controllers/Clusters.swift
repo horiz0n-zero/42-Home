@@ -925,16 +925,17 @@ extension ClustersView {
         private let hostLabel: BasicUILabel
         let closeButton: ActionButtonView
         private let tableView: GenericSingleInfiniteRequestTableView<UserLocationLogTableViewCell, IntraClusterLocation>
+        static private var primary: UIColor!
         
-        init(host: String, title: String, user: IntraUserInfo?, campus: IntraUserCampus) {
+        init(host: String, title: String, user: IntraUserInfo?, campus: IntraUserCampus, primary: UIColor) {
             self.hostLabel = BasicUILabel(text: title)
             self.hostLabel.font = HomeLayout.fontSemiBoldTitle
             self.hostLabel.textColor = HomeDesign.white
             self.hostLabel.adjustsFontSizeToFitWidth = true
             self.closeButton = ActionButtonView(asset: .actionClose, color: HomeDesign.actionRed)
-            self.tableView = .init(.campusWithCampusIdLocations(campus.campus_id),
-                                   parameters: ["filter[host]": host, "sort": "-begin_at"])
+            self.tableView = .init(.campusWithCampusIdLocations(campus.campus_id), parameters: ["filter[host]": host, "sort": "-begin_at"])
             self.tableView.backgroundColor = UIColor.clear
+            Self.primary = primary
             super.init()
             self.tableView.block = self.selectLocation
             self.tableView.nextPage()
@@ -945,19 +946,14 @@ extension ClustersView {
             guard newSuperview != nil else { return }
             
             self.contentView.addSubview(self.closeButton)
-            self.closeButton.topAnchor.constraint(equalTo: self.contentView.topAnchor,
-                                                  constant: HomeLayout.margin).isActive = true
-            self.closeButton.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor,
-                                                       constant: -HomeLayout.margin).isActive = true
+            self.closeButton.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: HomeLayout.margin).isActive = true
+            self.closeButton.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -HomeLayout.margin).isActive = true
             self.contentView.addSubview(self.hostLabel)
             self.hostLabel.centerYAnchor.constraint(equalTo: self.closeButton.centerYAnchor).isActive = true
-            self.hostLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor,
-                                                    constant: HomeLayout.margin).isActive = true
-            self.hostLabel.trailingAnchor.constraint(equalTo: self.closeButton.leadingAnchor,
-                                                     constant: -HomeLayout.margin).isActive = true
+            self.hostLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: HomeLayout.margin).isActive = true
+            self.hostLabel.trailingAnchor.constraint(equalTo: self.closeButton.leadingAnchor, constant: -HomeLayout.margin).isActive = true
             self.contentView.addSubview(self.tableView)
-            self.tableView.topAnchor.constraint(equalTo: self.closeButton.bottomAnchor,
-                                                constant: HomeLayout.margin).isActive = true
+            self.tableView.topAnchor.constraint(equalTo: self.closeButton.bottomAnchor, constant: HomeLayout.margin).isActive = true
             self.tableView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor).isActive = true
             self.tableView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor).isActive = true
             self.tableView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor).isActive = true
@@ -1006,26 +1002,18 @@ extension ClustersView {
                     return
                 }
                 self.contentView.addSubview(self.container)
-                self.container.topAnchor.constraint(equalTo: self.contentView.topAnchor,
-                                                    constant: HomeLayout.smargin).isActive = true
-                self.container.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor,
-                                                        constant: HomeLayout.margin).isActive = true
-                self.container.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor,
-                                                         constant: -HomeLayout.margin).isActive = true
-                self.container.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor,
-                                                       constant: -HomeLayout.smargin).isActive = true
+                self.container.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: HomeLayout.smargin).isActive = true
+                self.container.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: HomeLayout.margin).isActive = true
+                self.container.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -HomeLayout.margin).isActive = true
+                self.container.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -HomeLayout.smargin).isActive = true
                 self.container.addSubview(self.userIcon)
                 self.userIcon.setSize(HomeLayout.userProfilIconHistoricHeigth, HomeLayout.userProfilIconHistoricRadius)
-                self.userIcon.leadingAnchor.constraint(equalTo: self.container.leadingAnchor,
-                                                       constant: HomeLayout.margin).isActive = true
-                self.userIcon.topAnchor.constraint(equalTo: self.container.topAnchor,
-                                                   constant: HomeLayout.margin).isActive = true
+                self.userIcon.leadingAnchor.constraint(equalTo: self.container.leadingAnchor, constant: HomeLayout.margin).isActive = true
+                self.userIcon.topAnchor.constraint(equalTo: self.container.topAnchor, constant: HomeLayout.margin).isActive = true
                 self.container.addSubview(self.userLogin)
-                self.userLogin.leadingAnchor.constraint(equalTo: self.userIcon.trailingAnchor,
-                                                        constant: HomeLayout.smargin).isActive = true
+                self.userLogin.leadingAnchor.constraint(equalTo: self.userIcon.trailingAnchor, constant: HomeLayout.smargin).isActive = true
                 self.userLogin.centerYAnchor.constraint(equalTo: self.userIcon.centerYAnchor).isActive = true
-                self.userLogin.trailingAnchor.constraint(equalTo: self.container.trailingAnchor,
-                                                         constant: -HomeLayout.margin).isActive = true
+                self.userLogin.trailingAnchor.constraint(equalTo: self.container.trailingAnchor, constant: -HomeLayout.margin).isActive = true
                 self.container.addSubview(self.logView)
                 self.logView.topAnchor.constraint(equalTo: self.userIcon.bottomAnchor).isActive = true
                 self.logView.leadingAnchor.constraint(equalTo: self.container.leadingAnchor).isActive = true
@@ -1036,7 +1024,7 @@ extension ClustersView {
             func fill(with element: IntraClusterLocation) {
                 self.userIcon.update(with: element.user)
                 self.userLogin.text = element.user.login
-                self.logView.update(with: element)
+                self.logView.update(with: element, primary: HistoricView.primary, hideHost: true)
             }
         }
     }
@@ -1056,7 +1044,7 @@ extension ClustersView {
     
     private func addHistoricView(_ host: String, title: String, user: IntraUserInfo?, campus: IntraUserCampus) {
         guard self.historicView == nil else { return }
-        let view = HistoricView(host: host, title: title, user: user, campus: campus)
+        let view = HistoricView(host: host, title: title, user: user, campus: campus, primary: self.primary)
         
         self.searchField.isUserInteractionEnabled = false
         self.addSubview(view)

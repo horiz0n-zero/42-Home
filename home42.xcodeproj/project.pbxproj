@@ -36,6 +36,10 @@
 		6034C5362624D756003D8B90 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6034C5352624D756003D8B90 /* main.swift */; };
 		6034C5392624D7F4003D8B90 /* Main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6034C5382624D7F4003D8B90 /* Main.swift */; };
 		6034C53D2624DD12003D8B90 /* DynamicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6034C53C2624DD12003D8B90 /* DynamicController.swift */; };
+		6040BCFA295EF49F00A29D90 /* AchievementsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6040BCF9295EF49F00A29D90 /* AchievementsList.swift */; };
+		6040BCFC2961838400A29D90 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6040BCFB2961838400A29D90 /* CalendarView.swift */; };
+		604CFE792954E56D00BFE28A /* AdjustableParametersProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604CFE782954E56D00BFE28A /* AdjustableParametersProvider.swift */; };
+		604CFE7B295AE02700BFE28A /* EventsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604CFE7A295AE02700BFE28A /* EventsList.swift */; };
 		6058FF64275262D000708B43 /* ProjectList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6058FF63275262D000708B43 /* ProjectList.swift */; };
 		6058FF662752725700708B43 /* CoalitionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6058FF652752725700708B43 /* CoalitionsList.swift */; };
 		605E3052262A093D006B0637 /* Clusters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605E3051262A093D006B0637 /* Clusters.swift */; };
@@ -167,6 +171,10 @@
 		6034C5352624D756003D8B90 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		6034C5382624D7F4003D8B90 /* Main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Main.swift; sourceTree = "<group>"; };
 		6034C53C2624DD12003D8B90 /* DynamicController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicController.swift; sourceTree = "<group>"; };
+		6040BCF9295EF49F00A29D90 /* AchievementsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsList.swift; sourceTree = "<group>"; };
+		6040BCFB2961838400A29D90 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		604CFE782954E56D00BFE28A /* AdjustableParametersProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdjustableParametersProvider.swift; sourceTree = "<group>"; };
+		604CFE7A295AE02700BFE28A /* EventsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsList.swift; sourceTree = "<group>"; };
 		6058FF63275262D000708B43 /* ProjectList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectList.swift; sourceTree = "<group>"; };
 		6058FF652752725700708B43 /* CoalitionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoalitionsList.swift; sourceTree = "<group>"; };
 		605E3051262A093D006B0637 /* Clusters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clusters.swift; sourceTree = "<group>"; };
@@ -361,6 +369,7 @@
 				60830FA627A6C745006989A6 /* StarsView.swift */,
 				60C5269028C67FCE00B8C104 /* MaskView.swift */,
 				6069949728CA307E0080DBFB /* LogView.swift */,
+				6040BCFB2961838400A29D90 /* CalendarView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -370,6 +379,8 @@
 			children = (
 				605E30A52631C8E2006B0637 /* CoalitionsBloc.swift */,
 				605E30B72632AA1C006B0637 /* UsersList.swift */,
+				604CFE7A295AE02700BFE28A /* EventsList.swift */,
+				6040BCF9295EF49F00A29D90 /* AchievementsList.swift */,
 				605E30C0263329A2006B0637 /* UserProject.swift */,
 				60FFE88127396D970005F7AD /* UserEventsHistoric.swift */,
 				6068688B278AEF2C00DA1C5E /* EventFeedbacksHistoric.swift */,
@@ -380,6 +391,7 @@
 				6058FF63275262D000708B43 /* ProjectList.swift */,
 				6058FF652752725700708B43 /* CoalitionsList.swift */,
 				60830FA227A040FB006989A6 /* ContributorsList.swift */,
+				604CFE782954E56D00BFE28A /* AdjustableParametersProvider.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -710,7 +722,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/home42\"\nrm -rf res/json/*.json\nnode \"$SRCROOT/home42/Extra/JSONResources.js\"\n#cp $SRCROOT/home42/res/json/*.json \"$BUILT_PRODUCTS_DIR/home42.app/res/json/\"\n";
+			shellScript = "cd \"$SRCROOT/home42\"\nnode \"$SRCROOT/home42/Extra/JSONResources.js\"\n#cp $SRCROOT/home42/res/json/*.json \"$BUILT_PRODUCTS_DIR/home42.app/res/json/\"\n";
 		};
 		60C5269628C7AF2500B8C104 /* Update res/guides */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -774,6 +786,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6040BCFA295EF49F00A29D90 /* AchievementsList.swift in Sources */,
 				605E306E262C3384006B0637 /* Events.swift in Sources */,
 				6033E0CA2698355A00BD2F8C /* HomeGuides.swift in Sources */,
 				607AC11927DA398C00E7F25F /* HomeQRCode.swift in Sources */,
@@ -787,6 +800,7 @@
 				60F9C18927AE728700F42353 /* HomeCable.swift in Sources */,
 				606C3C8526288BFC00A5E652 /* UITextView.swift in Sources */,
 				60B5D0B327F0C4660001B976 /* IntraNetObjects.swift in Sources */,
+				604CFE792954E56D00BFE28A /* AdjustableParametersProvider.swift in Sources */,
 				602EC876272C2A8700636323 /* SeeCache.swift in Sources */,
 				60FFE88027390DBC0005F7AD /* UIPageControl.swift in Sources */,
 				605E306B262C3230006B0637 /* HomeTelephony.swift in Sources */,
@@ -822,6 +836,7 @@
 				60A22F5C26D2348000D2869B /* LevelBar.swift in Sources */,
 				605E30A62631C8E2006B0637 /* CoalitionsBloc.swift in Sources */,
 				606A223E285C6D8000E4AED8 /* InfiniteTableView.swift in Sources */,
+				6040BCFC2961838400A29D90 /* CalendarView.swift in Sources */,
 				60FFE88227396D970005F7AD /* UserEventsHistoric.swift in Sources */,
 				6058FF662752725700708B43 /* CoalitionsList.swift in Sources */,
 				6099CBD52646B856003DA85F /* UICollectionView.swift in Sources */,
@@ -833,6 +848,7 @@
 				605E3086262C8FE0006B0637 /* Settings.swift in Sources */,
 				609CD7CC2658391E00BCB91B /* CGPoint.swift in Sources */,
 				6096A6C0263DBA8400597F34 /* UserCorrectionsLogs.swift in Sources */,
+				604CFE7B295AE02700BFE28A /* EventsList.swift in Sources */,
 				6034C51D26247010003D8B90 /* UIStackView.swift in Sources */,
 				605E3055262A0A5F006B0637 /* UserProfilIconView.swift in Sources */,
 				6069949828CA307E0080DBFB /* LogView.swift in Sources */,
@@ -1013,7 +1029,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = home42/home42.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 76BYA9T7S3;
 				GCC_PREPROCESSOR_DEFINITIONS = "$(inherited)";
 				INFOPLIST_FILE = home42/Info.plist;
@@ -1024,7 +1040,7 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZED_STRING_SWIFTUI_SUPPORT = NO;
-				MARKETING_VERSION = 1.0.6;
+				MARKETING_VERSION = 1.0.7;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.horiz0n-zero.home42";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1046,7 +1062,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = home42/home42.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 76BYA9T7S3;
 				GCC_OPTIMIZATION_LEVEL = "-Os -whole-module-optimization";
 				INFOPLIST_FILE = home42/Info.plist;
@@ -1057,7 +1073,7 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZED_STRING_SWIFTUI_SUPPORT = NO;
-				MARKETING_VERSION = 1.0.6;
+				MARKETING_VERSION = 1.0.7;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.horiz0n-zero.home42";
 				PRODUCT_NAME = "$(TARGET_NAME)";

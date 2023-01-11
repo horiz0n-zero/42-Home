@@ -17,15 +17,25 @@ import Foundation
 import UIKit
 import AVKit
 
-final class ElearningViewController: HomeViewController, SearchFieldViewDelegate, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate {
+final class ElearningViewController: HomeViewController, SearchFieldViewDelegate, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate, AdjustableParametersProviderDelegate {
     
     private let scrollView: BasicUIScrollView
     private let pageControl: BasicUIPageControl
     
     private let notionView: BasicUIView
     private let searchField: SearchFieldViewWithTimer
-    private let notionTableView: GenericSingleInfiniteRequestTableView<NotionTableViewCell, IntraNotion>
+    private let settingsAction: ActionButtonView
+    private var settings: AdjustableParametersProviderViewController<ElearningViewController>!
     
+    static let defaultParameters: [String : Any] = [:]
+    static let searchParameter: AdjustableParametersProviderViewController<ElearningViewController>.SearchParameter? = .init(title: "", keys: [.searchName], keysName: [""], textGetter: \.searchField.text)
+    static let parameters: [AdjustableParametersProviderViewController<ElearningViewController>.Parameter] = [
+        .init(key: .sort, source: .notionSort, selectorType: .stringAscDesc(.asc), selectorTitleKey: "field.sort-message", selectorInlineWithNextElement: false, selectorCanSelectNULL: false),
+        .init(key: .filterCreatedAt, source: .calendar, selectorType: .date, selectorTitleKey: "sort.created-at", selectorInlineWithNextElement: false, selectorCanSelectNULL: true),
+        .init(key: .filterUpdatedAt, source: .calendar, selectorType: .date, selectorTitleKey: "sort.updated-at", selectorInlineWithNextElement: false, selectorCanSelectNULL: true)
+    ]
+    
+    private let notionTableView: GenericSingleInfiniteRequestTableView<NotionTableViewCell, IntraNotion>
     private let subnotionView: BasicUIView
     private let subnotionTableView: BasicUITableView
     private var subnotions: ContiguousArray<IntraSubnotion>! = nil
@@ -33,6 +43,7 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
     private var attachments: Array<IntraAttachment>! = nil
     
     private let cache: CachingInterface
+    let primary: UIColor = HomeDesign.primary
     
     required init() {
         self.scrollView = BasicUIScrollView()
@@ -45,7 +56,8 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
         self.pageControl.currentPage = 0
         self.pageControl.isUserInteractionEnabled = false
         self.notionView = BasicUIView()
-        self.searchField = SearchFieldViewWithTimer()
+        self.settingsAction = .init(asset: .actionSettings, color: HomeDesign.primary)
+        self.searchField = SearchFieldViewWithTimer(actions: [self.settingsAction])
         if App.userCursus != nil {
             self.notionTableView = .init(.cursusWithCursusIdNotions(App.userCursus.cursus_id), parameters: ["sort": "updated_at"])
         }
@@ -62,7 +74,12 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
         self.subnotionTableView.contentInsetAdjustTopConstant(HomeLayout.safeAeraMain.top + HomeLayout.smargin, bottom: HomeLayout.safeAera.bottom + 40.0)
         self.cache = CachingInterface()
         super.init()
-        
+        if App.userCursus != nil && App.user.cursus_users.count > 0 {
+            self.settings = .init(delegate: self, defaultParameters: [.sort: "updated_at"], extra: .notionCursus)
+        }
+        else {
+            self.settings = .init(delegate: self, defaultParameters: [.sort: "updated_at"])
+        }
         self.view.addSubview(self.scrollView)
         self.scrollView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
         self.scrollView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
@@ -95,7 +112,7 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
         self.notionTableView.block = self.notionSelected(_:)
         self.notionTableView.backgroundColor = .clear
         Task(priority: .userInitiated, operation: {
-            await self.notionTableView.nextPage()
+            self.notionTableView.nextPage()
         })
         
         self.scrollView.addSubview(self.subnotionView)
@@ -113,6 +130,7 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
         self.subnotionTableView.trailingAnchor.constraint(equalTo: self.subnotionView.trailingAnchor, constant: -(HomeLayout.safeAeraMain.left + HomeLayout.margin)).isActive = true
         self.subnotionTableView.topAnchor.constraint(equalTo: self.subnotionView.topAnchor).isActive = true
         self.subnotionTableView.bottomAnchor.constraint(equalTo: self.subnotionView.bottomAnchor).isActive = true
+        self.settingsAction.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(ElearningViewController.showSettings(sender:))))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
@@ -137,14 +155,16 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
         self.pageControl.currentPage = index
     }
     
+    func adjustableParametersProviderParametersUpdated(_ newParameters: [String : Any]) {
+        self.notionTableView.restart(with: newParameters)
+    }
+    
+    func adjustableParametersProviderExtraValueSelected(_ newTitle: String, newRoute: HomeApi.Routes) {
+        self.notionTableView.route = newRoute
+    }
+    
     func searchFieldTextUpdated(_ searchField: SearchFieldView) {
-        if searchField.text.count > 0 {
-            self.notionTableView.restart(with: ["search[name]": searchField.text, "sort": "updated_at"])
-        }
-        else {
-            self.notionTableView.restart(with: ["sort": "updated_at"])
-        }
-        print(#function, searchField.text)
+        self.notionTableView.restart(with: self.settings.parameters)
     }
     func searchFieldBeginEditing(_ searchField: SearchFieldView) { }
     func searchFieldEndEditing(_ searchField: SearchFieldView) { }
@@ -544,8 +564,7 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
             let video = self.attachments[indexPath.row] as! IntraVideoAttachment
             let source = video.videoUrl.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!
             guard let url = URL(string: source) else {
-                DynamicAlert(contents: [.title(~"elearning.incorrect-link"), .text(source)],
-                             actions: [.normal(~"general.ok", nil)])
+                DynamicAlert(contents: [.title(~"elearning.incorrect-link"), .text(source)], actions: [.normal(~"general.ok", nil)])
                 return
             }
             let player = AVPlayer(url: url)
@@ -553,6 +572,8 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
             
             playerViewController.player = player
             playerViewController.allowsPictureInPicturePlayback = true
+            try? AVAudioSession.sharedInstance().setCategory(.playback)
+            try? AVAudioSession.sharedInstance().setActive(true)
             self.present(playerViewController, animated: true) {
                 player.play()
             }
@@ -561,5 +582,12 @@ final class ElearningViewController: HomeViewController, SearchFieldViewDelegate
         if indexPath.section != 0 && self.attachments[indexPath.row].type == .video {
             playVideo()
         }
+    }
+    
+    static let canExport: Bool = false
+    func adjustableParametersProviderWillExport() -> String { return "" }
+    
+    @objc private func showSettings(sender: UITapGestureRecognizer) {
+        self.presentWithBlur(self.settings)
     }
 }

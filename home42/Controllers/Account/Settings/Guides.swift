@@ -84,6 +84,7 @@ final class GuidesViewController: HomeViewController, UITableViewDataSource, UIT
             self.subtitle = BasicUILabel(text: "")
             self.subtitle.font = HomeLayout.fontRegularMedium
             self.subtitle.numberOfLines = 0
+            self.subtitle.textColor = HomeDesign.black
             self.version = CoalitionMaskView(EventPeopleCurvedView(text: "?.?.?",
                                                                    primaryColor: HomeDesign.primary,
                                                                    secondaryColor: HomeDesign.primary))

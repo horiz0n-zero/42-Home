@@ -209,7 +209,7 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
             Section.RowBoolean.init("settings.desc.show.events", keypath: \.profilShowEvents),
             Section.RowBoolean.init("settings.desc.show.corrections", keypath: \.profilShowCorrections),
             Section.RowIntegerCounter.init("settings.desc.corrections-count", keypath: \.profilCorrectionsCount, min: 1, max: 8, step: 1),
-            // Section.RowBoolean.init("settings.desc.show.logs", keypath: \.profilShowLogs),
+            Section.RowBoolean.init("settings.desc.show.logs", keypath: \.profilShowLogs),
             Section.RowBoolean.init("settings.desc.show.partnership", keypath: \.profilShowPartnerships)
         ]),
         .init("title.clusters", .controllerClusters, rows: [
@@ -231,6 +231,7 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
             Section.RowBoolean.init("settings.desc.cluster.show", keypath: \.trackerShowLocationHistoric),
             Section.RowSelectorEnum.init("settings.desc.peoples.sort", keypath: \.peopleListViewControllerSort),
             Section.RowBoolean.init("settings.desc.peoples.warn", keypath: \.peopleWarnWhenRemove),
+            Section.RowBoolean.init("settings.desc.logs", keypath: \.trackerShowLocationOnLogCell),
             Section.RowBoolean.init("settings.desc.peoples.e1.active", keypath: \.peopleExtraList1Available),
             Section.RowCustomizePeople.init("settings.desc.peoples.e1.icon", keypath: \.peopleExtraList1Icon, assets: People.assets, colorKeyPath: \.peopleExtraList1Color, namePath: \.peopleExtraList1Name),
             Section.RowBoolean.init("settings.desc.peoples.e2.active", keypath: \.peopleExtraList2Available),
@@ -475,7 +476,7 @@ extension SettingsViewController {
                 let languages = HomeApiResources.languages.filter({ HomeWords.exist($0) }).sorted(by: { $0.name < $1.name })
                 let index = languages.firstIndex(where: { $0.id == App.userLanguage.id }) ?? 0
                 
-                func selectLanguage(language: IntraLanguage) {
+                func selectLanguage(_ index: Int, _ language: IntraLanguage) {
                     HomeDefaults.save(language, forKey: .language)
                     HomeWords.configure(language)
                     self.parentHomeViewController?.dismissToRootController(animated: true) {
@@ -484,7 +485,7 @@ extension SettingsViewController {
                 }
                 
                 DynamicAlert.init(contents: [.advancedSelector(.languages, languages, index)],
-                                  actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectLanguage(language:), to: ((Any) -> Void).self))])
+                                  actions: [.normal(~"general.cancel", nil), .getAdvancedSelector(unsafeBitCast(selectLanguage, to: ((Int, Any) -> Void).self))])
             }
             
             static func defaultView() -> Self {

@@ -69,22 +69,24 @@ final class DynamicAlert: DynamicController {
         case colorPicker(UIColor, UnsafeMutablePointer<UIColor>)
         case usersSelector(IntraUserInfo?, (IntraUserInfo) -> ())
         case textEditor(String)
+        case dateSelector(Date)
     }
     @frozen enum Action {
         case normal(String, (() -> ())? = nil)
         case highligth(String, (() -> ())? = nil)
         case getRoulette(String, (Int, String) -> ())
-        case getAdvancedSelector((Any) -> ())
+        case getAdvancedSelector((Int, Any) -> ())
         case getIcon(String, (Int, UIImage.Assets) -> ())
         case getCode((Int) -> ())
         case apiErrorJSON(Data, HomeApi.RequestError)
         
         case slotInterval((Date, Date) -> ())
         case textEditor((String) -> ())
+        case dateSelector((Date) -> ())
         
         var isHighligth: Bool {
             switch self {
-            case .highligth(_, _), .getCode(_), .getRoulette(_, _), .apiErrorJSON, .slotInterval(_), .getIcon(_, _), .textEditor(_), .getAdvancedSelector(_):
+            case .highligth(_, _), .getCode(_), .getRoulette(_, _), .apiErrorJSON, .slotInterval(_), .getIcon(_, _), .textEditor(_), .getAdvancedSelector(_), .dateSelector(_):
                 return true
             default:
                 return false
@@ -94,7 +96,7 @@ final class DynamicAlert: DynamicController {
             switch self {
             case .normal(let txt, _), .highligth(let txt, _), .getRoulette(let txt, _), .getIcon(let txt, _):
                 return txt
-            case .slotInterval(_), .textEditor(_), .getAdvancedSelector(_), .getCode(_):
+            case .slotInterval(_), .textEditor(_), .getAdvancedSelector(_), .getCode(_), .dateSelector(_):
                 return ~"general.select"
             case .apiErrorJSON:
                 return "JSON"
@@ -230,6 +232,7 @@ final class DynamicAlert: DynamicController {
                 switch error.status {
                 case .internal, .flowError(_):
                     title.text = error.description
+                    title.textColor = HomeDesign.black
                 case .code(let code):
                     let s1 = "\(code) "
                     let a1: [NSAttributedString.Key : Any]
@@ -338,6 +341,15 @@ final class DynamicAlert: DynamicController {
                 textEditor.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
                 topAnchor = textEditor.bottomAnchor
                 useKeyboard = true
+            case .dateSelector(let date):
+                let dateView = DateSelector(date: date, primary: primaryColor)
+                
+                DynamicAlert.dateSelector = dateView
+                contentView.addSubview(dateView)
+                dateView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: HomeLayout.margin).isActive = true
+                dateView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
+                dateView.topAnchor.constraint(equalTo: topAnchor, constant: HomeLayout.margins).isActive = true
+                topAnchor = dateView.bottomAnchor
             }
         }
         if actions.count > 0 {
@@ -434,7 +446,7 @@ final class DynamicAlert: DynamicController {
         case .getCode(let block):
             block(DynamicAlert.codeView.value)
         case .getAdvancedSelector(let block):
-            block(DynamicAlert.advancedSelectorType.value())
+            block(DynamicAlert.advancedSelectorType.index(), DynamicAlert.advancedSelectorType.value())
         case .getRoulette(_, let block):
             block(DynamicAlert.rouletteView.index, DynamicAlert.rouletteView.value)
         case .getIcon(_, let block):
@@ -445,6 +457,8 @@ final class DynamicAlert: DynamicController {
             WebViewDataContainerDecoder(data: data, error: error)
         case .textEditor(let block):
             block(DynamicAlert.textEditor.view.text ?? DynamicAlert.textEditor.defaultText)
+        case .dateSelector(let block):
+            block(DynamicAlert.dateSelector.date)
         }
         self.remove()
     }
@@ -489,7 +503,7 @@ final class DynamicAlert: DynamicController {
         }, completion: super.remove(isFinish:))
     }
     
-    @MainActor @inlinable static func presentWith(error: HomeApi.RequestError) {
+    @MainActor @inlinable static func presentWith(error: HomeApi.RequestError) { // if application is inactive return
         let actions: [DynamicAlert.Action]
         
         if let data = error.data {
@@ -501,14 +515,13 @@ final class DynamicAlert: DynamicController {
         _ = DynamicAlert.init(contents: [.apiError(error)], actions: actions)
     }
     @MainActor @inlinable static func presentWith(error: Error) {
-        if error.localizedDescription.count == 0 {
+        if error.localizedDescription.count == 0 { // if application is inactive return
             #if DEBUG
             print(#function, error)
             #endif
             return
         }
-        _ = DynamicAlert.init(contents: [.text(error.localizedDescription)],
-                              actions: [.normal(~"general.ok", nil)])
+        _ = DynamicAlert.init(contents: [.text(error.localizedDescription)], actions: [.normal(~"general.ok", nil)])
     }
     
     @inlinable static func presentInformation(_ asset: UIImage.Assets, title: String, description: String) {
@@ -733,6 +746,22 @@ extension DynamicAlert {
                 return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewCampus>).selection
             case .clusters:
                 return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewClusters>).selection
+            }
+        }
+        func index() -> Int {
+            switch self {
+            case .string:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<String, AdvancedSelectorViewString>).index
+            case .title:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraTitle, AdvancedSelectorViewTitle>).index
+            case .group:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraGroup, AdvancedSelectorViewGroup>).index
+            case .languages:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraLanguage, AdvancedSelectorViewLanguage>).index
+            case .campus:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewCampus>).index
+            case .clusters:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewClusters>).index
             }
         }
     }
@@ -1038,11 +1067,14 @@ extension DynamicAlert {
         private let gradientTop: GradientView
         private let gradientBottom: GradientView
         
-        private unowned(unsafe) let primary: UIColor
+        private let primary: UIColor
         private let source: [G]
         private var currentSource: [G]
         private var selectionIndex: Int
         private(set) var selection: G
+        var index: Int {
+            return self.source.firstIndex(of: self.selection) ?? 0
+        }
         
         init(primary: UIColor, source: [G], selectionIndex: Int) {
             self.searchField = SearchFieldView()
@@ -2132,4 +2164,98 @@ extension DynamicAlert {
         }
     }
     static private weak var textEditor: TextEditor! = nil
+}
+
+// MARK: - DateSelector
+extension DynamicAlert {
+    
+    final private class DateSelector: BasicUIView, CalendarDaysViewDelegate {
+        
+        private let dateLabel: BasicUILabel
+        private let calendarDateLabel: BasicUILabel
+        private let calendarView: CalendarDaysView
+        
+        private var selection: Date
+        private weak var lastSelectionView: CalendarDaysView.DayView? = nil
+        
+        var date: Date {
+            return self.selection
+        }
+        
+        init(date: Date, primary: UIColor) {
+            self.selection = date - date.minute.minutes - date.hour.hours - date.nanosecond.nanoseconds
+            self.dateLabel = .init(text: "???")
+            self.dateLabel.textColor = HomeDesign.black
+            self.dateLabel.font = HomeLayout.fontSemiBoldMedium
+            self.dateLabel.textAlignment = .left
+            self.calendarDateLabel = BasicUILabel(text: "???")
+            self.calendarDateLabel.textColor = HomeDesign.gray
+            self.calendarDateLabel.font = HomeLayout.fontRegularMedium
+            self.calendarDateLabel.textAlignment = .right
+            self.calendarView = .init(date: self.selection, primary: primary)
+            super.init()
+            self.dateLabel.text = self.text(usingDate: self.selection)
+            self.calendarDateLabel.text = self.calendarView.dateMonthText
+            self.calendarView.delegate = self
+            print("DynamicAlert.DateSelector", #function, self.selection.toString(.comprehensive))
+        }
+        required init?(coder: NSCoder) { fatalError() }
+        
+        override func willMove(toSuperview newSuperview: UIView?) {
+            guard newSuperview != nil else {
+                return
+            }
+            
+            self.addSubview(self.dateLabel)
+            self.dateLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+            self.dateLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+            self.dateLabel.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+            self.addSubview(self.calendarView)
+            self.calendarView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+            self.calendarView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+            self.calendarView.topAnchor.constraint(equalTo: self.dateLabel.bottomAnchor, constant: HomeLayout.margin).isActive = true
+            self.addSubview(self.calendarDateLabel)
+            self.calendarDateLabel.topAnchor.constraint(equalTo: self.calendarView.bottomAnchor, constant: HomeLayout.smargin).isActive = true
+            self.calendarDateLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+            self.calendarDateLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+            self.calendarDateLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+            self.lastSelectionView = self.calendarView.dayViewForDate(self.selection)
+        }
+        
+        private func text(usingDate date: Date) -> String {
+            return date.toString(.dateSelector)
+        }
+        
+        func calendarDaysViewSwipeLeft() {
+            self.calendarView.addMonth()
+            self.calendarDateLabel.text = self.calendarView.dateMonthText
+        }
+        func calendarDaysViewSwipeRight() {
+            self.calendarView.removeMonth()
+            self.calendarDateLabel.text = self.calendarView.dateMonthText
+        }
+        func calendarDaysViewSelect(dayView: CalendarDaysView.DayView, date: Date) {
+            self.selection = date
+            self.dateLabel.text = self.text(usingDate: self.selection)
+            if let view = self.lastSelectionView {
+                HomeAnimations.transitionQuick(withView: view, {
+                    view.resetStyle()
+                })
+            }
+            HomeAnimations.transitionQuick(withView: dayView, {
+                dayView.primarySelectedStyle()
+            })
+            self.lastSelectionView = dayView
+            print(#function, date.toString(.comprehensive))
+        }
+        func calendarDaysViewUpdated(dayView: CalendarDaysView.DayView, newDate: Date) {
+            if newDate.day == self.selection.day && newDate.month == self.selection.month && newDate.year == self.selection.year {
+                dayView.primarySelectedStyle()
+            }
+            else {
+                dayView.resetStyle()
+            }
+        }
+    }
+    static private weak var dateSelector: DateSelector! = nil
 }

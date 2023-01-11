@@ -73,3 +73,10 @@ func -(lhs: CGPoint, rhs: CGFloat) -> CGPoint {
 func /(lhs: CGPoint, rhs: CGFloat) -> CGPoint {
     return CGPoint(x: lhs.x / rhs, y: lhs.y / rhs)
 }
+
+func +<E>(lhs: Array<E>, rhs: Array<E>) -> Array<E> {
+    var newArray = lhs
+    
+    newArray.append(contentsOf: rhs)
+    return newArray
+}
