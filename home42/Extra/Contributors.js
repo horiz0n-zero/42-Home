@@ -18,7 +18,7 @@ const querystring = require('querystring')
 const fs = require('fs')
 
 const client_id = 'API_ID'
-const client_secret = 'API_SECRET'
+const client_secret = 'API_CLIENT'
 
 function sleep(millis) {
     return new Promise(resolve => setTimeout(resolve, millis));
@@ -266,7 +266,7 @@ const datas = [
        'groups': [home42Contributor, home42Spellchecker]
    },
    {
-       'login': "mgraf',
+       'login': 'mgraf',
        'groups': [home42Contributor, home42Spellchecker]
    }
 ];

@@ -251,8 +251,12 @@ final class ClusterScrollableSegmentView: BasicUIView, ClusterSelectorView, UISc
     init(values: [String], extraValues: [ClusterSelectorViewExtraValues]?, selectedIndex: Int, primary: UIColor) {
         self.selectedIndex = selectedIndex
         self.oldSelectedIndex = selectedIndex
-        self.extraValues = extraValues ?? Array(repeating: .init(placeAvailable: 0, placeCount: 0, friends: 0, extra1: 0, extra2: 0), count: values.count)
-        
+        if let extraValues = extraValues, extraValues.count == values.count {
+            self.extraValues = extraValues
+        }
+        else {
+            self.extraValues = Array(repeating: .init(placeAvailable: 0, placeCount: 0, friends: 0, extra1: 0, extra2: 0), count: values.count)
+        }
         self.scrollView = BasicUIScrollView()
         self.scrollView.contentInset = .init(top: 0.0, left: HomeLayout.scorner, bottom: 0.0, right: HomeLayout.scorner)
         self.viewsContainer = BasicUIView()

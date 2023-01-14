@@ -627,6 +627,9 @@ final class AdjustableParametersProviderViewController<G: AdjustableParametersPr
                 #endif
             }
         }
+        for action in self.header.actions where action.asset == .actionShare {
+            action.primary = primary
+        }
     }
     
     final private class AscDescContainerView<G: UIView>: BasicUIView {
@@ -665,6 +668,6 @@ final class AdjustableParametersProviderViewController<G: AdjustableParametersPr
             self.present(UIActivityViewController(activityItems: [self.delegate.adjustableParametersProviderWillExport()], applicationActivities: nil), animated: true)
         }
         
-        DynamicAlert(.none, contents: [.title(~"export.title"), .text(~"export.description")], actions: [.normal(~"general.cancel", nil), .highligth(~"general.generate", share)])
+        DynamicAlert(.noneWithPrimary(self.delegate.primary), contents: [.title(~"export.title"), .text(~"export.description")], actions: [.normal(~"general.cancel", nil), .highligth(~"general.generate", share)])
     }
 }

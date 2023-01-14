@@ -2197,7 +2197,6 @@ extension DynamicAlert {
             self.dateLabel.text = self.text(usingDate: self.selection)
             self.calendarDateLabel.text = self.calendarView.dateMonthText
             self.calendarView.delegate = self
-            print("DynamicAlert.DateSelector", #function, self.selection.toString(.comprehensive))
         }
         required init?(coder: NSCoder) { fatalError() }
         
@@ -2227,12 +2226,16 @@ extension DynamicAlert {
         }
         
         func calendarDaysViewSwipeLeft() {
-            self.calendarView.addMonth()
-            self.calendarDateLabel.text = self.calendarView.dateMonthText
+            HomeAnimations.transitionQuick(withView: self) {
+                self.calendarView.addMonth()
+                self.calendarDateLabel.text = self.calendarView.dateMonthText
+            }
         }
         func calendarDaysViewSwipeRight() {
-            self.calendarView.removeMonth()
-            self.calendarDateLabel.text = self.calendarView.dateMonthText
+            HomeAnimations.transitionQuick(withView: self) {
+                self.calendarView.removeMonth()
+                self.calendarDateLabel.text = self.calendarView.dateMonthText
+            }
         }
         func calendarDaysViewSelect(dayView: CalendarDaysView.DayView, date: Date) {
             self.selection = date
@@ -2246,7 +2249,6 @@ extension DynamicAlert {
                 dayView.primarySelectedStyle()
             })
             self.lastSelectionView = dayView
-            print(#function, date.toString(.comprehensive))
         }
         func calendarDaysViewUpdated(dayView: CalendarDaysView.DayView, newDate: Date) {
             if newDate.day == self.selection.day && newDate.month == self.selection.month && newDate.year == self.selection.year {

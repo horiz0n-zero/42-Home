@@ -24,6 +24,7 @@ final class HomeDeeplinks: NSObject {
         case unlock
         case events
         case databaseRemove
+        case databaseAdd
     }
     
     @frozen enum Parameter: String {
@@ -43,6 +44,9 @@ final class HomeDeeplinks: NSObject {
         ],
         .databaseRemove: [
             .init([.init(.key, .string, constraint: .required)], endpoint: #selector(MainViewController.deeplinkDatabaseRemove))
+        ],
+        .databaseAdd: [
+            .init([.init(.key, .string, constraint: .required), .init(.data, .string, constraint: .required)], endpoint: #selector(MainViewController.deeplinkDatabaseAdd))
         ]
     ]
     private struct DeeplinkDescription {

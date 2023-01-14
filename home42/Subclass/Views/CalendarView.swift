@@ -60,7 +60,6 @@ final class CalendarDaysView: BasicUIView {
         right.direction = .right
         self.addGestureRecognizer(right)
         self.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(CalendarDaysView.tapGesture(sender:))))
-        print("CalendarDaysView", #function, self.date.toString(.comprehensive))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     

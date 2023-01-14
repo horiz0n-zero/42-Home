@@ -632,7 +632,6 @@ final class DateSelectorView: RoundedGenericActionsView<BasicUILabel, ActionButt
     }
     
     private func dateSelected(_ date: Date) {
-        print(#function, date.toString(.comprehensive))
         self.date = date
         self.view.text = date.toString(.dateSelectorWithSlashs)
         self.delegate?.dateSelectorViewSelect(date)

@@ -35,6 +35,26 @@ final class HomeWords: NSObject {
         HomeWords.json = try! JSONSerialization.jsonObject(with: data, options: .allowFragments) as! [String: String]
         SwiftDate.defaultRegion = Region(calendar: Calendar.current, zone: Zones.current, locale: Locales.init(rawValue: language.identifier) ?? Locales.current)
     }
+    
+    #if DEBUG
+    static func _debugTryAllLanguages() {
+        let refLanguage = HomeApiResources.languages.first(where: { $0.identifier == "fr" })!
+        let allKeys: [String]
+        
+        HomeWords.configure(refLanguage)
+        allKeys = Array(Self.json.keys)
+        for language in HomeApiResources.languages where HomeWords.exist(language) {
+            print("--- testing ---", language.name, language.identifier)
+            print()
+            HomeWords.configure(language)
+            for key in allKeys {
+                print(key, language.identifier)
+                print("=>", ~key)
+            }
+            print()
+        }
+    }
+    #endif
 }
 
 extension String {

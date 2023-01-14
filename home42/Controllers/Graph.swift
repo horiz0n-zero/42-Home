@@ -418,11 +418,10 @@ final fileprivate class HolyGraphView: BasicUIView, SelectorViewDelegate, Search
     }
     
     func searchFieldBeginEditing(_ searchField: SearchFieldView) {
-        print(#function)
+
     }
     func searchFieldEndEditing(_ searchField: SearchFieldView) {
         self.removeSearchProjectsView()
-        print(#function)
     }
     func searchFieldTextUpdated(_ searchField: SearchFieldView) {
         self.searchProjectsView?.searchFieldValueChanged(shouldReloadData: true)

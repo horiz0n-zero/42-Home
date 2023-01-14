@@ -38,7 +38,7 @@ final class EventsListViewController: HomeViewController, SearchFieldViewDelegat
                                                                                                                               textGetter: \.searchField.text)
     static let parameters: [AdjustableParametersProviderViewController<EventsListViewController>.Parameter] = [
         .init(key: .sort, source: .eventSort, selectorType: .stringAscDesc(.desc), selectorTitleKey: "field.sort-message", selectorInlineWithNextElement: false, selectorCanSelectNULL: false),
-        .init(key: .filterFuture, source: .boolean, selectorType: .boolean, selectorTitleKey: "field.is-futur", selectorInlineWithNextElement: true, selectorCanSelectNULL: true),
+        .init(key: .filterFuture, source: .boolean, selectorType: .boolean, selectorTitleKey: "field.is-future", selectorInlineWithNextElement: true, selectorCanSelectNULL: true),
         .init(key: .filterRemote, source: .boolean, selectorType: .boolean, selectorTitleKey: "field.is-remote", selectorInlineWithNextElement: false, selectorCanSelectNULL: true),
         .init(key: .filterBeginAt, source: .calendar, selectorType: .date, selectorTitleKey: "sort.begin-at", selectorInlineWithNextElement: false, selectorCanSelectNULL: true),
         .init(key: .filterEndAt, source: .calendar, selectorType: .date, selectorTitleKey: "sort.end-at", selectorInlineWithNextElement: false, selectorCanSelectNULL: true)

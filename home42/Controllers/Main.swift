@@ -683,4 +683,12 @@ extension MainViewController {
         HomeDefaults.remove(key)
         DynamicAlert(contents: [.title(~"general.remove"), .text(key)], actions: [.normal(~"general.ok", nil)])
     }
+    
+    @objc func deeplinkDatabaseAdd(parameters: [String: Any]) {
+        let key = parameters[HomeDeeplinks.Parameter.key.rawValue] as! String
+        let data = parameters[HomeDeeplinks.Parameter.key.rawValue] as! String
+        
+        HomeDefaults.save(data, forRawKey: key)
+        DynamicAlert(contents: [.title(~"general.add"), .text(key)], actions: [.normal(~"general.ok", nil)])
+    }
 }

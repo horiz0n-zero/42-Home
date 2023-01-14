@@ -1171,12 +1171,10 @@ extension ProfilViewController {
                     projectName = "???"
                 }
                 if let correctorId = scaleTeam.corrector?.id, correctorId == App.user.id {
-                    self.detailsLabel.text = String(format: ~"you-will-correct",
-                                                    scaleTeam.team.name, projectName)
+                    self.detailsLabel.text = String(format: ~"you-will-correct", scaleTeam.team.name, projectName)
                 }
                 else {
-                    self.detailsLabel.text = String(format: ~"you-will-be-corrected",
-                                                    scaleTeam.correcteds.first?.login ?? "???", projectName)
+                    self.detailsLabel.text = String(format: ~"you-will-be-corrected", scaleTeam.correcteds.first?.login ?? "???", projectName)
                 }
                 self.detailsLabel.text = self.detailsLabel.text! + "\n" + scaleTeam.beginAtDate.newDiffTime(to: Date())
             }
@@ -1299,9 +1297,14 @@ private extension ProfilViewController {
             didSet {
                 if self.isLoading {
                     self.activity.startAnimating()
+                    HomeAnimations.animateQuick {
+                        self.activity.alpha = 1.0
+                    }
                 }
                 else {
-                    self.activity.stopAnimating()
+                    HomeAnimations.animateQuick({
+                        self.activity.alpha = 0.0
+                    }, completion: { _ in self.activity.stopAnimating() })
                 }
             }
         }
@@ -1328,7 +1331,7 @@ private extension ProfilViewController {
             return locations
         }
         
-        @MainActor private func getCompleteMonth(at date: Date) async throws -> ContiguousArray<IntraClusterLocation> {
+        @MainActor @discardableResult private func getCompleteMonth(at date: Date) async throws -> Int {
             let start = date.dateAt(.startOfMonth)
             let end = date.dateAt(.endOfMonth)
             var newLogs: ContiguousArray<IntraClusterLocation> = []
@@ -1344,27 +1347,25 @@ private extension ProfilViewController {
                 index &+= 1
             }
             self.locationsForStartingMonth[start.year * 100 + start.month] = newLogs
-            print(#function, start.toString(.logCell), self.locationsForStartingMonth[start.year * 100 + start.month]?.count)
-            return newLogs
+            return newLogs.count
         }
         
         @MainActor private func startRequest() async {
             do {
-                var newLogs: ContiguousArray<IntraClusterLocation> = try await getCompleteMonth(at: self.calendarView.date)
-                
-                if newLogs.count == 0 {
-                    newLogs = try await HomeApi.get(.usersWithUserIdLocations(self.userId), params: ["sort":"-begin_at", "page[size]": 5])
-                    if newLogs.count == 0 {
+                if try await getCompleteMonth(at: self.calendarView.date) == 0 {
+                    if let locations: ContiguousArray<IntraClusterLocation> = try await HomeApi.get(.usersWithUserIdLocations(self.userId), params: ["sort":"-begin_at", "page[size]": 1]), locations.count > 0 {
+                        self.setEmptyLocationsForRange(locations[0].beginDate.dateAt(.nextMonth), endMonth: self.calendarView.date)
+                        self.calendarView.setNewDate(locations[0].beginDate)
+                        self.mostDepthMonthDate = self.calendarView.date
+                        self.title.update(with: self.calendarView.date.toString(.logCell), primaryColor: self.primary)
+                        try await self.getCompleteMonth(at: self.calendarView.date)
+                        self.updateCalendarViewWithAssociatedLocations()
+                    }
+                    else {
                         self.isAtEnd = true
                         self.isLoading = false
-                        return // load finish
+                        return
                     }
-                    self.setEmptyLocationsForRange(newLogs[0].beginDate.dateAt(.nextMonth), endMonth: self.calendarView.date)
-                    self.calendarView.setNewDate(newLogs[0].beginDate)
-                    self.mostDepthMonthDate = self.calendarView.date
-                    self.title.update(with: self.calendarView.date.toString(.logCell), primaryColor: self.primary)
-                    _ = try await self.getCompleteMonth(at: self.calendarView.date)
-                    self.updateCalendarViewWithAssociatedLocations()
                 }
                 else {
                     self.title.update(with: self.calendarView.date.toString(.logCell), primaryColor: self.primary)
@@ -1381,17 +1382,14 @@ private extension ProfilViewController {
             let diff = end.timeIntervalSince(start).toUnits([.month])[.month] ?? 0
             var start = start
             
-            print(#function, start.toString(.logCell), end.toString(.logCell), diff)
             if diff > 0 {
                 for _ in 0 ..< diff {
                     self.locationsForStartingMonth[start.year * 100 + start.month] = []
-                    print(start.toString(.logCell))
                     start = start.dateAt(.nextMonth)
                 }
             }
             else {
                 self.locationsForStartingMonth[start.year * 100 + start.month] = []
-                print(start.toString(.logCell))
             }
         }
         
@@ -1415,10 +1413,9 @@ private extension ProfilViewController {
                 self.isLoading = true
                 Task {
                     do {
-                        if (try await self.getCompleteMonth(at: self.calendarView.date)).count == 0 {
+                        if try await self.getCompleteMonth(at: self.calendarView.date) == 0 {
                             let range = "2014-01-01,\(self.calendarView.date.dateAt(.endOfMonth).toString(.apiShortFormat))"
-                            let logs: ContiguousArray<IntraClusterLocation> = try await HomeApi.get(.usersWithUserIdLocations(self.userId),
-                                                                                                    params: ["sort": "-begin_at", "page[size]": 5, "range[begin_at]": range])
+                            let logs: ContiguousArray<IntraClusterLocation> = try await HomeApi.get(.usersWithUserIdLocations(self.userId), params: ["sort": "-begin_at", "page[size]": 5, "range[begin_at]": range])
                             
                             if logs.count == 0 {
                                 self.isAtEnd = true
@@ -1465,11 +1462,12 @@ private extension ProfilViewController {
                 }
             }
             
-            self.calendarView.enumerateDayViews(handler(_:date:))
+            HomeAnimations.transitionQuick(withView: self.calendarView) {
+                self.calendarView.enumerateDayViews(handler(_:date:))
+            }
         }
         
         func setup(with userId: Int) {
-            print("UserLogsTableViewCell", #function)
             self.userId = userId
             Task {
                 await self.startRequest()
