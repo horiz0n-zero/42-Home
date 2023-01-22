@@ -503,24 +503,23 @@ final class DynamicAlert: DynamicController {
         }, completion: super.remove(isFinish:))
     }
     
-    @MainActor @inlinable static func presentWith(error: HomeApi.RequestError) { // if application is inactive return
-        let actions: [DynamicAlert.Action]
-        
-        if let data = error.data {
-            actions = [.normal(~"general.ok", nil), .apiErrorJSON(data, error)]
+    @MainActor @inlinable static func presentWith(error: HomeApi.RequestError) {
+        if case .flowError(.oauthRefreshFailure) = error.status {
+            App.logout()
         }
         else {
-            actions = [.normal(~"general.ok", nil)]
+            let actions: [DynamicAlert.Action]
+            
+            if let data = error.data {
+                actions = [.normal(~"general.ok", nil), .apiErrorJSON(data, error)]
+            }
+            else {
+                actions = [.normal(~"general.ok", nil)]
+            }
+            _ = DynamicAlert.init(contents: [.apiError(error)], actions: actions)
         }
-        _ = DynamicAlert.init(contents: [.apiError(error)], actions: actions)
     }
     @MainActor @inlinable static func presentWith(error: Error) {
-        if error.localizedDescription.count == 0 { // if application is inactive return
-            #if DEBUG
-            print(#function, error)
-            #endif
-            return
-        }
         _ = DynamicAlert.init(contents: [.text(error.localizedDescription)], actions: [.normal(~"general.ok", nil)])
     }
     

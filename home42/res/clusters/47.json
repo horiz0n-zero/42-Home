@@ -2,9 +2,10 @@
     "width": 1740.0, "height": 1248.0,
     "placeWidth": 48.0, "placeHeight": 60.0,
     "elementsCount": 330,
+    "overrideSegmentUseScrollableSegment": true,
     "floors": [
         {
-            "name": "cluster 1",
+            "name": "Gotham",
             "prefix": "c1",
             "elementsCount": 110,
             "places": [
@@ -123,7 +124,7 @@
             ]
         },
         {
-            "name": "cluster 2",
+            "name": "Asgard",
             "prefix": "c2",
             "elementsCount": 71,
             "places": [
@@ -203,7 +204,7 @@
             ]
         },
         {
-            "name": "cluster 3",
+            "name": "Salle Sur Demande",
             "prefix": "c3",
             "elementsCount": 30,
             "places": [
