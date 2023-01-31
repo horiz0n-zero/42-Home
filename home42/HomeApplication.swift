@@ -80,6 +80,57 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
         _ = self.settings
     }
     
+    private func checkUpdate() {
+        let currentVersion = Bundle.main.infoDictionary!["CFBundleShortVersionString"] as! String
+        let identifier = Bundle.main.infoDictionary!["CFBundleIdentifier"] as! String
+        let url = URL(string: "http://itunes.apple.com/lookup?bundleId=\(identifier)")!
+        
+        struct ItunesLookup: Codable {
+            let releaseDate: String
+            let releaseNotes: String
+            let version: String
+        }
+        struct ItunesLookupResult: Codable {
+            let results: [ItunesLookup]
+        }
+        
+        @MainActor func showAlert(_ lookup: ItunesLookup) {
+            DynamicAlert(contents: [.text(lookup.releaseNotes)], actions: [.normal(~"general.ok", nil), .highligth(~"general.see", {
+                self.open(URL(string: "https://apps.apple.com/fr/app/42-home/id1602117968")!)
+            })])
+        }
+        
+        func value(forVersion version: String) -> Int {
+            var value = 0
+            let numbers = version.split(separator: ".").map({ Int($0) }).compactMap({ $0 })
+            
+            if numbers.count > 0 {
+                for index in 0 ..< numbers.count {
+                    value *= 100
+                    value += numbers[index]
+                }
+            }
+            return value
+        }
+        
+        Task {
+            do {
+                let (data, response) = try await HomeApi.urlSession.data(from: url)
+                
+                if (response as! HTTPURLResponse).statusCode == 200, let lookup = (try JSONDecoder.decoder.decode(ItunesLookupResult.self, from: data)).results.first {
+                    if value(forVersion: currentVersion) < value(forVersion: lookup.version) {
+                        showAlert(lookup)
+                    }
+                }
+            }
+            catch {
+                #if DEBUG
+                print(error)
+                #endif
+            }
+        }
+    }
+    
     func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         App = self
         self.window!.rootViewController = self.mainController
@@ -92,6 +143,7 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
                 HomeResources.storageCoalitionsImages.forceCachingIfSaved(coalition)
             }
             self.mainController.login()
+            self.checkUpdate()
         }
         else {
             self.user = nil
@@ -115,8 +167,7 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
         return true
     }
     
-    func application(_ app: UIApplication, open url: URL,
-                     options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         return HomeDeeplinks.handle(url.absoluteString)
     }
     

@@ -21,7 +21,7 @@ import SwiftDate
 
 final class HomeApi: NSObject {
     
-    static private let uid: String =           "CLIENT_ID"
+    static private let uid: String =           "CLIENT_UID"
     static private let secret: String =        "CLIENT_SECRET"
     static private let redirectURI: String =   "https://intra.42.fr"
     static private let scope: String =         "public+forum+projects+profile+elearning+tig"

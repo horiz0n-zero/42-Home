@@ -17,7 +17,7 @@ const https = require('https')
 const querystring = require('querystring')
 const fs = require('fs')
 
-const client_id = 'CLIENT_ID'
+const client_id = 'CLIENT_UID'
 const client_secret = 'CLIENT_SECRET'
 
 function sleep(millis) {

@@ -265,9 +265,7 @@ final fileprivate class HolyGraphView: BasicUIView, SelectorViewDelegate, Search
             self.scrollView.isScrollEnabled = true
             self.scrollView.delegate = self
             self.scrollView.contentInset = .init(top: offsetY, left: 0.0, bottom: 0.0, right: 0.0)
-            self.scrollView.zoom(to: .init(origin: .zero, size: .init(width: self.scrollViewContainer.frame.width,
-                                                                      height: self.scrollViewContainer.frame.height)),
-                                 animated: false)
+            self.scrollView.zoom(to: .init(origin: .zero, size: .init(width: self.scrollViewContainer.frame.width, height: self.scrollViewContainer.frame.height)), animated: false)
             self.state = .done(self.user, self.cursus)
         }
         catch {
@@ -296,7 +294,15 @@ final fileprivate class HolyGraphView: BasicUIView, SelectorViewDelegate, Search
         guard self.projects.count > 0 else {
             return container
         }
+        let circles: [ProjectLinesView.Circle]
+        let circlesURL = HomeResources.applicationDirectory.appendingPathComponent("res/graphs/\(self.cursus.cursus_id).json")
         
+        do {
+            circles = try JSONDecoder.decoder.decode([ProjectLinesView.Circle].self, from: try Data(contentsOf: circlesURL))
+        }
+        catch {
+            circles = []
+        }
         for project in self.projects {
             minX = min(project.x, minX)
             minY = min(project.y, minY)
@@ -328,7 +334,7 @@ final fileprivate class HolyGraphView: BasicUIView, SelectorViewDelegate, Search
             }
         }
         container.frame.size = .init(width: CGFloat(maxX - minX), height: CGFloat(maxY - minY))
-        linesView = ProjectLinesView(lines: lines)
+        linesView = ProjectLinesView(lines: lines, circles: circles)
         linesView.frame = container.frame
         container.insertSubview(linesView, at: 0)
         return container
@@ -610,8 +616,16 @@ private extension HolyGraphView {
         }
         private let lines: [ProjectLinesView.Line]
         
-        init(lines: [ProjectLinesView.Line]) {
+        struct Circle: Codable {
+            let centerX: CGFloat
+            let centerY: CGFloat
+            let radius: CGFloat
+        }
+        private let circles: [ProjectLinesView.Circle]
+        
+        init(lines: [ProjectLinesView.Line], circles: [ProjectLinesView.Circle]) {
             self.lines = lines
+            self.circles = circles
             super.init()
             self.translatesAutoresizingMaskIntoConstraints = false
             self.backgroundColor = .clear
@@ -634,6 +648,10 @@ private extension HolyGraphView {
             for line in self.lines {
                 context.move(to: line.to)
                 context.addLine(to: line.from)
+                context.strokePath()
+            }
+            for circle in circles {
+                context.addArc(center: .init(x: circle.centerX - (circle.radius / 2.0) + 10.0, y: circle.centerY - (circle.radius  / 2.0) + 10.0), radius: circle.radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
                 context.strokePath()
             }
         }

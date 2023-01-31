@@ -23,7 +23,7 @@ final class EventsViewController: HomeViewController {
     required init() {
         let parameters: [String: Any] = ["filter[future]":true, "sort":"begin_at"]
         
-        if let cursus = App.userCursus {
+        if let cursus = App.userCursus, App.user.is_staff == false {
             self.tableView = .init(.campusWithCampusIdCursusWithCursusIdEvents(App.userCampus.campus_id, cursus.cursus_id), parameters: parameters, pageSize: 30)
         }
         else {
@@ -38,9 +38,7 @@ final class EventsViewController: HomeViewController {
         self.tableView.contentInsetAdjustTopAndBottom()
         self.tableView.backgroundColor = .clear
         self.tableView.block = self.eventSelected(_:)
-        Task.init(priority: .userInitiated, operation: {
-            await self.tableView.nextPage()
-        })
+        self.tableView.nextPage()
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     

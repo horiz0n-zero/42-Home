@@ -79,6 +79,19 @@ final class IntraUser: IntraObject {
     let patroned: ContiguousArray<IntraPatron>
     let patroning: ContiguousArray<IntraPatron>
     let image: IntraUser.Image
+    let is_staff: Bool?
+    let is_alumni: Bool?
+    
+    @frozen private enum CodingKeys: String, CodingKey {
+        case id, login, email, phone, displayname, correction_point, location, wallet, pool_month, pool_year
+        case titles_users, titles, cursus_users
+        case achievements, expertises_users, languages_users, groups
+        case projects_users, campus, campus_users
+        case partnerships, patroned, patroning
+        case image
+        case is_staff = "staff?"
+        case is_alumni = "alumni?"
+    }
     
     final class Image: IntraObject {
         let link: String!
