@@ -21,8 +21,8 @@ import SwiftDate
 
 final class HomeApi: NSObject {
     
-    static private let uid: String =           "CLIENT_UID"
-    static private let secret: String =        "CLIENT_SECRET"
+    static private let uid: String =           "API_ID"
+    static private let secret: String =        "API_SECRET"
     static private let redirectURI: String =   "https://intra.42.fr"
     static private let scope: String =         "public+forum+projects+profile+elearning+tig"
     static private let authorizePath: String = "https://api.intra.42.fr/oauth/authorize?client_id=%@&redirect_uri=%@&response_type=code&scope=%@"
@@ -78,6 +78,7 @@ final class HomeApi: NSObject {
     struct RequestError: CustomStringConvertible, Error {
         
         @frozen enum Status {
+            case cancel
             case code(Int)
             case `internal`
             
@@ -116,6 +117,8 @@ final class HomeApi: NSObject {
             let paramsJSON = self.parameters == nil ? "" : self.parameters.json
             
             switch self.status {
+            case .cancel:
+                return "cancel"
             case .code(let code):
                 return "\(code) \(self.path)\n\(self.serverMessage)\n\(paramsJSON)"
             case .internal:
@@ -137,17 +140,13 @@ final class HomeApi: NSObject {
             }
         }
         
-        var isCancelled: Bool { // need a reflexion on this
-            switch self.status {
-            case .internal where self.data == nil && self.serverMessage == "cancelled":
-                return true
-            default:
-                return false
-            }
-        }
-        
         init(status: Status, path: String, data: Data?, parameters: [String: Any]!, serverMessage: String) {
-            self.status = status
+            if serverMessage == "cancelled" {
+                self.status = .cancel
+            }
+            else {
+                self.status = status
+            }
             self.path = path
             self.data = data
             self.parameters = parameters
@@ -178,6 +177,9 @@ final class HomeApi: NSObject {
             self.data = nil
             self.parameters = [:]
             self.serverMessage = ""
+        }
+        static func canceled() -> HomeApi.RequestError {
+            return .init(status: .cancel, path: "", data: nil, parameters: nil, serverMessage: "")
         }
     }
 }
@@ -361,8 +363,7 @@ extension HomeApi {
             }
             else {
                 serverErrorMessage = String(data: ret.data, encoding: .utf8) ?? "no serveur message received"
-                throw HomeApi.RequestError(status: .code((ret.response as! HTTPURLResponse).statusCode), path: path, data: ret.data, parameters: params,
-                                           serverMessage: serverErrorMessage)
+                throw HomeApi.RequestError(status: .code((ret.response as! HTTPURLResponse).statusCode), path: path, data: ret.data, parameters: params, serverMessage: serverErrorMessage)
             }
         }
         catch {
@@ -383,6 +384,9 @@ extension HomeApi {
         #if DEBUG
         print(method, path, params ?? "[:]")
         #endif
+        if HomeApi.tokens == nil {
+            throw HomeApi.RequestError.canceled()
+        }
         if HomeApi.tokens.expireDate <= Date() {
             try await HomeApi.asyncAuthRefresh()
         }

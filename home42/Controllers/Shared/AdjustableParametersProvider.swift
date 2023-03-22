@@ -61,6 +61,7 @@ final class AdjustableParametersProviderViewController<G: AdjustableParametersPr
         @frozen @usableFromInline enum Source {
             case userSort
             case eventSort
+            case eventFeedbacksSort
             case achievementSort
             case notionSort
             case poolYear
@@ -75,6 +76,8 @@ final class AdjustableParametersProviderViewController<G: AdjustableParametersPr
                     return HomeApiResources.userSortOptionsKeys.map { ~$0 }
                 case .eventSort:
                     return HomeApiResources.eventSortOptionsKeys.map { ~$0 }
+                case .eventFeedbacksSort:
+                    return HomeApiResources.eventFeedbacksOptionsKeys.map { ~$0 }
                 case .achievementSort:
                     return HomeApiResources.achievementOptionsKeys.map { ~$0 }
                 case .notionSort:
@@ -95,6 +98,8 @@ final class AdjustableParametersProviderViewController<G: AdjustableParametersPr
                     return HomeApiResources.userSortOptions
                 case .eventSort:
                     return HomeApiResources.eventSortOptions
+                case .eventFeedbacksSort:
+                    return HomeApiResources.eventFeedbacksOptions
                 case .achievementSort:
                     return HomeApiResources.achievementOptions
                 case .notionSort:

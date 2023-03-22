@@ -249,7 +249,9 @@ final class PeopleListViewController: HomeViewController, UITableViewDelegate, U
             }
             
             if App.settings.peopleWarnWhenRemove {
-                DynamicAlert(contents: [.text(String(format: ~"peoples.remove", self.peoples[indexPath.row].login))], actions: [.normal(~"general.cancel", nil), .highligth(~"general.remove", remove)])
+                DynamicAlert(.withPrimary(~"general.warning", self.primary),
+                             contents: [.text(String(format: ~"peoples.remove", self.peoples[indexPath.row].login))],
+                             actions: [.normal(~"general.cancel", nil), .highligth(~"general.remove", remove)])
             }
             else {
                 remove()

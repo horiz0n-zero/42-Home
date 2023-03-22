@@ -31,6 +31,9 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
     private let passwdTextField: LoginTextField
     private let loginButton: LoginButton
     
+    private let isStaff: HomeSwitch
+    private let isStaffLabel: BasicUILabel
+    
     private let conditionsLabel: BasicUILabel
     private let sourceCodeLabel: BasicUILabel
     
@@ -49,6 +52,11 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.passwdLabel = LoginTextFieldUpperText(.passwd)
         self.passwdTextField = LoginTextField(.passwd)
         self.loginButton = LoginButton()
+        
+        self.isStaff = HomeSwitch(isOn: false)
+        self.isStaffLabel = .init(text: (~"field.is-staff").lowercased())
+        self.isStaffLabel.textColor = HomeDesign.white
+        self.isStaffLabel.font = HomeLayout.fontRegularNormal
         
         self.conditionsLabel = BasicUILabel(attribute: NSAttributedString.init(string: ~"login.cgu", attributes: [
                                                                                 .underlineStyle: NSUnderlineStyle.single.rawValue,
@@ -97,7 +105,13 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.loginButton.leadingAnchor.constraint(equalTo: self.formContainer.leadingAnchor).isActive = true
         self.loginButton.trailingAnchor.constraint(equalTo: self.formContainer.trailingAnchor).isActive = true
         self.loginButton.topAnchor.constraint(equalTo: self.passwdTextField.bottomAnchor, constant: HomeLayout.margind).isActive = true
-        self.loginButton.bottomAnchor.constraint(equalTo: self.formContainer.bottomAnchor).isActive = true
+        self.formContainer.addSubview(self.isStaff)
+        self.isStaff.topAnchor.constraint(equalTo: self.loginButton.bottomAnchor, constant: HomeLayout.margin).isActive = true
+        self.isStaff.trailingAnchor.constraint(equalTo: self.loginButton.trailingAnchor).isActive = true
+        self.formContainer.addSubview(self.isStaffLabel)
+        self.isStaffLabel.centerYAnchor.constraint(equalTo: self.isStaff.centerYAnchor).isActive = true
+        self.isStaffLabel.trailingAnchor.constraint(equalTo: self.isStaff.leadingAnchor, constant: -HomeLayout.smargin).isActive = true
+        self.isStaff.bottomAnchor.constraint(equalTo: self.formContainer.bottomAnchor).isActive = true
         
         self.view.addSubview(self.logoCenter)
         self.logoCenter.bottomAnchor.constraint(equalTo: self.formContainer.topAnchor, constant: -HomeLayout.margin).isActive = true
@@ -107,7 +121,6 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.logoCenter.addSubview(self.logo42)
         self.logo42.centerYAnchor.constraint(equalTo: self.logoCenter.centerYAnchor).isActive = true
         self.logo42.centerXAnchor.constraint(equalTo: self.logoCenter.centerXAnchor).isActive = true
-        
         
         self.view.addSubview(self.conditionsLabel)
         self.conditionsLabel.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -HomeLayout.margin).isActive = true
@@ -143,19 +156,16 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
     }
     
     @frozen private enum State: String {
-        case connect   = "login.state.connect"
-        case waiting   = "login.state.waiting"
-        case signin    = "login.state.signin"
-        case signin2FA = "terminal.waiting"
-        case authorize = "login.state.authorize"
-        case loading   = "login.state.loading"
-        case cookie    = "login.state.cookies"
+        case connect     = "login.state.connect"
+        case waiting     = "login.state.waiting"
+        case signin      = "login.state.signin"
+        case signin2FA   = "terminal.waiting"
+        case authorize   = "login.state.authorize"
+        case loading     = "login.state.loading"
+        case cookie      = "login.state.cookies"
     }
     private var state: State = .connect {
-        didSet {
-            self.loginButton.setAttributedTitle(.init(string: (~self.state.rawValue).uppercased(),
-                                                      attributes: [.foregroundColor: HomeDesign.white, .font: HomeLayout.fontBoldTitle]), for: .normal)
-        }
+        didSet { self.loginButton.setAttributedTitle(.init(string: (~self.state.rawValue).uppercased(), attributes: [.foregroundColor: HomeDesign.white, .font: HomeLayout.fontBoldTitle]), for: .normal) }
     }
     
     private var signinHandler: WKWebView? = nil
@@ -181,12 +191,6 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
             await Cookies.clearWebsiteData(targettingWebView: webview)
             webview.navigationDelegate = self
             webview.load(HomeApi.oauthAuthorizePath.request)
-            /*self.view.addSubview(webview)
-            webview.translatesAutoresizingMaskIntoConstraints = false
-            webview.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-            webview.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
-            webview.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
-            webview.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true*/
             return webview
         }
         
@@ -224,6 +228,30 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         HomeDefaults.remove(.coalitions)
     }
     
+    private func requestAndSend2FACode() {
+       
+        func tryCode(code: String) {
+            let codeJS = "document.getElementById(\"otp\").value = \"\(code)\";"
+            let commitJS = "document.getElementById(\"kc-login\").click();"
+            
+            func javascriptError(_ object: Any?, error: Error?) {
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self.loginErrorOccured(error.localizedDescription)
+                    }
+                }
+            }
+            self.signinHandler!.evaluateJavaScript(codeJS, completionHandler: javascriptError(_:error:))
+            self.signinHandler!.evaluateJavaScript(commitJS, completionHandler: javascriptError(_:error:))
+        }
+        
+        func cancelAuthentification() {
+            self.loginErrorOccured(~"general.error", showAlert: false)
+        }
+        
+        DynamicAlert(.primary(~"general.warning"), contents: [.title("Intra 2FA"), .textEditor("")], actions: [.normal(~"general.cancel", cancelAuthentification), .textEditor(tryCode(code:))])
+    }
+    
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         
         func javascriptError(_ object: Any?, error: Error?) {
@@ -241,34 +269,39 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         #endif
         switch self.state {
         case .signin:
-            let login = String(format: "document.getElementById(\"user_login\").value = \"%@\";", self.loginTextField.text!)
-            let passw = String(format: "document.getElementById(\"user_password\").value = \"%@\";", self.passwdTextField.text!)
-            
-            webView.evaluateJavaScript(login, completionHandler: javascriptError(_:error:))
-            webView.evaluateJavaScript(passw, completionHandler: javascriptError(_:error:))
-            webView.evaluateJavaScript("document.querySelector(\'[name=\"commit\"]\').click();", completionHandler: javascriptError(_:error:))
-        case .signin2FA:
-            let style: DynamicAlert.Style
-            
-            func tryCode(code: String) {
-                let codeJS = "document.getElementById(\"users_code\").value = \"\(code)\""
-                let commitJS = "document.querySelector(\'[name=\"commit\"]\').click();"
-                
-                webView.evaluateJavaScript(codeJS, completionHandler: javascriptError(_:error:))
-                webView.evaluateJavaScript(commitJS, completionHandler: javascriptError(_:error:))
-            }
-            
-            func cancelAuthentification() {
-                self.loginErrorOccured(~"general.error", showAlert: false)
-            }
-            
-            if !webView.url!.absoluteString.contains("new") {
-                style = .withPrimary(~"general.error", HomeDesign.redError)
+            if webView.url!.absoluteString.hasPrefix("https://auth.42.fr/auth/realms") {
+                if webView.url!.absoluteString.contains("login-actions") {
+                    webView.evaluateJavaScript("document.getElementById(\"otp\").name") { object, error in
+                        if object as? String == "otp" {
+                            DispatchQueue.main.async {
+                                self.state = .signin2FA
+                                self.requestAndSend2FACode()
+                            }
+                        }
+                        else {
+                            self.loginErrorOccured(~"login.error.passwd-incorrect")
+                        }
+                    }
+                }
+                else {
+                    let login = String(format: "document.getElementById(\"username\").value = \"%@\";", self.loginTextField.text!)
+                    let passw = String(format: "document.getElementById(\"password\").value = \"%@\";", self.passwdTextField.text!)
+                    
+                    webView.evaluateJavaScript(login, completionHandler: javascriptError(_:error:))
+                    webView.evaluateJavaScript(passw, completionHandler: javascriptError(_:error:))
+                    webView.evaluateJavaScript("document.getElementById(\"kc-login\").click();", completionHandler: javascriptError(_:error:))
+                }
             }
             else {
-                style = .primary(~"general.warning")
+                if self.isStaff.isOn {
+                    webView.evaluateJavaScript("document.querySelector(\'[href=\"https://profile.intra.42.fr/users/auth/keycloak_admin\"]\').click();")
+                }
+                else {
+                    webView.evaluateJavaScript("document.querySelector(\'[href=\"https://profile.intra.42.fr/users/auth/keycloak_student\"]\').click();")
+                }
             }
-            DynamicAlert(style, contents: [.title("Intra 2FA"), .textEditor("")], actions: [.normal(~"general.cancel", cancelAuthentification), .textEditor(tryCode(code:))])
+        case .signin2FA:
+            self.requestAndSend2FACode()
         case .authorize:
             webView.evaluateJavaScript("document.forms[0].submit();", completionHandler: javascriptError(_:error:))
         default:
@@ -299,14 +332,9 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         print(webView.url!.host!, webView.url!.path)
         print()
         #endif
-        if path.hasPrefix("https://signin.intra.42.fr/users/sign_in") {
+        if path.hasPrefix("https://signin.intra.42.fr/users/sign_in") || path.hasPrefix("https://auth.42.fr/auth/realms") {
             DispatchQueue.main.async {
-                if self.state == .signin {
-                    self.loginErrorOccured(~"login.error.passwd-incorrect")
-                }
-                else {
-                    self.state = .signin
-                }
+                self.state = .signin
             }
         }
         else if path.hasPrefix("https://signin.intra.42.fr/intra_otp_sessions") {
@@ -325,7 +353,7 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
                 self.codeReceived((webView.url!.query! as NSString).substring(from: 5))
             }
         }
-        else if path.hasPrefix("https://profile.intra.42.fr") == false { // must clear old cookies catch before redirect
+        else if path.hasPrefix("https://profile.intra.42.fr") == false {
             self.loginErrorOccured(String(format: ~"login.error.unexpected-redirection", path))
         }
     }
@@ -382,7 +410,7 @@ extension LoginViewController {
             case passwd = "general.passwd"
         }
         init(_ text: Text) {
-            super.init(text: ~text.rawValue)
+            super.init(text: (~text.rawValue).lowercased())
             self.textColor = HomeDesign.white
             self.font = HomeLayout.fontRegularNormal
         }

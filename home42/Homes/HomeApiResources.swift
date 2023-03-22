@@ -77,4 +77,6 @@ final class HomeApiResources: NSObject {
     static let achievementOptionsKeys: [String] = ["sort.created-at", "sort.name", "sort.id"]
     static let notionOptions: [String] = ["updated_at", "created_at", "name", "id"]
     static let notionOptionsKeys: [String] = ["sort.updated-at", "sort.created-at", "sort.name", "sort.id"]
+    static let eventFeedbacksOptions: [String] = ["created_at", "rating", "id"]
+    static let eventFeedbacksOptionsKeys: [String] = ["sort.created-at", "general.rating", "sort.id"]
 }

@@ -16,24 +16,37 @@
 import Foundation
 import UIKit
 
-final class EventFeedbacksHistoricViewController: HomeViewController, UserSearchFieldViewDelegate {
+final class EventFeedbacksHistoricViewController: HomeViewController, UserSearchFieldViewDelegate, AdjustableParametersProviderDelegate {
     
     private let header: HeaderWithActionsView
     private let userSearchField: UserSearchFieldView?
     private let gradientTop: GradientView
+    private let settingsButton: ActionButtonView
+    private var settings: AdjustableParametersProviderViewController<EventFeedbacksHistoricViewController>!
     private let tableView: GenericSingleInfiniteRequestTableView<EventFeedbackCell, IntraFeedback>
     
+    let primary: UIColor
+    
+    static var defaultParameters: [String: Any] = [:]
+    static let searchParameter: AdjustableParametersProviderViewController<EventFeedbacksHistoricViewController>.SearchParameter? = nil
+    static let parameters: [AdjustableParametersProviderViewController<EventFeedbacksHistoricViewController>.Parameter] = [
+        .init(key: .sort, source: .eventFeedbacksSort, selectorType: .stringAscDesc(.desc), selectorTitleKey: "field.sort-message", selectorInlineWithNextElement: false, selectorCanSelectNULL: false)
+    ]
+    
     convenience init(event: IntraEvent) {
-        self.init(headerTitle: event.name, route: .eventsWithEventIdFeedbacks(event.id), parameters: ["sort":"-created_at"], addUserSearchField: false)
+        Self.defaultParameters = [:]
+        self.init(headerTitle: event.name, route: .eventsWithEventIdFeedbacks(event.id), addUserSearchField: false, primary: event.uicolor)
     }
     required convenience init() {
-        self.init(headerTitle: ~"general.feedbacks", route: .feedbacks, parameters: ["sort":"-created_at", "filter[user_id]": App.user.id, "filter[feedbackable_type]": "Event"], addUserSearchField: true)
+        Self.defaultParameters = ["filter[user_id]": App.user.id, "filter[feedbackable_type]": "Event"]
+        self.init(headerTitle: ~"general.feedbacks", route: .feedbacks, addUserSearchField: true, primary: HomeDesign.primary)
     }
     
-    private init(headerTitle: String, route: HomeApi.Routes, parameters: [String : Any]?, addUserSearchField: Bool) {
-        self.header = HeaderWithActionsView(title: headerTitle, actions: nil)
+    private init(headerTitle: String, route: HomeApi.Routes, addUserSearchField: Bool, primary: UIColor) {
+        self.settingsButton = .init(asset: .actionSettings, color: primary)
+        self.header = HeaderWithActionsView(title: headerTitle, actions: [settingsButton])
         if addUserSearchField {
-            self.userSearchField = UserSearchFieldView(user: .init(id: App.user.id, login: App.user.login, image: App.user.image), primary: HomeDesign.primary)
+            self.userSearchField = UserSearchFieldView(user: .init(id: App.user.id, login: App.user.login, image: App.user.image), primary: primary)
         }
         else {
             self.userSearchField = nil
@@ -42,8 +55,9 @@ final class EventFeedbacksHistoricViewController: HomeViewController, UserSearch
         self.gradientTop.startPoint = .init(x: 0.5, y: 0.0)
         self.gradientTop.endPoint = .init(x: 0.5, y: 1.0)
         self.gradientTop.colors = [HomeDesign.white.cgColor, UIColor.init(white: 1.0, alpha: 0.0).cgColor]
-        self.tableView = .init(route, parameters: parameters, page: 1, pageSize: 100)
+        self.tableView = .init(route, parameters: nil, page: 1, pageSize: 100)
         self.tableView.contentInset = .init(top: HomeLayout.margin, left: 0.0, bottom: 0.0, right: 0.0)
+        self.primary = primary
         super.init()
         self.view.backgroundColor = HomeDesign.white
         self.view.addSubview(self.header)
@@ -70,12 +84,39 @@ final class EventFeedbacksHistoricViewController: HomeViewController, UserSearch
         self.gradientTop.leadingAnchor.constraint(equalTo: self.tableView.leadingAnchor).isActive = true
         self.gradientTop.trailingAnchor.constraint(equalTo: self.tableView.trailingAnchor).isActive = true
         self.gradientTop.heightAnchor.constraint(equalToConstant: HomeLayout.margin).isActive = true
+        self.settings = .init(delegate: self, defaultParameters: [:])
+        self.tableView.parameters = self.settings.parameters
         self.tableView.nextPage()
+        self.settingsButton.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(EventFeedbacksHistoricViewController.presentSettings)))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
+    @objc private func presentSettings() {
+        self.presentWithBlur(self.settings)
+    }
+    
+    func adjustableParametersProviderExtraValueSelected(_ newTitle: String, newRoute: HomeApi.Routes) { }
+    func adjustableParametersProviderParametersUpdated(_ newParameters: [String : Any]) {
+        self.tableView.restart(with: newParameters)
+    }
+    
+    static let canExport: Bool = true
+    
+    func adjustableParametersProviderWillExport() -> String {
+        var r: String = ""
+        
+        for (index, feedback) in self.tableView.elements.enumerated() {
+            r += "\(feedback.user.login) \(feedback.rating)/5\n\(feedback.comment)\n"
+            if index != self.tableView.elements.count - 1 {
+                r += "\n"
+            }
+        }
+        return r
+    }
+    
     func userSearchFieldViewSelect(view: UserSearchFieldView, user: IntraUserInfo) {
-        self.tableView.restart(with: ["sort":"-created_at", "filter[user_id]": user.id, "filter[feedbackable_type]": "Event"])
+        Self.defaultParameters = ["filter[user_id]": user.id, "filter[feedbackable_type]": "Event"]
+        self.tableView.restart(with: self.settings.parameters)
     }
     
     final private class EventFeedbackCell: BasicUITableViewCell, GenericSingleInfiniteRequestCell {

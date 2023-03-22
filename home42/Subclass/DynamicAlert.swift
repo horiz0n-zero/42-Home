@@ -230,7 +230,7 @@ final class DynamicAlert: DynamicController {
                 let title = BasicUILabel(text: "")
                 
                 switch error.status {
-                case .internal, .flowError(_):
+                case .internal, .flowError(_), .cancel:
                     title.text = error.description
                     title.textColor = HomeDesign.black
                 case .code(let code):
@@ -504,6 +504,9 @@ final class DynamicAlert: DynamicController {
     }
     
     @MainActor @inlinable static func presentWith(error: HomeApi.RequestError) {
+        if case .cancel = error.status {
+            return
+        }
         if case .flowError(.oauthRefreshFailure) = error.status {
             App.logout()
         }
@@ -607,12 +610,8 @@ extension DynamicAlert {
             self.event = event
             super.init()
             self.backgroundColor = event.uicolor
-            if self.peopleButton != nil {
-                self.peopleButton!.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(EventHeader.usersTapped(gesture:))))
-            }
-            if self.feedbackButton != nil {
-                self.feedbackButton!.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(EventHeader.feedbacksTapped(gesture:))))
-            }
+            self.peopleButton?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(EventHeader.usersTapped(gesture:))))
+            self.feedbackButton?.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(EventHeader.feedbacksTapped(gesture:))))
         }
         required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
         

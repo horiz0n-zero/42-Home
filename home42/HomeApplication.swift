@@ -152,6 +152,7 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
             self.userCursus = nil
             self.userCoalition = nil
             self.prepare()
+            self.checkUpdate()
         }
         return true
     }

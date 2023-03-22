@@ -18,8 +18,8 @@ const querystring = require('querystring')
 const fs = require('fs')
 var counter = 0
 
-const client_id = 'CLIENT_UID'
-const client_secret = 'CLIENT_SECRET'
+const client_id = 'API_ID'
+const client_secret = 'API_SECRET'
 
 function sleep(millis) {
     return new Promise(resolve => setTimeout(resolve, millis));

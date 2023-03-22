@@ -154,6 +154,7 @@ extension HomeLayout {
     static let elearningSubnotionActionHeight: CGFloat = 30.0
     
     static let switchHeigth: CGFloat = HomeLayout.actionButtonIconSize
+    static let switchWidth: CGFloat = HomeLayout.actionButtonIconSize * 1.8
     static let switchRadius: CGFloat = HomeLayout.switchHeigth / 2.0
     
     static let guidesVersionHeight: CGFloat = 16.0

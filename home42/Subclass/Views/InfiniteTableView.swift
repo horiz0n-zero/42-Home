@@ -90,7 +90,7 @@ class GenericSingleInfiniteRequestTableView<C: GenericSingleInfiniteRequestCell,
             }
             catch {
                 self.error = error as? HomeApi.RequestError
-                if self.error!.isCancelled {
+                if case .cancel = self.error!.status {
                     return
                 }
                 self.antenneViewCell.antenne.isBreak = true

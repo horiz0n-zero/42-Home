@@ -260,9 +260,12 @@ final class ClusterScrollableSegmentView: BasicUIView, ClusterSelectorView, UISc
         self.scrollView = BasicUIScrollView()
         self.scrollView.contentInset = .init(top: 0.0, left: HomeLayout.scorner, bottom: 0.0, right: HomeLayout.scorner)
         self.viewsContainer = BasicUIView()
-        self.views = (0 ..< values.count).map({
-            return SelectableView(values[$0], extraValues: extraValues?[$0], isSelected: $0 == selectedIndex, primary: primary)
-        })
+        if extraValues != nil && extraValues!.count == values.count {
+            self.views = (0 ..< values.count).map({ SelectableView(values[$0], extraValues: extraValues![$0], isSelected: $0 == selectedIndex, primary: primary) })
+        }
+        else {
+            self.views = (0 ..< values.count).map({ SelectableView(values[$0], extraValues: nil, isSelected: $0 == selectedIndex, primary: primary) })
+        }
         super.init()
         self.scrollView.delegate = self
         self.backgroundColor = HomeDesign.white

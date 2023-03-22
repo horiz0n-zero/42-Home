@@ -65,23 +65,12 @@ final class HomeSwitch: BasicUIView {
     private(set) var isOn: Bool
     private var primary: UIColor
     
-    private let onLabel: BasicUILabel
-    private let offLabel: BasicUILabel
-    
     static private let ballHeight: CGFloat = HomeLayout.switchHeigth - (HomeLayout.dmargin * 2.0)
     static private let ballRadius: CGFloat = HomeSwitch.ballHeight / 2.0
     private let ball: BasicUIView
     private var ballCenterX: NSLayoutConstraint!
     
-    init(on: String = ~"general.on-state", off: String = ~"general.off-state", isOn: Bool = true, primary: UIColor = HomeDesign.primary) {
-        self.onLabel = BasicUILabel(text: on)
-        self.onLabel.textColor = HomeDesign.black
-        self.onLabel.textAlignment = .center
-        self.onLabel.font = HomeLayout.fontSemiBoldMedium
-        self.offLabel = BasicUILabel(text: off)
-        self.offLabel.textColor = HomeDesign.black
-        self.offLabel.textAlignment = .center
-        self.offLabel.font = HomeLayout.fontSemiBoldMedium
+    init(isOn: Bool = true, primary: UIColor = HomeDesign.primary) {
         self.ball = BasicUIView()
         self.ball.layer.cornerRadius = HomeSwitch.ballRadius
         self.ball.layer.shadowOffset = .zero
@@ -102,20 +91,13 @@ final class HomeSwitch: BasicUIView {
     
     override func willMove(toSuperview newSuperview: UIView?) {
         guard newSuperview != nil else { return }
-        self.addSubview(self.onLabel)
-        self.onLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: HomeLayout.smargin).isActive = true
-        self.onLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.onLabel.trailingAnchor.constraint(greaterThanOrEqualTo: self.trailingAnchor, constant: -HomeLayout.switchHeigth).isActive = true
-        self.addSubview(self.offLabel)
-        self.offLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -HomeLayout.smargin).isActive = true
-        self.offLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        self.offLabel.leadingAnchor.constraint(greaterThanOrEqualTo: self.leadingAnchor, constant: HomeLayout.switchHeigth).isActive = true
         self.addSubview(self.ball)
         self.ball.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
         self.ball.widthAnchor.constraint(equalToConstant: HomeSwitch.ballHeight).isActive = true
         self.ball.heightAnchor.constraint(equalToConstant: HomeSwitch.ballHeight).isActive = true
         self.updateBallConstraint()
         self.heightAnchor.constraint(equalToConstant: HomeLayout.switchHeigth).isActive = true
+        self.widthAnchor.constraint(equalToConstant: HomeLayout.switchWidth).isActive = true
     }
     
     private func updateBallConstraint() {
@@ -123,10 +105,10 @@ final class HomeSwitch: BasicUIView {
             self.removeConstraint(self.ballCenterX)
         }
         if self.isOn {
-            self.ballCenterX = self.ball.centerXAnchor.constraint(equalTo: self.onLabel.trailingAnchor, constant: HomeSwitch.ballRadius + HomeLayout.dmargin)
+            self.ballCenterX = self.ball.centerXAnchor.constraint(equalTo: self.trailingAnchor, constant: -(HomeSwitch.ballRadius + HomeLayout.dmargin))
         }
         else {
-            self.ballCenterX = self.ball.centerXAnchor.constraint(equalTo: self.offLabel.leadingAnchor, constant: -(HomeSwitch.ballRadius + HomeLayout.dmargin))
+            self.ballCenterX = self.ball.centerXAnchor.constraint(equalTo: self.leadingAnchor, constant: (HomeSwitch.ballRadius + HomeLayout.dmargin))
         }
         if self.ball.superview != nil {
             self.ballCenterX.isActive = true
@@ -135,18 +117,12 @@ final class HomeSwitch: BasicUIView {
     
     private func updateState() {
         if self.isOn {
-            self.onLabel.alpha = 1.0
-            self.offLabel.alpha = 0.0
             self.ball.backgroundColor = HomeDesign.white
             self.backgroundColor = self.primary
-            self.onLabel.textColor = HomeDesign.white
         }
         else {
-            self.onLabel.alpha = 0.0
-            self.offLabel.alpha = 1.0
             self.ball.backgroundColor = HomeDesign.lightGray
             self.backgroundColor = HomeDesign.white
-            self.offLabel.textColor = HomeDesign.black
         }
     }
     
