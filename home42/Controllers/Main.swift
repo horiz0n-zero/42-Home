@@ -129,7 +129,6 @@ final class MainViewController: HomeViewController {
     // MARK: -
     private func controllerSet(_ controller: HomeViewController) {
         controller.view.frame = UIScreen.main.bounds
-        
         self.addChild(controller)
         self.controllerContainer.addSubview(controller.view)
         controller.view.translatesAutoresizingMaskIntoConstraints = false

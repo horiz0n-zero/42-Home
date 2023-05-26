@@ -121,6 +121,22 @@ final class EventsListViewController: HomeViewController, SearchFieldViewDelegat
         self.presentWithBlur(self.settings)
     }
     
-    static let canExport: Bool = false
-    func adjustableParametersProviderWillExport() -> String { fatalError() }
+    static let canExport: Bool = true
+    func adjustableParametersProviderWillExport() -> String {
+        var r = ""
+        
+        for (index, event) in self.tableView.elements.enumerated() {
+            r += event.name + "\n"
+            r += ~"event.header.start-at" + event.beginDate.toString(.custom("EEEE dd/MM/yyyy HH:mm")) + "\n"
+            r += ~"event.header.end-at" + event.endDate.toString(.custom("EEEE dd/MM/yyyy HH:mm")) + "\n"
+            if event.location != nil {
+                r += event.location + "\n"
+            }
+            r += event.eventDescription
+            if index < self.tableView.elements.count - 1 {
+                r += "\n\n\n"
+            }
+        }
+        return r
+    }
 }

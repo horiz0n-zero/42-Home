@@ -84,7 +84,7 @@
     "title.clusters": "Clusters",
     "title.events": "Events",
     "title.elearning": "E-learning",
-    "title.corrections": "Fixes",
+    "title.corrections": "Corrections",
     "title.shop": "Store",
     "title.companies": "Companies",
     "title.research": "Research",
@@ -360,5 +360,10 @@
     "slots.add": "Are you sure you want to add this slot?",
     "slots.remove": "Are you sure you want to remove this slot?",
     "research.events": "Search for an event",
-    "research.achievements": "Research an achievement"
+    "research.achievements": "Research an achievement",
+    "settings.desc.peoples.custom": "Set the name, color and icon for your friends list.",
+    "title.people": "Friends",
+    "research.peoples": "See list \"%@\"",
+    "testflight.title": "Become a beta tester!",
+    "testflight.desc": "Download the Testflight app and get future updates early, use the following link to join the beta tester team."
 }

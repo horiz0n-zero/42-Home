@@ -360,5 +360,10 @@
     "slots.add": "本当にこのスロットを追加しますか?",
     "slots.remove": "本当にこのスロットを削除しますか?",
     "research.events": "イベントを検索",
-    "research.achievements": "成果を研究する"
+    "research.achievements": "成果を研究する",
+    "settings.desc.peoples.custom": "友達リストの名前、色、アイコンを設定します。",
+    "title.people": "友達",
+    "research.peoples": "リスト「%@」を参照してください。",
+    "testflight.title": "ベータテスターに​​なってみよう！",
+    "testflight.desc": "Testflight アプリをダウンロードして将来のアップデートを早期に入手し、次のリンクを使用してベータ テスター チームに参加してください。"
 }

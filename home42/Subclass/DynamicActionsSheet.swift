@@ -239,13 +239,9 @@ final class DynamicActionsSheet: DynamicController {
             super.init()
         }
         required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-        
-        
     }
     
-    static func presentWithWebLink(_ link: String, title: String? = nil, text: String? = nil, primary: UIColor,
-                                   parentViewController: UIViewController) {
-        
+    static func actionsForWebLink(_ link: String, parentViewController: UIViewController) -> [DynamicActionsSheet.Action] {
         var checkedLink: String = link
         var actions: [DynamicActionsSheet.Action] = []
         
@@ -263,15 +259,9 @@ final class DynamicActionsSheet: DynamicController {
             UIPasteboard.general.string = checkedLink
         }
         
-        if let title = title {
-            actions.append(.title(title))
-        }
-        if let text = text {
-            actions.append(.text(text))
-        }
         actions.append(.normal(~"openweb-link", .settingsWeb, openWeb))
         actions.append(.normal(~"openweb-link-safari", .settingsWeb, openSafari))
         actions.append(.normal(~"general.copy", .settingsCode, copy))
-        DynamicActionsSheet(actions: actions, primary: primary)
+        return actions
     }
 }

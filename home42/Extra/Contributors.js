@@ -17,7 +17,7 @@ const https = require('https')
 const querystring = require('querystring')
 const fs = require('fs')
 
-const client_id = 'API_ID'
+const client_id = 'API_UID'
 const client_secret = 'API_SECRET'
 
 function sleep(millis) {

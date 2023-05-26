@@ -34,7 +34,7 @@ final class People: IntraObject {
             case .me:
                 return HomeDesign.primary
             case .friends:
-                return HomeDesign.greenSuccess
+                return App.settings.peopleCustomColor?.uiColor ?? HomeDesign.greenSuccess
             case .extraList1:
                 return App.settings.peopleExtraList1Color.uiColor
             case .extraList2:
@@ -46,7 +46,7 @@ final class People: IntraObject {
             case .me:
                 return ~"title.profil"
             case .friends:
-                return ~"peoples.friends"
+                return App.settings.peopleCustomName ?? ~"peoples.friends"
             case .extraList1:
                 return App.settings.peopleExtraList1Name
             case .extraList2:
@@ -58,7 +58,7 @@ final class People: IntraObject {
             case .me:
                 return .actionPeopleSunglass
             case .friends:
-                return .actionFriends
+                return App.settings.peopleCustomIcon ?? .actionFriends
             case .extraList1:
                 return App.settings.peopleExtraList1Icon
             case .extraList2:

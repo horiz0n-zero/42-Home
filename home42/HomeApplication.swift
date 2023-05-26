@@ -70,7 +70,6 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
         HomeApi.tokens = nil
         HomeApi.cookies = nil
         self.mainController.logout()
-        self.settings.logout()
     }
     
     private func prepare() {
@@ -152,7 +151,6 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
             self.userCursus = nil
             self.userCoalition = nil
             self.prepare()
-            self.checkUpdate()
         }
         return true
     }
@@ -160,7 +158,7 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         self.window!.makeKeyAndVisible()
         if self.userLoggedIn == false {
-            self.mainController.present(LoginViewController(), animated: false, completion: nil)
+            self.mainController.present(LoginViewController(), animated: false, completion: self.checkUpdate)
         }
         if let deeplink = HomeDeeplinks.deeplink(from: launchOptions) {
             HomeDeeplinks.handle(deeplink)
@@ -175,7 +173,7 @@ final class HomeApplication: UIApplication, UIApplicationDelegate {
     func applicationDidReceiveMemoryWarning(_ application: UIApplication) {
         HomeResources.clearCache()
     }
-    
+        
     var userLanguage: IntraLanguage {
         
         func defaultLanguage() -> IntraLanguage {

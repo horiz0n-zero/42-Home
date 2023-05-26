@@ -326,9 +326,7 @@ final class Cookies: IntraObject {
                 }
             }
             private func updateStateDelegateText() {
-                self.delegate.loginButton.setAttributedTitle(.init(string: (~self.state.rawValue).uppercased(),
-                                                                   attributes: [.foregroundColor: HomeDesign.white, .font: HomeLayout.fontBoldTitle]),
-                                                             for: .normal)
+                self.delegate.loginButton.setAttributedTitle(.init(string: (~self.state.rawValue).uppercased(), attributes: [.foregroundColor: HomeDesign.white, .font: HomeLayout.fontBoldTitle]), for: .normal)
             }
             
             func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

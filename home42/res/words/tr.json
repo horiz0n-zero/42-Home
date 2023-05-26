@@ -360,5 +360,10 @@
     "slots.add": "Bu alanı eklemek istediğinizden emin misiniz?",
     "slots.remove": "Bu alanı kaldırmak istediğinizden emin misiniz?",
     "research.events": "Bir etkinlik ara",
-    "research.achievements": "Bir başarıyı araştırın"
+    "research.achievements": "Bir başarıyı araştırın",
+    "settings.desc.peoples.custom": "Arkadaş listeniz için adı, rengi ve simgeyi ayarlayın.",
+    "title.people": "Arkadaşlar",
+    "research.peoples": "\"%@\" listesine bakın",
+    "testflight.title": "Beta test kullanıcısı olun!",
+    "testflight.desc": "Testflight uygulamasını indirin ve gelecekteki güncellemeleri erken alın, beta test ekibine katılmak için aşağıdaki bağlantıyı kullanın."
 }

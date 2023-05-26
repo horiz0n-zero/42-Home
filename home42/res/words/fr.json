@@ -108,6 +108,7 @@
     "title.contributor": "42Home Contributeurs",
     "title.partnerships": "Parteneriats",
     "title.languages": "Langues",
+    "title.people": "Copains",
     "event.action.register": "S'inscrire",
     "event.action.unregister": "Se désinscrire",
     "event.state.full": "Complet",
@@ -166,6 +167,7 @@
     "clusters.logged-in": "Actuellement connecté",
     "clusters.debugfile": "Voulez vous tester ce cluster ?\nSelectionner le campus auquel il est affilié pour pouvoir charger les places correspondantes.",
     "graph.required-cursus": "aucun cursus n'est disponible pour %@",
+    "research.peoples": "Voir la liste \"%@\"",
     "research.users": "Rechercher un utilisateur",
     "research.projects": "Rechercher un utilisateur parmi ceux étant lier un projet sélectionné",
     "research.users-title": "Rechercher un utilisateur parmi ceux possèdant un titre sélectionné",
@@ -226,6 +228,7 @@
     "settings.desc.event.confirm": "Confirmer l'inscription à un évènement lorsque vous ne pourrez plus vous désinscrire de celui ci",
     "settings.desc.peoples.e1.active": "Rendre active la liste de people une",
     "settings.desc.peoples.e2.active": "Rendre active la liste de people deux",
+    "settings.desc.peoples.custom": "Paramétrer le nom, la couleur et l'icône de votre liste de copains",
     "settings.desc.peoples.e1.icon": "Paramétrer le nom, la couleur et l'icône de la liste de people une",
     "settings.desc.peoples.e2.icon": "Paramétrer le nom, la couleur et l'icône de la liste de people deux",
     "settings.desc.cluster.counter-prefer": "Afficher le nombre de places prise dans chaque cluster plutôt que le nombre de places restante",
@@ -247,7 +250,7 @@
     "guides.cluster.title": "Ajouter un cluster manquant",
     "guides.cluster": "Apprenez comment créer un cluster à partir d'un fichier JSON ciblant un campus particulier. Soumettez-le sur github et apprécier de le voir officiellement disponible a tous dans une prochaine mise à jour.",
     "github.title": "Le code source est disponible",
-    "github.text": "Le code est disponible sur github et ouvert aux contributions",
+    "github.text": "Le code est disponible sur github et est ouvert aux contributions",
     "terminal.running": "Fonctionne",
     "terminal.waiting": "En attente",
     "disconnect.title": "Êtes-vous sur de vouloir vous déconnecter ?",
@@ -360,5 +363,7 @@
     "slots.add": "Êtes vous sur de vouloir ajouter ce slot ?",
     "slots.remove": "Êtes vous sur de vouloir supprimer ce slot ?",
     "research.events": "Rechercher un évenement",
-    "research.achievements": "Rechercher un achievement"
+    "research.achievements": "Rechercher un achievement",
+    "testflight.title": "Deviens beta testeur !",
+    "testflight.desc": "Télécharge l'application Testflight et obtiens les futures mises à jour en avance, utilise le lien suivant pour rejoindre l'équipe de beta testeur."
 }

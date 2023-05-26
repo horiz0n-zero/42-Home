@@ -360,5 +360,10 @@
     "slots.add": "Vés a afegir-hi la ranura?",
     "slots.remove": "Si voleu eliminar aquesta ranura?",
     "research.events": "Cerca un esdeveniment",
-    "research.achievements": "Investigar un assoliment"
+    "research.achievements": "Investigar un assoliment",
+    "settings.desc.peoples.custom": "Estableix el nom, el color i la icona per a la teva llista d'amics.",
+    "title.people": "Amics",
+    "research.peoples": "Veure la llista \"%@\"",
+    "testflight.title": "Converteix-te en un tester beta!",
+    "testflight.desc": "Baixeu l'aplicació Testflight i obteniu actualitzacions futures abans d'hora; feu servir l'enllaç següent per unir-vos a l'equip de prova beta."
 }

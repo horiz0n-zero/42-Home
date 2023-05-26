@@ -1,0 +1,30 @@
+{
+    "width": 420.0, "height": 600.0,
+    "placeWidth": 48.0, "placeHeight": 60.0,
+    "elementsCount": 12,
+    "floors": [
+        {
+            "name": "test",
+            "prefix": "c1",
+            "elementsCount": 12,
+            "places": [
+                { "host": "c1r1s1", "display": "r1s1", "position": [96.0, 120.0] },
+                { "host": "c1r1s2", "display": "r1s2", "position": [96.0, 180.0] },
+                { "host": "c1r1s3", "display": "r1s3", "position": [96.0, 240.0] },
+                { "host": "c1r1s4", "display": "r1s4", "position": [96.0, 300.0] },
+                { "host": "c1r1s5", "display": "r1s5", "position": [96.0, 360.0] },
+                { "host": "c1r1s6", "display": "r1s6", "position": [96.0, 420.0] },
+                { "host": "c1r2s1", "display": "r2s1", "position": [276.0, 120.0] },
+                { "host": "c1r2s2", "display": "r2s2", "position": [276.0, 180.0] },
+                { "host": "c1r2s3", "display": "r2s3", "position": [276.0, 240.0] },
+                { "host": "c1r2s4", "display": "r2s4", "position": [276.0, 300.0] },
+                { "host": "c1r2s5", "display": "r2s5", "position": [276.0, 360.0] },
+                { "host": "c1r2s6", "display": "r2s6", "position": [276.0, 420.0] }
+            ],
+            "pillars": [
+            ]
+        }
+    ],
+    "transitions": [
+    ]
+}

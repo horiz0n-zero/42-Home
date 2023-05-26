@@ -360,5 +360,10 @@
     "slots.add": "이 슬롯을 추가하겠습니까?",
     "slots.remove": "이 슬롯을 제거하겠습니까?",
     "research.events": "이벤트 검색",
-    "research.achievements": "업적 검색"
+    "research.achievements": "업적 검색",
+    "settings.desc.peoples.custom": "친구 목록의 이름, 색상 및 아이콘을 설정합니다.",
+    "title.people": "친구",
+    "research.peoples": "\"%@\" 목록 보기",
+    "testflight.title": "베타 테스터가 되어보세요!",
+    "testflight.desc": "Testflight 앱을 다운로드하고 향후 업데이트를 조기에 받으십시오. 다음 링크를 사용하여 베타 테스터 팀에 가입하십시오."
 }

@@ -163,6 +163,9 @@ final class UserSettings: IntraObject {
         let color: UIColor
         let name: String
     }
+    var peopleCustomIcon: UIImage.Assets?
+    var peopleCustomName: String?
+    var peopleCustomColor: DecodableColor?
     var peopleExtraList1Available: Bool
     var peopleExtraList1Icon: UIImage.Assets
     var peopleExtraList1Color: DecodableColor
@@ -231,6 +234,9 @@ final class UserSettings: IntraObject {
         
         self.peopleListViewControllerSort = .createdAt
         self.peopleWarnWhenRemove = true
+        self.peopleCustomIcon = nil
+        self.peopleCustomName = nil
+        self.peopleCustomColor = nil
         self.peopleExtraList1Available = false
         self.peopleExtraList1Icon = .actionAddFriends
         self.peopleExtraList1Color = .init(color: HomeDesign.gold)
@@ -279,6 +285,10 @@ final class UserSettings: IntraObject {
         
         self.peopleListViewControllerSort = (try? container.decode(PeopleListViewControllerSort.self, forKey: .peopleListViewControllerSort)) ?? .createdAt
         self.peopleWarnWhenRemove = (try? container.decode(Bool.self, forKey: .peopleWarnWhenRemove)) ?? true
+        self.peopleCustomIcon = try? container.decode(UIImage.Assets.self, forKey: .peopleCustomIcon)
+        self.peopleCustomName = try? container.decode(String.self, forKey: .peopleCustomName)
+        self.peopleCustomColor = try? container.decode(DecodableColor.self, forKey: .peopleCustomColor)
+        
         self.peopleExtraList1Available = (try? container.decode(Bool.self, forKey: .peopleExtraList1Available)) ?? false
         self.peopleExtraList1Icon = (try? container.decode(UIImage.Assets.self, forKey: .peopleExtraList1Icon)) ?? .actionAddFriends
         self.peopleExtraList1Color = (try? container.decode(DecodableColor.self, forKey: .peopleExtraList1Color)) ?? .init(color: HomeDesign.gold)
@@ -290,11 +300,7 @@ final class UserSettings: IntraObject {
         self.cacheProfilQuality = (try? container.decode(ProfilImageQuality.self, forKey: .cacheProfilQuality)) ?? .small
     }
     
-    func save() {
+    @inlinable func save() {
         HomeDefaults.save(self, forKey: .settings)
-    }
-    func logout() {
-        self.peopleExtraList1Available = false
-        self.peopleExtraList2Available = false
     }
 }

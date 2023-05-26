@@ -950,8 +950,10 @@ extension DynamicAlert {
         }
         
         @objc private func websiteTapped() {
-            DynamicActionsSheet.presentWithWebLink(self.website.text!, primary: self.primary,
-                                                   parentViewController: self.parentViewController!)
+            var actions: [DynamicActionsSheet.Action] = [.textWithPrimary(self.website.text!)]
+            
+            actions += DynamicActionsSheet.actionsForWebLink(self.website.text!, parentViewController: self.parentViewController!)
+            DynamicActionsSheet(actions: actions, primary: self.primary)
         }
         
         override class func filter(_ source: [IntraCampus], with text: String) -> [IntraCampus] {

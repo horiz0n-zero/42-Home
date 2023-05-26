@@ -360,5 +360,10 @@
     "slots.add": "Tem certeza que deseja adicionar este slot?",
     "slots.remove": "Tem certeza que deseja remover este slot?",
     "research.events": "Pesquisar um evento",
-    "research.achievements": "Pesquisar uma conquista"
+    "research.achievements": "Pesquisar uma conquista",
+    "settings.desc.peoples.custom": "Defina o nome, a cor e o ícone da sua lista de amigos.",
+    "title.people": "Amigos",
+    "research.peoples": "Veja a lista \"%@\"",
+    "testflight.title": "Torne-se um testador beta!",
+    "testflight.desc": "Baixe o aplicativo Testflight e obtenha atualizações futuras com antecedência, use o link a seguir para ingressar na equipe de testadores beta."
 }

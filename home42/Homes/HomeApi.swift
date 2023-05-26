@@ -21,7 +21,7 @@ import SwiftDate
 
 final class HomeApi: NSObject {
     
-    static private let uid: String =           "API_ID"
+    static private let uid: String =           "API_UID"
     static private let secret: String =        "API_SECRET"
     static private let redirectURI: String =   "https://intra.42.fr"
     static private let scope: String =         "public+forum+projects+profile+elearning+tig"
@@ -571,6 +571,7 @@ extension HomeApi {
         case projectsWithProjectIdAttachments(Int)
         case titlesWithTitleIdUsers(Int)
         case partnershipsWithPartnershipIdUsers(Int)
+        case clusters
         case token
         case tokenInformation
         case test(String)
@@ -703,6 +704,8 @@ extension HomeApi {
                 return HomeApi.apiRoot + "titles/\(id)/users"
             case .partnershipsWithPartnershipIdUsers(let id):
                 return HomeApi.apiRoot + "partnerships/\(id)/users"
+            case .clusters:
+                return HomeApi.apiRoot + "clusters"
             case .token:
                 return "https://api.intra.42.fr/oauth/token"
             case .tokenInformation:

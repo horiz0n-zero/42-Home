@@ -360,5 +360,10 @@
     "slots.add": "Bist Du dir sicher, dass Du diesen Slot hinzufügen möchtest?",
     "slots.remove": "Bist Du dir sicher, dass Du diesen Slot entfernen möchtest?",
     "research.events": "Nach einer Veranstaltung suchen",
-    "research.achievements": "Einen Erfolg erforschen"
+    "research.achievements": "Einen Erfolg erforschen",
+    "settings.desc.peoples.custom": "Stel de naam, kleur en het pictogram in voor uw vriendenlijst.",
+    "title.people": "Vrienden",
+    "research.peoples": "Zie lijst \"%@\"",
+    "testflight.title": "Word bètatester!",
+    "testflight.desc": "Download de Testflight-app en ontvang toekomstige updates vroeg, gebruik de volgende link om lid te worden van het bètatesterteam."
 }

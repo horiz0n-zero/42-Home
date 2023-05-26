@@ -250,17 +250,18 @@ private extension ResearchViewController {
     }
     
     final private class ResearchPeopleView: BasicUIView, HomeFramingTableViewCellView {
-        static var edges: UIEdgeInsets = .init(top: HomeLayout.margin, left: HomeLayout.margin,
-                                               bottom: 0.0, right: HomeLayout.margin)
+        static var edges: UIEdgeInsets = .init(top: HomeLayout.margin, left: HomeLayout.margin, bottom: 0.0, right: HomeLayout.margin)
         
-        private let titleHeader: LeftCurvedTitleView
-        private let peopleButton: ActionButtonView
+        private let titleHeader: PeopleCurvedView
+        private let descriptionLabel: BasicUILabel
         
         override init() {
-            self.titleHeader = LeftCurvedTitleView(text: "???", primaryColor: HomeDesign.primary, addTopCorner: false)
-            self.peopleButton = ActionButtonView(asset: .actionPeopleKo, color: HomeDesign.primary)
-            self.peopleButton.isUserInteractionEnabled = false
-            self.peopleButton.alpha = 1.0
+            self.titleHeader = PeopleCurvedView(asset: .actionPeople, text: "???", primaryColor: HomeDesign.primary, addTopCorner: false)
+            self.descriptionLabel = BasicUILabel(text: "???")
+            self.descriptionLabel.font = HomeLayout.fontRegularMedium
+            self.descriptionLabel.textColor = HomeDesign.black
+            self.descriptionLabel.numberOfLines = 0
+            self.descriptionLabel.textAlignment = .left
             super.init()
             self.backgroundColor = HomeDesign.white
             self.layer.cornerRadius = HomeLayout.corner
@@ -275,15 +276,16 @@ private extension ResearchViewController {
             self.titleHeader.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
             self.titleHeader.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
             self.titleHeader.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
-            self.addSubview(self.peopleButton)
-            self.peopleButton.topAnchor.constraint(equalTo: self.titleHeader.bottomAnchor, constant: HomeLayout.smargin).isActive = true
-            self.peopleButton.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-            self.peopleButton.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -HomeLayout.smargin).isActive = true
+            self.addSubview(self.descriptionLabel)
+            self.descriptionLabel.topAnchor.constraint(equalTo: self.titleHeader.bottomAnchor, constant: HomeLayout.margin).isActive = true
+            self.descriptionLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: HomeLayout.margin).isActive = true
+            self.descriptionLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -HomeLayout.margin).isActive = true
+            self.descriptionLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -HomeLayout.margin).isActive = true
         }
         
         func update(with peopleList: People.ListType) {
-            self.titleHeader.update(with: peopleList.title, primaryColor: peopleList.color)
-            self.peopleButton.set(asset: peopleList.asset, color: peopleList.color)
+            self.titleHeader.update(with: peopleList.asset, text: peopleList.title, primaryColor: peopleList.color)
+            self.descriptionLabel.text = String(format: ~"research.peoples", peopleList.title)
         }
     }
 }

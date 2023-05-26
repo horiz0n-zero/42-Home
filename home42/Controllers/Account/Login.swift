@@ -152,7 +152,10 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.present(SafariWebView(URL(string: "https://signin.intra.42.fr/legal")!), animated: true, completion: nil)
     }
     @objc private func sourceCodeTapped(sender: UITapGestureRecognizer) {
-        DynamicActionsSheet.presentWithWebLink("https://github.com/horiz0n-zero/42-Home", title: ~"github.title", text: ~"github.text", primary: HomeDesign.primary, parentViewController: self)
+        var actions: [DynamicActionsSheet.Action] = [.title(~"github.title"), .text(~"github.text")]
+        
+        actions += DynamicActionsSheet.actionsForWebLink("https://github.com/horiz0n-zero/42-Home", parentViewController: self)
+        DynamicActionsSheet(actions: actions, primary: HomeDesign.primaryDefault)
     }
     
     @frozen private enum State: String {

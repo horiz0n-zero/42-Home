@@ -30,9 +30,7 @@ final class LeftCurvedTitleView: BasicUILabel {
         self.textColor = HomeDesign.white
         self.adjustsFontSizeToFitWidth = true
     }
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     override func willMove(toSuperview newSuperview: UIView?) {
         guard newSuperview != nil else { return }
@@ -58,8 +56,7 @@ final class LeftCurvedTitleView: BasicUILabel {
     fileprivate static let dradius = radius * 2.0
     static let minHeight = HomeLayout.leftCurvedTitleViewHeigth * 0.3
     private static let minusWidth = HomeLayout.leftCurvedTitleViewHeigth * 0.6
-    static let middleHeigth: CGFloat = HomeLayout.leftCurvedTitleViewHeigth -
-                                                ((HomeLayout.leftCurvedTitleViewHeigth - LeftCurvedTitleView.minHeight) / 2.0)
+    static let middleHeigth: CGFloat = HomeLayout.leftCurvedTitleViewHeigth - ((HomeLayout.leftCurvedTitleViewHeigth - LeftCurvedTitleView.minHeight) / 2.0)
     override func drawText(in rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()!
         let textRect = rect.insetBy(dx: HomeLayout.margin, dy: 0.0)
@@ -95,6 +92,51 @@ final class LeftCurvedTitleView: BasicUILabel {
         context.addLine(to: .zero)
         context.fillPath()
         super.drawText(in: textRect)
+    }
+}
+
+final class PeopleCurvedView: BasicUIView {
+
+    private let backgroundAssetView: BasicUIView
+    private let assetView: BasicUIImageView
+    private let curvedView: LeftCurvedTitleView
+
+    init(asset: UIImage.Assets, text: String, primaryColor: UIColor, addTopCorner: Bool = true) {
+        self.backgroundAssetView = .init()
+        self.backgroundAssetView.backgroundColor = primaryColor
+        self.assetView = .init(asset: asset)
+        self.assetView.tintColor = HomeDesign.white
+        self.curvedView = .init(text: text, primaryColor: primaryColor, addTopCorner: addTopCorner)
+        super.init()
+    }
+    required init?(coder: NSCoder) { fatalError() }
+    
+    func update(with asset: UIImage.Assets, text: String, primaryColor: UIColor, animate: Bool = false) {
+        self.assetView.image = asset.image
+        self.backgroundAssetView.backgroundColor = primaryColor
+        self.curvedView.update(with: text, primaryColor: primaryColor, animate: animate)
+    }
+    
+    override func willMove(toSuperview newSuperview: UIView?) {
+        guard newSuperview != nil else {
+            return
+        }
+        
+        self.addSubview(self.backgroundAssetView)
+        self.backgroundAssetView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        self.backgroundAssetView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        self.backgroundAssetView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        self.backgroundAssetView.widthAnchor.constraint(equalTo: self.backgroundAssetView.heightAnchor, multiplier: 1.0).isActive = true
+        self.backgroundAssetView.addSubview(self.assetView)
+        self.assetView.centerXAnchor.constraint(equalTo: self.backgroundAssetView.centerXAnchor, constant: HomeLayout.smargin).isActive = true
+        self.assetView.centerYAnchor.constraint(equalTo: self.backgroundAssetView.centerYAnchor).isActive = true
+        self.assetView.topAnchor.constraint(equalTo: self.backgroundAssetView.topAnchor, constant: HomeLayout.dmargin).isActive = true
+        self.assetView.widthAnchor.constraint(equalTo: self.assetView.heightAnchor, multiplier: 1.0).isActive = true
+        self.insertSubview(self.curvedView, belowSubview: self.backgroundAssetView)
+        self.curvedView.leadingAnchor.constraint(equalTo: self.backgroundAssetView.trailingAnchor).isActive = true
+        self.curvedView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        self.curvedView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        self.curvedView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
     }
 }
 

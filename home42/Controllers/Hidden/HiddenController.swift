@@ -62,24 +62,10 @@ WBCsgoa9iT2l+n/nLInIAa/njMXR8l0D6OwnV30SN6NbN0b8oR7ESA==
     }()
     
     static func presentActionSheetForQRCodes(_ link: String, parentViewController: UIViewController) {
-        var checkedLink: String = link
-        
         guard App.userLoggedIn && App.user.id == 20091 && App.user.login == "afeuerst" else {
             return
         }
-        if link.hasPrefix("https://") == false && link.hasPrefix("http://") == false {
-            checkedLink = "https://" + link
-        }
-        
-        func openWeb() {
-            parentViewController.present(SafariWebView(checkedLink.url), animated: true, completion: nil)
-        }
-        func openSafari() {
-            App.open(checkedLink.url, options: [:], completionHandler: nil)
-        }
-        func copy() {
-            UIPasteboard.general.string = checkedLink
-        }
+        var actions: [DynamicActionsSheet.Action]
         
         func generate(forHiddenControllerType type: HiddenViewController.Type, title: String, icon: UIImage.Assets) {
             
@@ -145,21 +131,23 @@ WBCsgoa9iT2l+n/nLInIAa/njMXR8l0D6OwnV30SN6NbN0b8oR7ESA==
         }
         
         func generateTracker() {
-            generate(forHiddenControllerType: TrackerViewController.self,
-                     title: ~"title.tracker", icon: .controllerTracker)
+            generate(forHiddenControllerType: TrackerViewController.self, title: ~"title.tracker", icon: .controllerTracker)
         }
         func generateCorrections() {
-            generate(forHiddenControllerType: CorrectionsViewController.self,
-                     title: ~"title.corrections", icon: .controllerCorrections)
+            generate(forHiddenControllerType: CorrectionsViewController.self, title: ~"title.corrections", icon: .controllerCorrections)
         }
         
-        DynamicActionsSheet(actions: [.title(~"general.qrcodes"),
-                                      .normalWithPrimary(~"title.tracker", .controllerTracker, HomeDesign.gold, generateTracker),
-                                      .normalWithPrimary(~"title.corrections", .controllerCorrections, HomeDesign.gold, generateCorrections),
-                                      .separatorWithPrimary(HomeDesign.black),
-                                      .title(~"github.title"), .text(~"github.text"),
-                                      .normal(~"openweb-link", .settingsWeb, openWeb),
-                                      .normal(~"openweb-link-safari", .settingsWeb, openSafari),
-                                      .normal(~"general.copy", .settingsCode, copy)])
+        func openTestflight() {
+            App.open("https://testflight.apple.com/join/MHJO6atU".url, options: [:], completionHandler: nil)
+        }
+        
+        actions = [.normalWithPrimary(~"title.tracker", .controllerTracker, HomeDesign.gold, generateTracker),
+                   .normalWithPrimary(~"title.corrections", .controllerCorrections, HomeDesign.gold, generateCorrections),
+                   .separatorWithPrimary(HomeDesign.black), .title(~"github.title"), .text(~"github.text")]
+        actions += DynamicActionsSheet.actionsForWebLink(link, parentViewController: parentViewController)
+        actions += [.separatorWithPrimary(HomeDesign.black),
+                   .title(~"testflight.title"), .text(~"testflight.desc"),
+                   .normal(~"general.open", .settingsTestflight, openTestflight)]
+        DynamicActionsSheet(actions: actions, primary: HomeDesign.primary)
     }
 }

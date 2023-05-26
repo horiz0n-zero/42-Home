@@ -157,8 +157,10 @@ final class GuidesViewController: HomeViewController, UITableViewDataSource, UIT
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let guide = self.guides[indexPath.row]
+        var actions: [DynamicActionsSheet.Action] = [.textWithPrimary(guide.video)]
         
-        DynamicActionsSheet.presentWithWebLink(guide.video, primary: HomeDesign.primary, parentViewController: self)
+        actions += DynamicActionsSheet.actionsForWebLink(guide.video, parentViewController: self)
+        DynamicActionsSheet(actions: actions, primary: guide.coalition?.uicolor ?? HomeDesign.primary)
     }
     func documentInteractionControllerViewControllerForPreview(_ controller: UIDocumentInteractionController) -> UIViewController {
         return self

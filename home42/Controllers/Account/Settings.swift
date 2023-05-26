@@ -187,6 +187,23 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
                 self.namePath = namePath
             }
         }
+        struct RowCustomizeOptionalPeople: SettingsRowData {
+            let reuseIdentifier: String = SettingsRowAvailable.customizePeople.rawValue
+            let descriptionKey: String
+            let keypath: ReferenceWritableKeyPath<UserSettings, UIImage.Assets?>
+            let assets: [UIImage.Assets]
+            let colorKeyPath: ReferenceWritableKeyPath<UserSettings, DecodableColor?>
+            let namePath: ReferenceWritableKeyPath<UserSettings, String?>
+            
+            init(_ descriptionKey: String, keypath: ReferenceWritableKeyPath<UserSettings, UIImage.Assets?>, assets: [UIImage.Assets],
+                 colorKeyPath: ReferenceWritableKeyPath<UserSettings, DecodableColor?>, namePath: ReferenceWritableKeyPath<UserSettings, String?>) {
+                self.descriptionKey = descriptionKey
+                self.keypath = keypath
+                self.assets = assets
+                self.colorKeyPath = colorKeyPath
+                self.namePath = namePath
+            }
+        }
         struct RowButton: SettingsRowData {
             let reuseIdentifier: String = SettingsRowAvailable.button.rawValue
             let descriptionKey: String
@@ -204,6 +221,13 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
     static private let sections: [SettingsViewController.Section] = [
         .init("title.languages", .actionText, rows: [
             Section.RowLanguage.init("settings.desc.languages")
+        ]),
+        .init("title.people", .actionPeople, rows: [
+            Section.RowCustomizeOptionalPeople.init("settings.desc.peoples.custom", keypath: \.peopleCustomIcon, assets: People.assets, colorKeyPath: \.peopleCustomColor, namePath: \.peopleCustomName),
+            Section.RowCustomizePeople.init("settings.desc.peoples.e1.icon", keypath: \.peopleExtraList1Icon, assets: People.assets, colorKeyPath: \.peopleExtraList1Color, namePath: \.peopleExtraList1Name),
+            Section.RowBoolean.init("settings.desc.peoples.e1.active", keypath: \.peopleExtraList1Available),
+            Section.RowCustomizePeople.init("settings.desc.peoples.e2.icon", keypath: \.peopleExtraList2Icon, assets: People.assets, colorKeyPath: \.peopleExtraList2Color, namePath: \.peopleExtraList2Name),
+            Section.RowBoolean.init("settings.desc.peoples.e2.active", keypath: \.peopleExtraList2Available)
         ]),
         .init("title.profil", .actionSee, rows: [
             Section.RowBoolean.init("settings.desc.show.events", keypath: \.profilShowEvents),
@@ -231,11 +255,7 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
             Section.RowBoolean.init("settings.desc.cluster.show", keypath: \.trackerShowLocationHistoric),
             Section.RowSelectorEnum.init("settings.desc.peoples.sort", keypath: \.peopleListViewControllerSort),
             Section.RowBoolean.init("settings.desc.peoples.warn", keypath: \.peopleWarnWhenRemove),
-            Section.RowBoolean.init("settings.desc.logs", keypath: \.trackerShowLocationOnLogCell),
-            Section.RowBoolean.init("settings.desc.peoples.e1.active", keypath: \.peopleExtraList1Available),
-            Section.RowCustomizePeople.init("settings.desc.peoples.e1.icon", keypath: \.peopleExtraList1Icon, assets: People.assets, colorKeyPath: \.peopleExtraList1Color, namePath: \.peopleExtraList1Name),
-            Section.RowBoolean.init("settings.desc.peoples.e2.active", keypath: \.peopleExtraList2Available),
-            Section.RowCustomizePeople.init("settings.desc.peoples.e2.icon", keypath: \.peopleExtraList2Icon, assets: People.assets, colorKeyPath: \.peopleExtraList2Color, namePath: \.peopleExtraList2Name)
+            Section.RowBoolean.init("settings.desc.logs", keypath: \.trackerShowLocationOnLogCell)
         ]),
         .init("title.events", .controllerEvents, rows: [
             Section.RowBoolean.init("settings.desc.event.confirm", keypath: \.eventsWarnSubscription)
@@ -244,7 +264,6 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
             Section.RowBoolean.init("settings.desc.elearning-use-hd", keypath: \.elearningHD)
         ]),
         /*.init("title.corrections", .controllerCorrections, true, CorrectionsViewController.self, rows: [
-        
         ]),*/
         .init("title.graph", .controllerGraph, rows: [
             Section.RowBoolean.init("settings.desc.graph.mix-color", keypath: \.graphMixColor),
@@ -304,8 +323,10 @@ final class SettingsViewController: HomeViewController, UITableViewDataSource, U
             (cell as! RowBooleanTableViewCell).update(with: rowBoolean)
         case let rowIntegerCounter as Section.RowIntegerCounter:
             (cell as! RowIntegerCounterTableViewCell).update(with: rowIntegerCounter)
-        case let RowCustomizePeople as Section.RowCustomizePeople:
-            (cell as! RowCustomizePeopleTableViewCell).update(with: RowCustomizePeople)
+        case let rowCustomizePeople as Section.RowCustomizePeople:
+            (cell as! RowCustomizePeopleTableViewCell).update(with: rowCustomizePeople)
+        case let rowCustomizeOptionalPeople as Section.RowCustomizeOptionalPeople:
+            (cell as! RowCustomizePeopleTableViewCell).update(with: rowCustomizeOptionalPeople)
         case let rowActions as Section.RowActions:
             (cell as! RowActionsTableViewCell).update(with: rowActions, target: self)
         case let rowCacheActions as Section.RowCacheActions:
@@ -658,65 +679,138 @@ extension SettingsViewController {
         }
     }
     
-    final private class RowCustomizePeopleTableViewCell: RowTableViewCell<RowCustomizePeopleTableViewCell.ActionsSelector, People> {
+    final private class RowCustomizePeopleTableViewCell: BasicUITableViewCell {
         
-        final class ActionsSelector: RoundedGenericActionsView<BasicUIImageView, ActionButtonView>, SettingsRowView {
-            
-            typealias Value = People
-            
-            static func defaultView() -> RowCustomizePeopleTableViewCell.ActionsSelector {
-                return ActionsSelector(BasicUIImageView(asset: .actionPeople))
-            }
-            
-            init(_ view: BasicUIImageView) {
-                super.init(view, initialActions: [ActionButtonView(asset: .actionText, color: HomeDesign.primary),
-                                                  ActionButtonView(asset: .actionBrush, color: HomeDesign.primary),
-                                                  ActionButtonView(asset: .actionSelect, color: HomeDesign.primary)])
-            }
-            required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-        }
-        
+        private let titleView: PeopleCurvedView
+        private let borderView: BasicUIView
+        private let valueView: BasicUIStackView
+        private let descriptionLabel: BasicUILabel
+
         override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+            let actionText = ActionButtonView(asset: .actionText, color: HomeDesign.primary)
+            let actionBrush = ActionButtonView(asset: .actionBrush, color: HomeDesign.primary)
+            let actionSelect = ActionButtonView(asset: .actionSelect, color: HomeDesign.primary)
+            
+            self.titleView = .init(asset: .actionPeople, text: "???", primaryColor: HomeDesign.primary, addTopCorner: false)
+            self.borderView = BasicUIView()
+            self.borderView.layer.cornerRadius = HomeLayout.corner
+            self.borderView.backgroundColor = HomeDesign.lightGray
+            self.borderView.layer.masksToBounds = true
+            self.valueView = .init()
+            self.valueView.axis = .horizontal
+            self.valueView.alignment = .fill
+            self.valueView.spacing = HomeLayout.smargin
+            self.valueView.distribution = .fillEqually
+            self.valueView.addArrangedSubview(actionText)
+            self.valueView.addArrangedSubview(actionBrush)
+            self.valueView.addArrangedSubview(actionSelect)
+            self.descriptionLabel = BasicUILabel(text: "???")
+            self.descriptionLabel.font = HomeLayout.fontRegularMedium
+            self.descriptionLabel.textColor = HomeDesign.black
+            self.descriptionLabel.text = "???"
+            self.descriptionLabel.numberOfLines = 0
             super.init(style: style, reuseIdentifier: reuseIdentifier)
-            for (index, selector) in [#selector(RowCustomizePeopleTableViewCell.selectName(gesture:)),
-                                      #selector(RowCustomizePeopleTableViewCell.selectColor(gesture:)),
-                                      #selector(RowCustomizePeopleTableViewCell.selectIcon(gesture:))].enumerated() {
-                self.valueView.actionViews[index].isUserInteractionEnabled = true
-                self.valueView.actionViews[index].addGestureRecognizer(UITapGestureRecognizer(target: self, action: selector))
+            for (index, selector) in [#selector(Self.selectName(gesture:)), #selector(Self.selectColor(gesture:)), #selector(Self.selectIcon(gesture:))].enumerated() {
+                (self.valueView.arrangedSubviews as! [ActionButtonView])[index].isUserInteractionEnabled = true
+                (self.valueView.arrangedSubviews as! [ActionButtonView])[index].addGestureRecognizer(UITapGestureRecognizer(target: self, action: selector))
             }
         }
         required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
         
-        var row: Section.RowCustomizePeople!
-        var color: UIColor = HomeDesign.primary
+        override func willMove(toSuperview newSuperview: UIView?) {
+            guard newSuperview != nil else { return }
+            
+            self.contentView.addSubview(self.borderView)
+            self.borderView.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: HomeLayout.margin).isActive = true
+            self.borderView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: HomeLayout.margin).isActive = true
+            self.borderView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -HomeLayout.margin).isActive = true
+            self.borderView.addSubview(self.titleView)
+            self.titleView.topAnchor.constraint(equalTo: self.borderView.topAnchor).isActive = true
+            self.titleView.leadingAnchor.constraint(equalTo: self.borderView.leadingAnchor).isActive = true
+            self.titleView.trailingAnchor.constraint(equalTo: self.borderView.trailingAnchor).isActive = true
+            self.contentView.addSubview(self.valueView)
+            self.valueView.centerYAnchor.constraint(equalTo: self.borderView.bottomAnchor).isActive = true
+            self.valueView.trailingAnchor.constraint(equalTo: self.borderView.trailingAnchor, constant: -HomeLayout.margin).isActive = true
+            self.valueView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -HomeLayout.smargin).isActive = true
+            self.borderView.addSubview(self.descriptionLabel)
+            self.descriptionLabel.topAnchor.constraint(equalTo: self.titleView.bottomAnchor, constant: HomeLayout.margin).isActive = true
+            self.descriptionLabel.leadingAnchor.constraint(equalTo: self.borderView.leadingAnchor, constant: HomeLayout.margin).isActive = true
+            self.descriptionLabel.trailingAnchor.constraint(equalTo: self.borderView.trailingAnchor, constant: -HomeLayout.margin).isActive = true
+            self.descriptionLabel.bottomAnchor.constraint(equalTo: self.valueView.topAnchor, constant: -HomeLayout.smargin).isActive = true
+        }
+        
+        private var row: Section.RowCustomizePeople!
+        private var rowOptional: Section.RowCustomizeOptionalPeople!
+        private var color: UIColor = HomeDesign.primary
         
         func update(with row: Section.RowCustomizePeople) {
             self.row = row
-            self.descriptionLabel.text = ~row.descriptionKey
+            self.rowOptional = nil
             self.color = App.settings[keyPath: row.colorKeyPath].uiColor
-            self.valueView.view.image = App.settings[keyPath: row.keypath].image
-            self.valueView.view.tintColor = HomeDesign.white
-            self.valueView.backgroundColor = self.color
+            self.titleView.update(with: App.settings[keyPath: row.keypath], text: App.settings[keyPath: row.namePath], primaryColor: self.color)
+            self.descriptionLabel.text = ~row.descriptionKey
+        }
+        func update(with row: Section.RowCustomizeOptionalPeople) {
+            self.row = nil
+            self.rowOptional = row
+            self.descriptionLabel.text = ~row.descriptionKey
+            self.color = App.settings[keyPath: row.colorKeyPath]?.uiColor ?? People.ListType.friends.color
+            self.titleView.update(with: App.settings[keyPath: row.keypath] ?? People.ListType.friends.asset, text: App.settings[keyPath: row.namePath] ?? People.ListType.friends.title, primaryColor: self.color)
+            self.descriptionLabel.text = ~row.descriptionKey
+        }
+        
+        private func updateTitle() {
+            if let row = self.row {
+                self.update(with: row)
+            }
+            else {
+                self.update(with: self.rowOptional)
+            }
         }
         
         @objc private func selectName(gesture: UITapGestureRecognizer) {
-            let name = App.settings[keyPath: self.row.namePath]
-            let newSelection: (String) -> () = { newName in
-                App.settings[keyPath: self.row.namePath] = newName
-            }
+            let name: String
+            let newSelection: (String) -> ()
             
-            DynamicAlert.init(.none,
-                              contents: [.title(String(format: ~"peoples.rename", name)), .textEditor(name)],
-                              actions: [.normal(~"general.cancel", nil), .textEditor(newSelection)])
+            if let row = self.row {
+                name = App.settings[keyPath: self.row.namePath]
+                newSelection = { newName in
+                    App.settings[keyPath: self.row.namePath] = newName
+                    self.updateTitle()
+                }
+            }
+            else {
+                name = App.settings[keyPath: self.rowOptional.namePath] ?? People.ListType.friends.title
+                newSelection = { newName in
+                    App.settings[keyPath: self.rowOptional.namePath] = newName
+                    self.updateTitle()
+                }
+            }
+            DynamicAlert.init(.none, contents: [.title(String(format: ~"peoples.rename", name)), .textEditor(name)], actions: [.normal(~"general.cancel", nil), .textEditor(newSelection)])
         }
         
         @objc private func selectIcon(gesture: UITapGestureRecognizer) {
-            DynamicAlert(.none,
-                         contents: [.icons(self.row.assets, self.row.assets.firstIndex(of: App.settings[keyPath: self.row.keypath]) ?? 0, HomeLayout.actionButtonSize)],
-                         actions: [.normal(~"general.cancel", nil), .getIcon(~"general.select", { _, asset in
-                self.valueView.view.image = asset.image
-                App.settings[keyPath: self.row.keypath] = asset
-            })])
+            let asset: UIImage.Assets
+            let assets: [UIImage.Assets]
+            let block: (Int, UIImage.Assets) -> ()
+            
+            if let row = self.row {
+                asset = App.settings[keyPath: row.keypath]
+                assets = row.assets
+                block = { _, asset in
+                    App.settings[keyPath: self.row.keypath] = asset
+                    self.updateTitle()
+                }
+            }
+            else {
+                asset = App.settings[keyPath: self.rowOptional.keypath] ?? People.ListType.friends.asset
+                assets = self.rowOptional.assets
+                block = { _, asset in
+                    App.settings[keyPath: self.rowOptional.keypath] = asset
+                    self.updateTitle()
+                }
+            }
+            DynamicAlert(.none, contents: [.icons(assets, assets.firstIndex(of: asset) ?? 0, HomeLayout.actionButtonSize)], actions: [.normal(~"general.cancel", nil), .getIcon(~"general.select", block)])
         }
         
         @objc private func selectColor(gesture: UITapGestureRecognizer) {
@@ -725,9 +819,15 @@ extension SettingsViewController {
             func reset() {
                 self.color = savedColor
             }
+            
             func apply() {
-                App.settings[keyPath: self.row.colorKeyPath] = DecodableColor(color: self.color)
-                self.valueView.backgroundColor = self.color
+                if let row = self.row {
+                    App.settings[keyPath: row.colorKeyPath] = DecodableColor(color: self.color)
+                }
+                else {
+                    App.settings[keyPath: self.rowOptional.colorKeyPath] = DecodableColor(color: self.color)
+                }
+                self.updateTitle()
             }
             
             _ = withUnsafeMutablePointer(to: &self.color, { pointer in
@@ -799,10 +899,17 @@ private extension SettingsViewController {
                     HiddenViewController.presentActionSheetForQRCodes("https://github.com/horiz0n-zero/42-Home", parentViewController: self.parentViewController!)
                 }
                 else {
-                    DynamicActionsSheet.presentWithWebLink("https://github.com/horiz0n-zero/42-Home",
-                                                           title: ~"github.title", text: ~"github.text",
-                                                           primary: HomeDesign.primary,
-                                                           parentViewController: self.parentViewController!)
+                    var actions: [DynamicActionsSheet.Action] = [.title(~"github.title"), .text(~"github.text")]
+                    
+                    func openTestflight() {
+                        App.open("https://testflight.apple.com/join/MHJO6atU".url, options: [:], completionHandler: nil)
+                    }
+                    
+                    actions += DynamicActionsSheet.actionsForWebLink("https://github.com/horiz0n-zero/42-Home", parentViewController: self.parentViewController!)
+                    actions += [.separatorWithPrimary(HomeDesign.black),
+                               .title(~"testflight.title"), .text(~"testflight.desc"),
+                               .normal(~"general.open", .settingsTestflight, openTestflight)]
+                    DynamicActionsSheet(actions: actions, primary: HomeDesign.primary)
                 }
             case self.cafards:
                 DynamicAlert(.primary(~"settings.extra.cafards"),

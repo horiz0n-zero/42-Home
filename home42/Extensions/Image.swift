@@ -90,6 +90,7 @@ extension UIImage {
         case settingsWeb = "settings_web"
         case settingsMore = "settings_more"
         case settingsGuides = "settings_guide"
+        case settingsTestflight = "settings_testflight"
         
         case extraAppFacetime = "extra_app_facetime"
         case extraAppFiles = "extra_app_files"

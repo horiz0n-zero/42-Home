@@ -360,5 +360,10 @@
     "slots.add": "Sunteți sigur că doriți să adăugați acest slot?",
     "slots.remove": "Sunteți sigur că doriți să eliminați acest slot?",
     "research.events": "Căutați un eveniment",
-    "research.achievements": "Cercetați o realizare"
+    "research.achievements": "Cercetați o realizare",
+    "settings.desc.peoples.custom": "Setați numele, culoarea și pictograma pentru lista de prieteni.",
+    "title.people": "Prieteni",
+    "research.peoples": "Vezi lista \"%@\"",
+    "testflight.title": "Deveniți un tester beta!",
+    "testflight.desc": "Descărcați aplicația Testflight și obțineți actualizări viitoare din timp, utilizați următorul link pentru a vă alătura echipei de teste beta."
 }

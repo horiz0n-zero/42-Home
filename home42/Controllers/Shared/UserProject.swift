@@ -77,7 +77,8 @@ final class UserProjectViewController: HomeViewController, UITableViewDelegate, 
     
     @MainActor private func startGettingProject() async throws {
         
-        let params = self.userProject.current_team_id == nil ? ["filter[user_id]": self.user.id, "filter[filled]": true] : ["filter[team_id]":self.userProject.current_team_id!, "filter[filled]": true]
+        let params: [String: Any] = self.userProject.current_team_id == nil ? ["filter[user_id]": self.user.id, "filter[filled]": true] :
+                                                                              ["filter[team_id]":self.userProject.current_team_id!, "filter[filled]": true]
         async let project: IntraProject = HomeApi.get(.projectsWithProjectId(self.userProject.project.id))
         async let scaleTeams: ContiguousArray<IntraScaleTeam> = HomeApi.get(.projectsWithProjectIdScaleTeams(self.userProject.project.id), params: params)
         

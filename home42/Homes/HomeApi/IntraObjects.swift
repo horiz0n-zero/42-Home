@@ -1121,6 +1121,19 @@ final class IntraFlag: IntraObject {
     let name: String
 }
 
+final class IntraCluster: IntraObject {
+    
+    let id: Int
+    let cdn_link: String?
+    let campus: IntraCluster.Campus
+    let name: String
+    
+    struct Campus: Codable {
+        let id: Int
+        let name: String
+    }
+}
+
 final class IntraTokenInformation: IntraObject {
     
     let resource_owner_id: Int?
