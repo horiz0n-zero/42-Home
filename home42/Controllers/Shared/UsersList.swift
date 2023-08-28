@@ -131,6 +131,9 @@ final class UsersListViewController: HomeViewController, SearchFieldViewDelegate
     func adjustableParametersProviderParametersUpdated(_ newParameters: [String : Any]) {
         self.tableView.reset()
         self.tableView.parameters = newParameters
+        if self.searchField.text.count > 0 {
+            self.tableView.parameters["range[login]"] = "\("a" * self.searchField.text.count),\("z" * self.searchField.text.count)"
+        }
         self.tableView.nextPage()
     }
     
@@ -138,9 +141,7 @@ final class UsersListViewController: HomeViewController, SearchFieldViewDelegate
     func searchFieldBeginEditing(_ searchField: SearchFieldView) { }
     func searchFieldEndEditing(_ searchField: SearchFieldView) { }
     func searchFieldTextUpdated(_ searchField: SearchFieldView) {
-        self.tableView.reset()
-        self.tableView.parameters = self.settings.parameters
-        self.tableView.nextPage()
+        self.adjustableParametersProviderParametersUpdated(self.settings.parameters)
     }
     
     private func userSelected(user: IntraUserInfo) {

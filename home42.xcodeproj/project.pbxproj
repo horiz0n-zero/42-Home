@@ -1040,7 +1040,7 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZED_STRING_SWIFTUI_SUPPORT = NO;
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.1.3;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.horiz0n-zero.home42";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1073,7 +1073,7 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZED_STRING_SWIFTUI_SUPPORT = NO;
-				MARKETING_VERSION = 1.1.2;
+				MARKETING_VERSION = 1.1.3;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.horiz0n-zero.home42";
 				PRODUCT_NAME = "$(TARGET_NAME)";
