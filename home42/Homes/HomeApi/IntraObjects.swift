@@ -657,7 +657,7 @@ final class IntraUserEvent: IntraObject {
     let event: IntraEvent
 }
 
-final class IntraBlock: IntraObject {
+final class IntraBloc: IntraObject {
     
     let id: Int
     let campus_id: Int

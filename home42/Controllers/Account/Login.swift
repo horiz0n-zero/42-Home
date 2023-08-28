@@ -17,46 +17,190 @@ import Foundation
 import UIKit
 import WebKit
 
-final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavigationDelegate {
+protocol LoginHandlerDelegate: AnyObject {
+    
+    func loginHandlerSuccessfullyLogin(user: IntraUser, coalitions: ContiguousArray<IntraCoalition>, cookies: Cookies)
+    func loginHandlerAbandonLogin()
+}
+
+final class LoginHandler: HomeViewController, WKNavigationDelegate {
+    
+    private let topBlurView: BasicUIVisualEffectView
+    private let backButtonContainer: BasicUIView
+    private let backButtonLabel: BasicUILabel
+    private let stateLabel: VibrancyView<BasicUILabel>
+    
+    private let webView: WKWebView
+    private unowned(unsafe) let loginDelegate: LoginHandlerDelegate
+    
+    private var user: IntraUser! = nil
+    private var coalitions: ContiguousArray<IntraCoalition>! = nil
+    private var cookie: Bool = false
+    
+    init(loginDelegate: LoginHandlerDelegate) async {
+        let config: WKWebViewConfiguration
+        let request = HomeApi.oauthAuthorizePath.request
+        
+        config = WKWebViewConfiguration()
+        config.processPool = WKProcessPool()
+        self.topBlurView = .init()
+        self.backButtonContainer = BasicUIView()
+        self.backButtonContainer.backgroundColor = HomeDesign.primaryDefault.withAlphaComponent(HomeDesign.alphaLowLayer)
+        self.backButtonContainer.layer.cornerRadius = HomeLayout.corner
+        self.backButtonContainer.layer.masksToBounds = true
+        self.backButtonLabel = BasicUILabel(text: ~"general.cancel")
+        self.backButtonLabel.font = HomeLayout.fontSemiBoldMedium
+        self.backButtonLabel.textAlignment = .center
+        self.backButtonLabel.textColor = HomeDesign.primaryDefault
+        self.stateLabel = .init(effect: self.topBlurView.effect, view: .init(text: request.url!.host!))
+        self.stateLabel.view.textAlignment = .right
+        self.stateLabel.view.font = HomeLayout.fontSemiBoldTitle
+        self.webView = WKWebView(frame: UIScreen.main.bounds, configuration: config)
+        self.webView.translatesAutoresizingMaskIntoConstraints = false
+        await Cookies.clearWebsiteData(targettingWebView: self.webView)
+        self.webView.load(request)
+        self.loginDelegate = loginDelegate
+        super.init()
+        self.modalPresentationStyle = .fullScreen
+        self.webView.navigationDelegate = self
+        self.webView.scrollView.contentInsetAdjustmentBehavior = .never
+        self.view.addSubview(self.webView)
+        self.webView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+        self.webView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        self.webView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        self.webView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        self.view.addSubview(self.topBlurView)
+        self.topBlurView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+        self.topBlurView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+        self.topBlurView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+        self.topBlurView.heightAnchor.constraint(equalToConstant: App.window!.safeAreaInsets.top + 40.0).isActive = true
+        self.backButtonContainer.isUserInteractionEnabled = true
+        self.backButtonContainer.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LoginHandler.backButtonTapped)))
+        self.topBlurView.contentView.addSubview(self.backButtonContainer)
+        self.backButtonContainer.leadingAnchor.constraint(equalTo: self.topBlurView.contentView.leadingAnchor, constant: HomeLayout.margin).isActive = true
+        self.backButtonContainer.bottomAnchor.constraint(equalTo: self.topBlurView.contentView.bottomAnchor, constant: -HomeLayout.smargin).isActive = true
+        self.backButtonContainer.addSubview(self.backButtonLabel)
+        self.backButtonLabel.centerXAnchor.constraint(equalTo: self.backButtonContainer.centerXAnchor).isActive = true
+        self.backButtonLabel.centerYAnchor.constraint(equalTo: self.backButtonContainer.centerYAnchor).isActive = true
+        self.backButtonLabel.leadingAnchor.constraint(equalTo: self.backButtonContainer.leadingAnchor, constant: HomeLayout.margin).isActive = true
+        self.backButtonLabel.topAnchor.constraint(equalTo: self.backButtonContainer.topAnchor, constant: HomeLayout.dmargin).isActive = true
+        self.topBlurView.contentView.addSubview(self.stateLabel)
+        self.stateLabel.trailingAnchor.constraint(equalTo: self.topBlurView.contentView.trailingAnchor, constant: -HomeLayout.margin).isActive = true
+        self.stateLabel.centerYAnchor.constraint(equalTo: self.backButtonContainer.centerYAnchor).isActive = true
+    }
+    required init?(coder: NSCoder) { fatalError() }
+    required init() { fatalError("init() has not been implemented") }
+        
+    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+        #if DEBUG
+        print(#function, webView.url!.host!, webView.url!.path)
+        print()
+        #endif
+        self.stateLabel.view.text = webView.url!.host!
+        if webView.url!.absoluteString.hasPrefix("https://intra.42.fr/?code=") {
+            self.codeReceived((webView.url!.query! as NSString).substring(from: 5))
+        }
+    }
+    
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        #if DEBUG
+        print(#function, webView.url!.host!, webView.url!.path)
+        print()
+        #endif
+        if webView.url!.absoluteString.hasPrefix("https://profile.intra.42.fr") {
+            self.cookie = true
+            Task.init(priority: .userInitiated, operation: {
+                do {
+                    try await self.nextStep()
+                }
+                catch {
+                    self.errorOccured(error: error as? HomeApi.RequestError)
+                }
+            })
+        }
+    }
+    
+    @MainActor private func errorOccured(error: HomeApi.RequestError?) {
+        self.user = nil
+        self.coalitions = nil
+        self.cookie = false
+        HomeDefaults.remove(.tokens)
+        HomeDefaults.remove(.cookies)
+        HomeDefaults.remove(.user)
+        HomeDefaults.remove(.coalitions)
+        if let error = error {
+            DynamicAlert.presentWith(error: error)
+            self.loginDelegate.loginHandlerAbandonLogin()
+        }
+    }
+    
+    private func codeReceived(_ code: String) {
+        Task.init(priority: .userInitiated, operation: {
+            do {
+                
+                @MainActor func updateState(_ text: String) {
+                    self.stateLabel.view.text = text
+                }
+                
+                try await HomeApi.auth(code)
+                updateState("/v2/me")
+                self.user = try await HomeApi.get(.me)
+                updateState("/v2/coalitions")
+                self.coalitions = try await HomeApi.get(.usersWithUserIdCoalitions(user.id))
+                try await self.nextStep()
+            }
+            catch {
+                self.errorOccured(error: error as? HomeApi.RequestError)
+            }
+        })
+    }
+    
+    @MainActor private func nextStep() async throws {
+        guard self.cookie && self.user != nil && self.coalitions != nil else {
+            return
+        }
+        
+        self.stateLabel.view.text = "verifying cookies ..."
+        if let cookies = await Cookies(httpCookies: await Cookies.readWebsiteCookies(targettingWebView: self.webView), verifyingWithUser: self.user) {
+            HomeDefaults.save(cookies, forKey: .cookies)
+            HomeDefaults.save(user, forKey: .user)
+            HomeDefaults.save(coalitions, forKey: .coalitions)
+            self.loginDelegate.loginHandlerSuccessfullyLogin(user: self.user, coalitions: self.coalitions, cookies: cookies)
+        }
+        else {
+            throw HomeApi.RequestError(status: .internal, path: "https://profile.intra.42.fr", data: nil, parameters: nil, serverMessage: "cookies are invalid")
+        }
+    }
+    
+    @objc private func backButtonTapped() {
+        self.loginDelegate.loginHandlerAbandonLogin()
+    }
+}
+
+final class LoginViewController: HomeViewController, LoginHandlerDelegate {
     
     private let background: BasicUIImageView
     private let logoCenter: BasicUIView
     private let logo42: BasicUIImageView
     
-    private let formContainer: BasicUIView
-    private var formContainerCenterY: NSLayoutConstraint!
-    private let loginLabel: LoginTextFieldUpperText
-    private let loginTextField: LoginTextField
-    private let passwdLabel: LoginTextFieldUpperText
-    private let passwdTextField: LoginTextField
     private let loginButton: LoginButton
-    
-    private let isStaff: HomeSwitch
-    private let isStaffLabel: BasicUILabel
     
     private let conditionsLabel: BasicUILabel
     private let sourceCodeLabel: BasicUILabel
     
+    private unowned let animatedCoalitionsBloc: IntraBloc
+    private var animatedCoalitionsBlocIndex: Int
+    private var animatedCoalitionsBlocTask: Task<(), Never>!
+    
     required init() {
         self.background = BasicUIImageView(asset: .coalitionDefaultBackground)
         self.logoCenter = BasicUIView()
-        self.logo42 = .init(asset: .svg42)
-        self.logo42.contentMode = .center
+        self.logo42 = .init(asset: .appIconBig)
+        self.logo42.contentMode = .scaleAspectFit
         self.logo42.tintColor = HomeDesign.white
         self.logo42.translatesAutoresizingMaskIntoConstraints = false
-        
-        self.formContainer = BasicUIView()
-        self.formContainer.backgroundColor = .clear
-        self.loginLabel = LoginTextFieldUpperText(.login)
-        self.loginTextField = LoginTextField(.login)
-        self.passwdLabel = LoginTextFieldUpperText(.passwd)
-        self.passwdTextField = LoginTextField(.passwd)
+
         self.loginButton = LoginButton()
-        
-        self.isStaff = HomeSwitch(isOn: false)
-        self.isStaffLabel = .init(text: (~"field.is-staff").lowercased())
-        self.isStaffLabel.textColor = HomeDesign.white
-        self.isStaffLabel.font = HomeLayout.fontRegularNormal
         
         self.conditionsLabel = BasicUILabel(attribute: NSAttributedString.init(string: ~"login.cgu", attributes: [
                                                                                 .underlineStyle: NSUnderlineStyle.single.rawValue,
@@ -66,6 +210,9 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
                                                                                 .underlineStyle: NSUnderlineStyle.single.rawValue,
                                                                                 .font: HomeLayout.fontThinMedium,
                                                                                 .foregroundColor: HomeDesign.white]))
+        self.animatedCoalitionsBloc = HomeApiResources.blocs.first(where: { $0.campus_id == 1 })!
+        self.animatedCoalitionsBlocIndex = self.animatedCoalitionsBloc.coalitions.firstIndex(where: { $0.name == "The Federation" }) ?? 0
+        self.animatedCoalitionsBlocTask = nil
         super.init()
         self.modalPresentationStyle = .fullScreen
         self.view.addSubview(self.background)
@@ -80,47 +227,21 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
             self.background.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
         }
         
-        self.view.addSubview(self.formContainer)
-        self.formContainerCenterY = self.formContainer.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
-        self.formContainerCenterY.priority = .defaultLow
-        self.formContainerCenterY.isActive = true
-        self.formContainer.bottomAnchor.constraint(lessThanOrEqualTo: self.view.keyboardLayoutGuide.topAnchor, constant: -HomeLayout.margin).isActive = true
-        self.formContainer.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-        self.formContainer.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margind).isActive = true
-        self.formContainer.addSubview(self.loginLabel)
-        self.loginLabel.leadingAnchor.constraint(equalTo: self.formContainer.leadingAnchor, constant: HomeLayout.dmargin).isActive = true
-        self.loginLabel.topAnchor.constraint(equalTo: self.formContainer.topAnchor).isActive = true
-        self.formContainer.addSubview(self.loginTextField)
-        self.loginTextField.leadingAnchor.constraint(equalTo: self.formContainer.leadingAnchor).isActive = true
-        self.loginTextField.trailingAnchor.constraint(equalTo: self.formContainer.trailingAnchor).isActive = true
-        self.loginTextField.topAnchor.constraint(equalTo: self.loginLabel.bottomAnchor, constant: HomeLayout.dmargin).isActive = true
-        self.formContainer.addSubview(self.passwdLabel)
-        self.passwdLabel.leadingAnchor.constraint(equalTo: self.formContainer.leadingAnchor, constant: HomeLayout.dmargin).isActive = true
-        self.passwdLabel.topAnchor.constraint(equalTo: self.loginTextField.bottomAnchor, constant: HomeLayout.margins).isActive = true
-        self.formContainer.addSubview(self.passwdTextField)
-        self.passwdTextField.leadingAnchor.constraint(equalTo: self.formContainer.leadingAnchor).isActive = true
-        self.passwdTextField.trailingAnchor.constraint(equalTo: self.formContainer.trailingAnchor).isActive = true
-        self.passwdTextField.topAnchor.constraint(equalTo: self.passwdLabel.bottomAnchor, constant: HomeLayout.dmargin).isActive = true
-        self.formContainer.addSubview(self.loginButton)
-        self.loginButton.leadingAnchor.constraint(equalTo: self.formContainer.leadingAnchor).isActive = true
-        self.loginButton.trailingAnchor.constraint(equalTo: self.formContainer.trailingAnchor).isActive = true
-        self.loginButton.topAnchor.constraint(equalTo: self.passwdTextField.bottomAnchor, constant: HomeLayout.margind).isActive = true
-        self.formContainer.addSubview(self.isStaff)
-        self.isStaff.topAnchor.constraint(equalTo: self.loginButton.bottomAnchor, constant: HomeLayout.margin).isActive = true
-        self.isStaff.trailingAnchor.constraint(equalTo: self.loginButton.trailingAnchor).isActive = true
-        self.formContainer.addSubview(self.isStaffLabel)
-        self.isStaffLabel.centerYAnchor.constraint(equalTo: self.isStaff.centerYAnchor).isActive = true
-        self.isStaffLabel.trailingAnchor.constraint(equalTo: self.isStaff.leadingAnchor, constant: -HomeLayout.smargin).isActive = true
-        self.isStaff.bottomAnchor.constraint(equalTo: self.formContainer.bottomAnchor).isActive = true
+        self.view.addSubview(self.loginButton)
+        self.loginButton.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
+        self.loginButton.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margind).isActive = true
+        self.loginButton.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         
         self.view.addSubview(self.logoCenter)
-        self.logoCenter.bottomAnchor.constraint(equalTo: self.formContainer.topAnchor, constant: -HomeLayout.margin).isActive = true
+        self.logoCenter.bottomAnchor.constraint(equalTo: self.loginButton.topAnchor, constant: -HomeLayout.margin).isActive = true
         self.logoCenter.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor, constant: HomeLayout.margin).isActive = true
-        self.logoCenter.leadingAnchor.constraint(equalTo: self.formContainer.leadingAnchor).isActive = true
-        self.logoCenter.trailingAnchor.constraint(equalTo: self.formContainer.trailingAnchor).isActive = true
+        self.logoCenter.leadingAnchor.constraint(equalTo: self.loginButton.leadingAnchor).isActive = true
+        self.logoCenter.trailingAnchor.constraint(equalTo: self.loginButton.trailingAnchor).isActive = true
         self.logoCenter.addSubview(self.logo42)
         self.logo42.centerYAnchor.constraint(equalTo: self.logoCenter.centerYAnchor).isActive = true
         self.logo42.centerXAnchor.constraint(equalTo: self.logoCenter.centerXAnchor).isActive = true
+        self.logo42.widthAnchor.constraint(equalTo: self.view.widthAnchor, multiplier: 0.70).isActive = true
+        self.logo42.heightAnchor.constraint(equalTo: self.logo42.widthAnchor, multiplier: 1.0).isActive = true
         
         self.view.addSubview(self.conditionsLabel)
         self.conditionsLabel.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor, constant: -HomeLayout.margin).isActive = true
@@ -129,278 +250,101 @@ final class LoginViewController: HomeViewController, UITextFieldDelegate, WKNavi
         self.sourceCodeLabel.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor, constant: HomeLayout.margin).isActive = true
         self.sourceCodeLabel.bottomAnchor.constraint(equalTo: self.conditionsLabel.bottomAnchor).isActive = true
         
-        self.formContainer.isUserInteractionEnabled = true
         self.loginButton.addTarget(self, action: #selector(LoginViewController.loginButtonTapped), for: .touchUpInside)
-        self.loginTextField.delegate = self
-        self.passwdTextField.delegate = self
         self.conditionsLabel.isUserInteractionEnabled = true
         self.conditionsLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LoginViewController.termButtonTapped(sender:))))
         self.sourceCodeLabel.isUserInteractionEnabled = true
         self.sourceCodeLabel.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(LoginViewController.sourceCodeTapped(sender:))))
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField == self.loginTextField {
-            return self.passwdTextField.becomeFirstResponder()
-        }
-        self.loginButtonTapped()
-        return self.passwdTextField.resignFirstResponder()
-    }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if self.animatedCoalitionsBlocTask == nil {
+            self.startAnimation()
+        }
+    }
+    
+    deinit {
+        self.animatedCoalitionsBlocTask?.cancel()
+    }
+    
+    private func startAnimation() {
+        self.animatedCoalitionsBlocTask = .init(operation: { [weak self] in
+            do {
+                func animate() async throws {
+                    guard let `self` = self else { return }
+                    let image: UIImage
+                    let coalition = await self.animatedCoalitionsBloc.coalitions[self.animatedCoalitionsBlocIndex]
+                    
+                    if let coalitionImage = HomeResources.storageCoalitionsImages.get(coalition) {
+                        image = coalitionImage
+                    }
+                    else if let (_, coalitionImage) = await HomeResources.storageCoalitionsImages.obtain(coalition) {
+                        image = coalitionImage
+                    }
+                    else {
+                        image = UIImage.Assets.coalitionDefaultBackground.image
+                    }
+                    
+                    @MainActor func applyChange() {
+                        HomeAnimations.transitionLong(withView: self.background, {
+                            self.background.image = image
+                            self.loginButton.backgroundColor = coalition.uicolor
+                        })
+                        self.animatedCoalitionsBlocIndex &+= 1
+                        if self.animatedCoalitionsBlocIndex >= self.animatedCoalitionsBloc.coalitions.count {
+                            self.animatedCoalitionsBlocIndex = 0
+                        }
+                    }
+                    await applyChange()
+                    try await Task.sleep(nanoseconds: 5_000_000_000)
+                    try await animate()
+                }
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                try await animate()
+            }
+            catch {
+                #if DEBUG
+                print(#function, error)
+                #endif
+            }
+        })
+    }
+    
     @objc private func termButtonTapped(sender: UITapGestureRecognizer) {
-        self.present(SafariWebView(URL(string: "https://signin.intra.42.fr/legal")!), animated: true, completion: nil)
+        self.present(SafariWebView(URL(string: "https://signin.intra.42.fr/legal")!, primaryColor: self.loginButton.backgroundColor!), animated: true, completion: nil)
     }
     @objc private func sourceCodeTapped(sender: UITapGestureRecognizer) {
         var actions: [DynamicActionsSheet.Action] = [.title(~"github.title"), .text(~"github.text")]
         
         actions += DynamicActionsSheet.actionsForWebLink("https://github.com/horiz0n-zero/42-Home", parentViewController: self)
-        DynamicActionsSheet(actions: actions, primary: HomeDesign.primaryDefault)
+        DynamicActionsSheet(actions: actions, primary: self.loginButton.backgroundColor!)
     }
     
-    @frozen private enum State: String {
-        case connect     = "login.state.connect"
-        case waiting     = "login.state.waiting"
-        case signin      = "login.state.signin"
-        case signin2FA   = "terminal.waiting"
-        case authorize   = "login.state.authorize"
-        case loading     = "login.state.loading"
-        case cookie      = "login.state.cookies"
-    }
-    private var state: State = .connect {
-        didSet { self.loginButton.setAttributedTitle(.init(string: (~self.state.rawValue).uppercased(), attributes: [.foregroundColor: HomeDesign.white, .font: HomeLayout.fontBoldTitle]), for: .normal) }
+    private var handler: LoginHandler? = nil
+    
+    @MainActor @objc private func loginButtonTapped() {
+        Task {
+            self.loginButton.isUserInteractionEnabled = false
+            self.loginButton.backgroundColor = self.loginButton.backgroundColor!.withAlphaComponent(HomeDesign.alphaLow)
+            self.handler = await LoginHandler(loginDelegate: self)
+            self.present(self.handler!, animated: true)
+        }
     }
     
-    private var signinHandler: WKWebView? = nil
-    
-    @objc private func loginButtonTapped() {
-        guard let login = self.loginTextField.text, !login.isEmpty, let passwd = self.passwdTextField.text, !passwd.isEmpty else {
-            if !self.loginTextField.text!.isEmpty || !self.passwdTextField.text!.isEmpty {
-                DynamicAlert(contents: [.text(~"login.error.passwd-required")], actions: [.normal(~"general.ok", nil)])
-            }
-            return
-        }
-        guard self.loginButton.isUserInteractionEnabled == true else {
-            return
-        }
-        
-        @Sendable @MainActor func newSigninHandler() async -> WKWebView {
-            let config: WKWebViewConfiguration
-            let webview: WKWebView
-            
-            config = WKWebViewConfiguration()
-            config.processPool = WKProcessPool()
-            webview = WKWebView(frame: .zero, configuration: config)
-            await Cookies.clearWebsiteData(targettingWebView: webview)
-            webview.navigationDelegate = self
-            webview.load(HomeApi.oauthAuthorizePath.request)
-            return webview
-        }
-        
-        if self.passwdTextField.isFirstResponder {
-            _ = self.passwdTextField.resignFirstResponder()
-        }
-        else if self.loginTextField.isFirstResponder {
-            _ = self.loginTextField.resignFirstResponder()
-        }
-        self.loginButton.isUserInteractionEnabled = false
-        self.loginButton.backgroundColor = self.loginButton.backgroundColor?.withAlphaComponent(HomeDesign.alphaLayer)
-        self.state = .waiting
-        Task.init(priority: .userInitiated, operation: {
-            self.signinHandler = await newSigninHandler()
-        })
+    func loginHandlerSuccessfullyLogin(user: IntraUser, coalitions: ContiguousArray<IntraCoalition>, cookies: Cookies) {
+        HomeApi.cookies = cookies
+        App.setApp(user: user, coalitions: coalitions)
+        self.dismissToRootController(animated: true)
+        self.animatedCoalitionsBlocTask?.cancel()
+        self.animatedCoalitionsBlocTask = nil
     }
-    private func loginErrorOccured(_ description: String, apiError: HomeApi.RequestError? = nil, showAlert: Bool = true) {
-        if showAlert {
-            if let error = apiError {
-                DynamicAlert.presentWith(error: error)
-            }
-            else {
-                DynamicAlert(contents: [.text(description)], actions: [.normal(~"general.ok", nil)])
-            }
-        }
-        self.signinHandler = nil
+    func loginHandlerAbandonLogin() {
         self.loginButton.isUserInteractionEnabled = true
         self.loginButton.backgroundColor = self.loginButton.backgroundColor?.withAlphaComponent(1.0)
-        self.state = .connect
-        self.user = nil
-        self.coalitions = nil
-        HomeDefaults.remove(.tokens)
-        HomeDefaults.remove(.cookies)
-        HomeDefaults.remove(.user)
-        HomeDefaults.remove(.coalitions)
-    }
-    
-    private func requestAndSend2FACode() {
-       
-        func tryCode(code: String) {
-            let codeJS = "document.getElementById(\"otp\").value = \"\(code)\";"
-            let commitJS = "document.getElementById(\"kc-login\").click();"
-            
-            func javascriptError(_ object: Any?, error: Error?) {
-                if let error = error {
-                    DispatchQueue.main.async {
-                        self.loginErrorOccured(error.localizedDescription)
-                    }
-                }
-            }
-            self.signinHandler!.evaluateJavaScript(codeJS, completionHandler: javascriptError(_:error:))
-            self.signinHandler!.evaluateJavaScript(commitJS, completionHandler: javascriptError(_:error:))
-        }
-        
-        func cancelAuthentification() {
-            self.loginErrorOccured(~"general.error", showAlert: false)
-        }
-        
-        DynamicAlert(.primary(~"general.warning"), contents: [.title("Intra 2FA"), .textEditor("")], actions: [.normal(~"general.cancel", cancelAuthentification), .textEditor(tryCode(code:))])
-    }
-    
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        
-        func javascriptError(_ object: Any?, error: Error?) {
-            if let error = error {
-                DispatchQueue.main.async {
-                    self.loginErrorOccured(error.localizedDescription)
-                }
-            }
-        }
-        
-        #if DEBUG
-        print(self.state, #function)
-        print(webView.url!.host!, webView.url!.path)
-        print()
-        #endif
-        switch self.state {
-        case .signin:
-            if webView.url!.absoluteString.hasPrefix("https://auth.42.fr/auth/realms") {
-                if webView.url!.absoluteString.contains("login-actions") {
-                    webView.evaluateJavaScript("document.getElementById(\"otp\").name") { object, error in
-                        if object as? String == "otp" {
-                            DispatchQueue.main.async {
-                                self.state = .signin2FA
-                                self.requestAndSend2FACode()
-                            }
-                        }
-                        else {
-                            self.loginErrorOccured(~"login.error.passwd-incorrect")
-                        }
-                    }
-                }
-                else {
-                    let login = String(format: "document.getElementById(\"username\").value = \"%@\";", self.loginTextField.text!)
-                    let passw = String(format: "document.getElementById(\"password\").value = \"%@\";", self.passwdTextField.text!)
-                    
-                    webView.evaluateJavaScript(login, completionHandler: javascriptError(_:error:))
-                    webView.evaluateJavaScript(passw, completionHandler: javascriptError(_:error:))
-                    webView.evaluateJavaScript("document.getElementById(\"kc-login\").click();", completionHandler: javascriptError(_:error:))
-                }
-            }
-            else {
-                if self.isStaff.isOn {
-                    webView.evaluateJavaScript("document.querySelector(\'[href=\"https://profile.intra.42.fr/users/auth/keycloak_admin\"]\').click();")
-                }
-                else {
-                    webView.evaluateJavaScript("document.querySelector(\'[href=\"https://profile.intra.42.fr/users/auth/keycloak_student\"]\').click();")
-                }
-            }
-        case .signin2FA:
-            self.requestAndSend2FACode()
-        case .authorize:
-            webView.evaluateJavaScript("document.forms[0].submit();", completionHandler: javascriptError(_:error:))
-        default:
-            if webView.url!.absoluteString.hasPrefix("https://profile.intra.42.fr") {
-                self.state = .cookie
-                Task.init(priority: .userInitiated, operation: {
-                    do {
-                        try await self.profilLoaded()
-                    }
-                    catch {
-                        if error is HomeApi.RequestError {
-                            self.loginErrorOccured("???", apiError: error as? HomeApi.RequestError)
-                        }
-                        else {
-                            self.loginErrorOccured(error.localizedDescription, apiError: nil)
-                        }
-                    }
-                })
-            }
-        }
-    }
-    
-    func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-        let path = webView.url!.absoluteString
-        
-        #if DEBUG
-        print(self.state, #function)
-        print(webView.url!.host!, webView.url!.path)
-        print()
-        #endif
-        if path.hasPrefix("https://signin.intra.42.fr/users/sign_in") || path.hasPrefix("https://auth.42.fr/auth/realms") {
-            DispatchQueue.main.async {
-                self.state = .signin
-            }
-        }
-        else if path.hasPrefix("https://signin.intra.42.fr/intra_otp_sessions") {
-            DispatchQueue.main.async {
-                self.state = .signin2FA
-            }
-        }
-        else if path.hasPrefix("https://api.intra.42.fr/oauth/authorize") {
-            DispatchQueue.main.async {
-                self.state = .authorize
-            }
-        }
-        else if path.hasPrefix("https://intra.42.fr/?code=") {
-            DispatchQueue.main.async {
-                self.state = .loading
-                self.codeReceived((webView.url!.query! as NSString).substring(from: 5))
-            }
-        }
-        else if path.hasPrefix("https://profile.intra.42.fr") == false {
-            self.loginErrorOccured(String(format: ~"login.error.unexpected-redirection", path))
-        }
-    }
-    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        self.loginErrorOccured(error.localizedDescription)
-    }
-    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        self.loginErrorOccured(error.localizedDescription)
-    }
-    
-    private var user: IntraUser!
-    private var coalitions: ContiguousArray<IntraCoalition>!
-    private func codeReceived(_ code: String) {
-        Task.init(priority: .userInitiated, operation: {
-            do {
-                try await HomeApi.auth(code)
-                #if false
-                self.user = try await HomeApi.get(.userWithId(128443))
-                self.coalitions = try await HomeApi.get(.usersWithUserIdCoalitions(128443))
-                #else
-                self.user = try await HomeApi.get(.me)
-                self.coalitions = try await HomeApi.get(.usersWithUserIdCoalitions(user.id))
-                #endif
-                try await self.profilLoaded()
-            }
-            catch {
-                self.loginErrorOccured("???", apiError: error as? HomeApi.RequestError)
-            }
-        })
-    }
-    
-    @MainActor private func profilLoaded() async throws {
-        guard self.state == .cookie && self.user != nil && self.coalitions != nil else { return }
-        
-        if let cookies = await Cookies(httpCookies: await Cookies.readWebsiteCookies(targettingWebView: self.signinHandler), verifyingWithUser: self.user) {
-            App.setApp(user: user, coalitions: coalitions)
-            self.dismiss(animated: true, completion: nil)
-            HomeDefaults.save(cookies, forKey: .cookies)
-            HomeDefaults.save(user, forKey: .user)
-            HomeDefaults.save(coalitions, forKey: .coalitions)
-        }
-        else {
-            throw HomeApi.RequestError(status: .internal, path: "https://profile.intra.42.fr", data: nil, parameters: nil, serverMessage: "cookies are invalid")
-        }
+        self.handler!.dismiss(animated: true)
+        self.handler = nil
     }
 }
 

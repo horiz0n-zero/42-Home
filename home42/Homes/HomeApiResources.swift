@@ -19,7 +19,7 @@ import UIKit
 final class HomeApiResources: NSObject {
     
     static private(set) var expertises: [Int: IntraExpertise]! = nil
-    static private(set) var blocs: ContiguousArray<IntraBlock>! = nil
+    static private(set) var blocs: ContiguousArray<IntraBloc>! = nil
     static private(set) var campus: ContiguousArray<IntraCampus>! = nil
     static private(set) var cursus: ContiguousArray<IntraCursus>! = nil
     static private(set) var titles: ContiguousArray<IntraTitle>! = nil

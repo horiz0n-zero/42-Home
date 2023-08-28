@@ -572,6 +572,7 @@ extension HomeApi {
         case titlesWithTitleIdUsers(Int)
         case partnershipsWithPartnershipIdUsers(Int)
         case clusters
+        case clustersWithId(Int)
         case token
         case tokenInformation
         case test(String)
@@ -706,6 +707,8 @@ extension HomeApi {
                 return HomeApi.apiRoot + "partnerships/\(id)/users"
             case .clusters:
                 return HomeApi.apiRoot + "clusters"
+            case .clustersWithId(let id):
+                return HomeApi.apiRoot + "clusters/\(id)"
             case .token:
                 return "https://api.intra.42.fr/oauth/token"
             case .tokenInformation:

@@ -144,7 +144,7 @@ final class AdjustableParametersProviderViewController<G: AdjustableParametersPr
         case title(IntraTitle)
         case group(IntraGroup)
         case achievement(IntraUserAchievement)
-        case coalitions(IntraCoalition, IntraBlock)
+        case coalitions(IntraCoalition, IntraBloc)
         case eventCampus
         case achievementCampus
         case notionCursus

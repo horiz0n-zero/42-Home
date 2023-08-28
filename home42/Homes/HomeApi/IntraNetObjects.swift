@@ -19,12 +19,12 @@ import SwiftDate
 extension HomeApi {
     
     static var cookies: Cookies!
-  
+    
     @frozen enum IntranetRoute {
         /// login, cursus_id, campus_id
         case graph
         /// param: login
-        case locationStats(String)
+        @available(*, deprecated) case locationStats(String)
         /// param: slug? -> 42cursus-computorv1
         /// team_id: 3808002, start: 2021-10-04, end: 2021-10-11
         case defenseSlots(String)
@@ -33,19 +33,23 @@ extension HomeApi {
         /// param: slug, base64One, base64Two
         /// team_id:
         case getSlot(String, String, String)
-
+        /// user login
+        case user(String)
+        
         var path: String {
             switch self {
             case .graph:
                 return "https://projects.intra.42.fr/project_data.json"
             case .locationStats(let login):
-                return "https://profile.intra.42.fr/users/\(login)/locations_stats.json"
+                return "https://translate.intra.42.fr/users/\(login)/locations_stats.json"
             case .defenseSlots(let slug):
                 return "https://projects.intra.42.fr/projects/\(slug)/slots.json"
             case .defense(let slug):
                 return "https://projects.intra.42.fr/projects/\(slug)/slots"
             case .getSlot(let slug, let ids, let teamId):
                 return "https://projects.intra.42.fr/projects/\(slug)/slots/\(ids).json?team_id=\(teamId)"
+            case .user(let login):
+                return "https://profile.intra.42.fr/users/\(login)"
             }
         }
         var method: String {
@@ -61,7 +65,6 @@ extension HomeApi {
     static func intranetRequest<G: Codable>(_ route: IntranetRoute, parameters: [String: Any]? = nil) async throws -> G {
         var request: URLRequest
         var components: URLComponents!
-        let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?.?.?"
         var ret: DataTaskAsyncReturnType!
         let serverErrorMessage: String
         let method = route.method
@@ -78,25 +81,23 @@ extension HomeApi {
             else {
                 components = URLComponents(string: route.path)
                 components.queryItems = parameters.map({ URLQueryItem.init(name: $0.key, value: "\($0.value)") })
-                request = URLRequest(url: components.url!, timeoutInterval: HomeApi.timeOut)
+                request = URLRequest(url: components.url!, cachePolicy: .useProtocolCachePolicy, timeoutInterval: HomeApi.timeOut)
             }
         }
         else {
-            request = URLRequest(url: route.path.url, timeoutInterval: HomeApi.timeOut)
+            request = URLRequest(url: route.path.url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: HomeApi.timeOut)
         }
         request.httpMethod = method
-        #if DEBUG
-        print(HomeApi.cookies.intraSessionProduction!, method, route.path, parameters ?? "[:]")
-        request.setValue("42Home \(appVersion)beta", forHTTPHeaderField: "User-Agent")
-        #else
-        request.setValue("42Home \(appVersion)", forHTTPHeaderField: "User-Agent")
-        #endif
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.setValue(HomeApi.cookies.intraSessionProduction!, forHTTPHeaderField: "Cookie")
+        request.httpShouldHandleCookies = true
+        request.allHTTPHeaderFields = HTTPCookie.requestHeaderFields(with: [HomeApi.cookies.intraSessionProductionHTTPCookie, HomeApi.cookies.userIdHTTPCookie])
+        #if DEBUG
+        print(HomeApi.cookies.intraSessionProduction!, method, route.path, parameters ?? "[:]")
+        #endif
         do {
-            ret = try await URLSession.init(configuration: URLSessionConfiguration.ephemeral).data(for: request, delegate: nil)
-            if (200 ... 299).contains((ret.response as! HTTPURLResponse).statusCode) {
+            ret = try await HomeApi.urlSession.data(for: request, delegate: nil)
+            if (200 ... 299).contains((ret.response as! HTTPURLResponse).statusCode) || (ret.response as! HTTPURLResponse).statusCode == 101 {
                 do {
                     return try JSONDecoder.decoder.decode(G.self, from: ret.data)
                 }
@@ -251,4 +252,10 @@ final class IntraNetSlot: IntraObject {
         splited.removeLast(splited.count - duration)
         return splited.joined(separator: ",")
     }
+}
+
+final class IntraNetShortUserDescription: IntraObject {
+    
+    let usual_full_name: String
+    
 }

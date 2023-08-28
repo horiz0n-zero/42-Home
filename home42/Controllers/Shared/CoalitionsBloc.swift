@@ -43,10 +43,10 @@ final class CoalitionsBlocViewController: HomeViewController, UITableViewDelegat
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     // MARK: -
-    private var bloc: IntraBlock!
+    private var bloc: IntraBloc!
         
     @MainActor func setup(with campusId: Int, cursusId: Int) async {
-        async let blocs: [IntraBlock] = HomeApi.get(.blocs, params: ["filter[campus_id]": campusId,
+        async let blocs: [IntraBloc] = HomeApi.get(.blocs, params: ["filter[campus_id]": campusId,
                                                                      "filter[cursus_id]": cursusId])
         
         do {

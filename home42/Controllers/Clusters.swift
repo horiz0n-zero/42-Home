@@ -184,9 +184,9 @@ final fileprivate class ClustersView: BasicUIView {
         else {
             aeraTop = HomeLayout.headerWithActionViewHeigth + HomeLayout.safeAera.top + HomeLayout.smargin
         }
-        if campus.isUserMainCampus {
+        if campus.isUserMainCampus, let index: Int = HomeDefaults.read(.liveClusterFloor), index < clusterDescription.floors.count {
             extraValues = HomeDefaults.read(.clustersExtraValues)
-            selectedIndex = HomeDefaults.read(.liveClusterFloor) ?? 0
+            selectedIndex = index
         }
         else {
             extraValues = nil

@@ -67,3 +67,26 @@ class HomePresentableVisualEffectView: UIVisualEffectView {
         }, completion: completion)
     }
 }
+
+final class VibrancyView<G: UIView>: BasicUIVisualEffectView {
+    
+    let view: G
+    
+    init(effect: UIVisualEffect?, view: G) {
+        self.view = view
+        super.init(effect: UIVibrancyEffect(blurEffect: effect as! UIBlurEffect, style: .secondaryFill))
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    override func willMove(toSuperview newSuperview: UIView?) {
+        guard newSuperview != nil else {
+            return
+        }
+        
+        self.contentView.addSubview(self.view)
+        self.view.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        self.view.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        self.view.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        self.view.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+    }
+}
