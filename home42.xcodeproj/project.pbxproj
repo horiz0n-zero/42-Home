@@ -38,10 +38,14 @@
 		6034C53D2624DD12003D8B90 /* DynamicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6034C53C2624DD12003D8B90 /* DynamicController.swift */; };
 		6040BCFA295EF49F00A29D90 /* AchievementsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6040BCF9295EF49F00A29D90 /* AchievementsList.swift */; };
 		6040BCFC2961838400A29D90 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6040BCFB2961838400A29D90 /* CalendarView.swift */; };
+		604562D72AF10F2300541EB0 /* LoginsVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604562D62AF10F2300541EB0 /* LoginsVerifier.swift */; };
+		604562D92AF2E84500541EB0 /* CopyableContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604562D82AF2E84500541EB0 /* CopyableContentView.swift */; };
+		604562DB2AF3931300541EB0 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604562DA2AF3931300541EB0 /* Utilities.swift */; };
 		604CFE792954E56D00BFE28A /* AdjustableParametersProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604CFE782954E56D00BFE28A /* AdjustableParametersProvider.swift */; };
 		604CFE7B295AE02700BFE28A /* EventsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 604CFE7A295AE02700BFE28A /* EventsList.swift */; };
 		6058FF64275262D000708B43 /* ProjectList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6058FF63275262D000708B43 /* ProjectList.swift */; };
 		6058FF662752725700708B43 /* CoalitionsList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6058FF652752725700708B43 /* CoalitionsList.swift */; };
+		605D174B2BE5041C00BDD9B0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 605D174A2BE5041C00BDD9B0 /* PrivacyInfo.xcprivacy */; };
 		605E3052262A093D006B0637 /* Clusters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605E3051262A093D006B0637 /* Clusters.swift */; };
 		605E3055262A0A5F006B0637 /* UserProfilIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605E3054262A0A5F006B0637 /* UserProfilIconView.swift */; };
 		605E3058262A12AE006B0637 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 605E3057262A12AE006B0637 /* Image.swift */; };
@@ -173,10 +177,14 @@
 		6034C53C2624DD12003D8B90 /* DynamicController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicController.swift; sourceTree = "<group>"; };
 		6040BCF9295EF49F00A29D90 /* AchievementsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementsList.swift; sourceTree = "<group>"; };
 		6040BCFB2961838400A29D90 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		604562D62AF10F2300541EB0 /* LoginsVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginsVerifier.swift; sourceTree = "<group>"; };
+		604562D82AF2E84500541EB0 /* CopyableContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyableContentView.swift; sourceTree = "<group>"; };
+		604562DA2AF3931300541EB0 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		604CFE782954E56D00BFE28A /* AdjustableParametersProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdjustableParametersProvider.swift; sourceTree = "<group>"; };
 		604CFE7A295AE02700BFE28A /* EventsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventsList.swift; sourceTree = "<group>"; };
 		6058FF63275262D000708B43 /* ProjectList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectList.swift; sourceTree = "<group>"; };
 		6058FF652752725700708B43 /* CoalitionsList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoalitionsList.swift; sourceTree = "<group>"; };
+		605D174A2BE5041C00BDD9B0 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		605E3051262A093D006B0637 /* Clusters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clusters.swift; sourceTree = "<group>"; };
 		605E3054262A0A5F006B0637 /* UserProfilIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfilIconView.swift; sourceTree = "<group>"; };
 		605E3057262A12AE006B0637 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
@@ -359,6 +367,7 @@
 				605E30BA2632AACD006B0637 /* RoundedGenericActionsView.swift */,
 				605E30BD2632B4DB006B0637 /* UserInfoView.swift */,
 				6099CBDD264C395A003DA85F /* TerminalView.swift */,
+				604562D82AF2E84500541EB0 /* CopyableContentView.swift */,
 				6099CBF326518434003DA85F /* TagsView.swift */,
 				6033E0CB26983F5E00BD2F8C /* ClusterViews.swift */,
 				6033E0CD269DF6EC00BD2F8C /* MessageView.swift */,
@@ -392,6 +401,7 @@
 				6058FF652752725700708B43 /* CoalitionsList.swift */,
 				60830FA227A040FB006989A6 /* ContributorsList.swift */,
 				604CFE782954E56D00BFE28A /* AdjustableParametersProvider.swift */,
+				604562D62AF10F2300541EB0 /* LoginsVerifier.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -480,6 +490,7 @@
 		60F5E0FD2621DD56004E0327 /* home42 */ = {
 			isa = PBXGroup;
 			children = (
+				605D174A2BE5041C00BDD9B0 /* PrivacyInfo.xcprivacy */,
 				60883949277A383000452A3C /* home42.entitlements */,
 				6034C5352624D756003D8B90 /* main.swift */,
 				60F5E0FE2621DD57004E0327 /* HomeApplication.swift */,
@@ -539,6 +550,7 @@
 				602EC870271AB17B00636323 /* Shop.swift */,
 				602EC872271AC45B00636323 /* Companies.swift */,
 				6033E0C72694328500BD2F8C /* Graph.swift */,
+				604562DA2AF3931300541EB0 /* Utilities.swift */,
 				605E3070262C33DA006B0637 /* Hidden */,
 				606C3C8C262A033400A5E652 /* Account */,
 				606C3C8B262A032200A5E652 /* Shared */,
@@ -676,6 +688,7 @@
 			files = (
 				6020AB1F27635BAA00AB806A /* LaunchScreen.storyboard in Resources */,
 				6034C517262336AA003D8B90 /* res in Resources */,
+				605D174B2BE5041C00BDD9B0 /* PrivacyInfo.xcprivacy in Resources */,
 				60F5E1082621DD57004E0327 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -844,6 +857,7 @@
 				605E3064262AE49D006B0637 /* Attributes.swift in Sources */,
 				607AC10327D27BED00E7F25F /* Constraints.swift in Sources */,
 				605E30AE2631EFA1006B0637 /* Particles.swift in Sources */,
+				604562DB2AF3931300541EB0 /* Utilities.swift in Sources */,
 				606C3C7F26283A6B00A5E652 /* Operators.swift in Sources */,
 				605E3086262C8FE0006B0637 /* Settings.swift in Sources */,
 				609CD7CC2658391E00BCB91B /* CGPoint.swift in Sources */,
@@ -857,6 +871,7 @@
 				6099CBF426518434003DA85F /* TagsView.swift in Sources */,
 				6034C5392624D7F4003D8B90 /* Main.swift in Sources */,
 				60B5D0B127F0C40A0001B976 /* IntraObjects.swift in Sources */,
+				604562D92AF2E84500541EB0 /* CopyableContentView.swift in Sources */,
 				606C3C742626292200A5E652 /* DynamicActionsSheet.swift in Sources */,
 				6034C53D2624DD12003D8B90 /* DynamicController.swift in Sources */,
 				602EC871271AB17B00636323 /* Shop.swift in Sources */,
@@ -871,6 +886,7 @@
 				60BA09962655338D00868ABF /* HomeFX.swift in Sources */,
 				602EC873271AC45B00636323 /* Companies.swift in Sources */,
 				60B5D0B927F0C5CF0001B976 /* UserSettings.swift in Sources */,
+				604562D72AF10F2300541EB0 /* LoginsVerifier.swift in Sources */,
 				6099CBF1265047EC003DA85F /* BinaryInteger.swift in Sources */,
 				6034C52326247324003D8B90 /* UIView.swift in Sources */,
 				6034C50126223791003D8B90 /* HomeDefaults.swift in Sources */,
@@ -1040,7 +1056,7 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZED_STRING_SWIFTUI_SUPPORT = NO;
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.1.8;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.horiz0n-zero.home42";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1073,7 +1089,7 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZED_STRING_SWIFTUI_SUPPORT = NO;
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.1.8;
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.horiz0n-zero.home42";
 				PRODUCT_NAME = "$(TARGET_NAME)";

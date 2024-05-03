@@ -24,7 +24,7 @@ extension HomeApi {
         /// login, cursus_id, campus_id
         case graph
         /// param: login
-        @available(*, deprecated) case locationStats(String)
+        case locationStats(String)
         /// param: slug? -> 42cursus-computorv1
         /// team_id: 3808002, start: 2021-10-04, end: 2021-10-11
         case defenseSlots(String)
@@ -252,10 +252,4 @@ final class IntraNetSlot: IntraObject {
         splited.removeLast(splited.count - duration)
         return splited.joined(separator: ",")
     }
-}
-
-final class IntraNetShortUserDescription: IntraObject {
-    
-    let usual_full_name: String
-    
 }

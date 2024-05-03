@@ -1,4 +1,4 @@
-// home42/Tracker.swift
+// home42/Utilities.swift
 /* +++++++++++++++++++++++++++++++++++++++++++++++++++ *
 +
 +      :::       ::::::::
@@ -15,9 +15,19 @@
 
 import Foundation
 import UIKit
-import SwiftyRSA
 
-final class TrackerViewController: HiddenViewController, UserSearchFieldViewDelegate {
-
+final class UtilitiesViewController: HomeViewController {
+    
+    var once: Bool = true
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if self.once {
+            let vc = LoginsVerifierViewController()
+            
+            self.presentWithBlur(vc)
+            self.once = false
+        }
+    }
+    
 }
-

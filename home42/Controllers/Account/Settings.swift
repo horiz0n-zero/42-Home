@@ -390,8 +390,8 @@ extension HomeSwitch: SettingsRowView {
 extension SelectorView: SettingsRowView {
     typealias Value = E
     
-    static func defaultView() -> SelectorView<E> {
-        return SelectorView<E>(keys: [], values: [])
+    static func defaultView() -> Self {
+        return unsafeDowncast(SelectorView<E>(keys: [], values: []), to: Self.self)
     }
 }
 extension ValueSelectorWithArrows: SettingsRowView {

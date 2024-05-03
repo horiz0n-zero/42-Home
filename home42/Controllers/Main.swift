@@ -349,6 +349,7 @@ fileprivate extension MainViewController {
         case broadcasts = "broadcasts"
         case tracker = "tracker"
         case graph = "graph"
+        case utilities = "utilities"
         
         init(id: String?) {
             if let id = id {
@@ -377,7 +378,9 @@ fileprivate extension MainViewController {
         .init(type: ShopViewController.self, id: .shop, title: "title.shop",
               icon: .controllerShop, isHidden: false),
         .init(type: CompaniesViewController.self, id: .companies, title: "title.companies",
-              icon: .controllerCompanies, isHidden: false)
+              icon: .controllerCompanies, isHidden: false)//,
+        //.init(type: UtilitiesViewController.self, id: .utilities, title: "title.utilities",
+        //      icon: .controllerUtilites, isHidden: false)
     ]
     static func getController(_ id: Controller) -> ControllerRepresentation {
         if let representation = MainViewController.controllerRepresentations.first(where: { $0.id == id }) {

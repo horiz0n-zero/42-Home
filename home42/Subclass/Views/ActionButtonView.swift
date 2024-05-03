@@ -61,6 +61,17 @@ final class ActionButtonView: HomePressableUIView {
             self.shadowView.layer.shadowColor = newValue.cgColor
         }
     }
+    var iconTintColor: UIColor {
+        get {
+            return self.icon.tintColor
+        }
+        set {
+            self.icon.tintColor = newValue
+        }
+    }
+    func removeBorderWidth() {
+        self.shadowView.layer.borderWidth = 0
+    }
     
     func `switch`(asset: UIImage.Assets, color: UIColor) {
         self.asset = asset
@@ -273,6 +284,14 @@ final class SmallActionButtonView: HomePressableUIView {
             self.shadowView.backgroundColor = newValue
             self.shadowView.layer.borderColor = newValue.withAlphaComponent(HomeDesign.alphaLayer).cgColor
             self.shadowView.layer.shadowColor = newValue.cgColor
+        }
+    }
+    var iconTintColor: UIColor {
+        get {
+            return self.icon.tintColor
+        }
+        set {
+            self.icon.tintColor = newValue
         }
     }
     

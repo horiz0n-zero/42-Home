@@ -220,8 +220,12 @@ extension IntraGroup: SelectorViewAdvancedSelectorCompatible {
     static let advancedSelectorType: DynamicAlert.AdvancedSelectorViewType = .group
     var advancedSelectorText: String { return self.name }
 }
+extension IntraCoalition: SelectorViewAdvancedSelectorCompatible {
+    static var advancedSelectorType: DynamicAlert.AdvancedSelectorViewType = .coalitions
+    var advancedSelectorText: String { return self.name }
+}
 
-final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButtonView> {
+class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButtonView> {
     
     weak var delegate: SelectorViewDelegate!
     private var selectedIndex: Int?
@@ -276,7 +280,7 @@ final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButto
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
         
-    @objc private func selectButtonTapped(sender: UITapGestureRecognizer) {
+    @objc final private func selectButtonTapped(sender: UITapGestureRecognizer) {
         let primary = self.actionViews[0].primary
         
         if self.keys.count == 0 {
@@ -323,7 +327,7 @@ final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButto
         }
     }
     
-    @objc private func closeButtonTapped(sender: UITapGestureRecognizer) {
+    @objc final private func closeButtonTapped(sender: UITapGestureRecognizer) {
         self.value = nil
         self.selectedIndex = nil
         self.view.text = self.selectNoneString
@@ -331,7 +335,7 @@ final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButto
         self.delegate?.selectorSelect(self)
     }
     
-    func update(keys: [String], values: [E], selectedIndex: Int? = nil) {
+    final func update(keys: [String], values: [E], selectedIndex: Int? = nil) {
         let text: String
         
         self.keys = keys
@@ -364,7 +368,7 @@ final class SelectorView<E>: RoundedGenericActionsView<BasicUILabel, ActionButto
         self.view.text = text
     }
     
-    override func setPrimary(_ color: UIColor) {
+    override final func setPrimary(_ color: UIColor) {
         super.setPrimary(color)
         for actionButton in self.actionsStack.arrangedSubviews as! [ActionButtonView] {
             actionButton.primary = color

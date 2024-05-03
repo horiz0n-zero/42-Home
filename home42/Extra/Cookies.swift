@@ -93,13 +93,14 @@ final class Cookies: IntraObject {
             self.intraSessionProductionHTTPCookie = cookie
             self.intraSessionProduction = "\(Cookies.intraSessionProductionKey)=\(cookie.value)"
             do {
-                let _: IntraNetShortUserDescription = try await HomeApi.intranetRequest(.user(user.login))
+                let _: Dictionary<String, String> = try await HomeApi.intranetRequest(.locationStats(user.login))
                 return
             }
             catch {
                 #if DEBUG
                 print(#function, #line, error)
                 #endif
+                try! await Task.sleep(nanoseconds: 250_000_000)
             }
         }
         HomeApi.cookies = nil

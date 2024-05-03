@@ -333,8 +333,10 @@ final class ClusterScrollableSegmentView: BasicUIView, ClusterSelectorView, UISc
     }
     
     func setSelectedIndex(_ index: Int) {
-        self.views[self.oldSelectedIndex].isSelected = false
-        self.views[index].isSelected = true
+        for (i, view) in self.views.enumerated() {
+            view.isSelected = index == i
+        }
+        self.scrollView.scrollRectToVisible(self.views[index].bounds, animated: false)
         self.selectedIndex = index
     }
     

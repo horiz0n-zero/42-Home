@@ -72,6 +72,7 @@ extension UIImage {
         case actionFeedbacks = "action_feedbacks"
         case actionShare = "action_share"
         case actionCalendar = "action_calendar"
+        case actionImport = "action_import"
         
         case controllerMystere  = "controller_mystere"
         case controllerClusters = "controller_clusters"
@@ -83,6 +84,7 @@ extension UIImage {
         case controllerGraph = "controller_graph"
         case controllerCompanies = "controller_companies"
         case controllerShop = "controller_shop"
+        case controllerUtilites = "controller_utilities"
         
         case settingsDonation = "settings_donation"
         case settingsCafard = "settings_cafard"

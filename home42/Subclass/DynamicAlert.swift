@@ -713,6 +713,7 @@ extension DynamicAlert {
         case languages
         case campus
         case clusters
+        case coalitions
         
         func view(primaryColor: UIColor, values: [Any], index: Int) -> BasicUIView {
             switch self {
@@ -728,6 +729,8 @@ extension DynamicAlert {
                 return AdvancedSelector<IntraCampus, AdvancedSelectorViewCampus>.init(primary: primaryColor, source: values as! [IntraCampus], selectionIndex: index)
             case .clusters:
                 return AdvancedSelector<IntraCampus, AdvancedSelectorViewClusters>.init(primary: primaryColor, source: values as! [IntraCampus], selectionIndex: index)
+            case .coalitions:
+                return AdvancedSelector<IntraCoalition, AdvancedSelectorViewCoalitions>.init(primary: primaryColor, source: values as! [IntraCoalition], selectionIndex: index)
             }
         }
         func value() -> Any {
@@ -744,6 +747,8 @@ extension DynamicAlert {
                 return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewCampus>).selection
             case .clusters:
                 return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewClusters>).selection
+            case .coalitions:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCoalition, AdvancedSelectorViewCoalitions>).selection
             }
         }
         func index() -> Int {
@@ -760,6 +765,8 @@ extension DynamicAlert {
                 return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewCampus>).index
             case .clusters:
                 return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCampus, AdvancedSelectorViewClusters>).index
+            case .coalitions:
+                return (DynamicAlert.advancedSelector as! AdvancedSelector<IntraCoalition, AdvancedSelectorViewCoalitions>).index
             }
         }
     }
@@ -870,6 +877,17 @@ extension DynamicAlert {
         }
         override class func filter(_ source: [IntraLanguage], with text: String) -> [IntraLanguage] { source.filter({ $0.name.contains(text) }) }
         override class func firstIndex(_ array: [IntraLanguage], with selection: IntraLanguage) -> Int { array.firstIndex(where: { $0.id == selection.id }) ?? 0 }
+    }
+    final private class AdvancedSelectorViewCoalitions: AdvancedSelectorViewLabelBase<IntraCoalition> {
+        override func update(with value: IntraCoalition) {
+            let bloc = HomeApiResources.blocs.first(where: { $0.coalitions.contains(value) })!
+            let campus = HomeApiResources.campus.first(where: { $0.id == bloc.campus_id })!
+            let cursus = HomeApiResources.cursus.first(where: { $0.id == bloc.cursus_id })!
+            
+            self.label.text = "\(value.name) (\(campus.name), \(cursus.name))"
+        }
+        override class func filter(_ source: [IntraCoalition], with text: String) -> [IntraCoalition] { source.filter({ $0.name.lowercased().contains(text.lowercased()) }) }
+        override class func firstIndex(_ array: [IntraCoalition], with selection: IntraCoalition) -> Int { array.firstIndex(where: { $0.id == selection.id }) ?? 0 }
     }
     
     final private class AdvancedSelectorViewCampus: AdvancedSelectorViewBase<IntraCampus> {
